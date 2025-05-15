@@ -31,10 +31,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   apiRouter.post("/auth/login", async (req: Request, res: Response) => {
     try {
+      console.log('Login route called with body:', req.body);
       const { username, password } = req.body;
+      
+      if (!username || !password) {
+        console.log('Missing username or password');
+        return res.status(400).json({ message: "Username and password are required" });
+      }
+      
       const result = await login(username, password);
+      console.log('Login successful, returning token');
       res.json(result);
-    } catch (error) {
+    } catch (error: any) {
+      console.log('Login failed with error:', error.message);
       res.status(401).json({ message: "Invalid credentials" });
     }
   });

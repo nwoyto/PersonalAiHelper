@@ -27,16 +27,23 @@ export async function authenticate(req: AuthRequest, res: Response, next: NextFu
 }
 
 export async function login(username: string, password: string) {
+  console.log(`Login attempt for user: ${username}`);
+  
   const user = await storage.getUserByUsername(username);
   if (!user) {
+    console.log('User not found in database');
     throw new Error("User not found");
   }
-
+  
+  console.log('User found, comparing passwords');
   const isValid = await bcrypt.compare(password, user.password);
   if (!isValid) {
+    console.log('Password comparison failed');
     throw new Error("Invalid password");
   }
-
+  
+  console.log('Password valid, generating token');
   const token = jwt.sign({ id: user.id, username: user.username }, JWT_SECRET);
+  console.log('Login successful');
   return { token, user: { id: user.id, username: user.username } };
 }
