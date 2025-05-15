@@ -198,12 +198,12 @@ export default function CalendarViews({
                   {dayEvents.slice(0, 3).map(event => (
                     <div 
                       key={event.id} 
-                      className={`text-xs truncate p-1 rounded-sm ${
+                      className={`text-xs truncate p-1 rounded-sm font-medium ${
                         'isTask' in event 
-                          ? `bg-gray-100 ${(event as any).completed ? "line-through opacity-60" : ""}`
-                          : event.provider === "google" ? "bg-red-100" :
-                            event.provider === "outlook" ? "bg-blue-100" :
-                            event.provider === "apple" ? "bg-gray-100" : "bg-primary-100"
+                          ? `bg-gray-100 text-gray-800 ${(event as any).completed ? "line-through opacity-60" : ""}`
+                          : event.provider === "google" ? "bg-red-100 text-red-800" :
+                            event.provider === "outlook" ? "bg-blue-100 text-blue-800" :
+                            event.provider === "apple" ? "bg-gray-100 text-gray-800" : "bg-primary-100 text-primary-800"
                       }`}
                     >
                       {event.title}
@@ -263,12 +263,12 @@ export default function CalendarViews({
                   {dayEvents.slice(0, 2).map(event => (
                     <div 
                       key={event.id} 
-                      className={`text-xs truncate p-0.5 rounded-sm ${
+                      className={`text-xs truncate p-0.5 rounded-sm font-medium ${
                         'isTask' in event 
-                          ? `bg-gray-100 ${(event as any).completed ? "line-through opacity-60" : ""}`
-                          : event.provider === "google" ? "bg-red-100" :
-                            event.provider === "outlook" ? "bg-blue-100" :
-                            event.provider === "apple" ? "bg-gray-100" : "bg-primary-100"
+                          ? `bg-gray-100 text-gray-800 ${(event as any).completed ? "line-through opacity-60" : ""}`
+                          : event.provider === "google" ? "bg-red-100 text-red-800" :
+                            event.provider === "outlook" ? "bg-blue-100 text-blue-800" :
+                            event.provider === "apple" ? "bg-gray-100 text-gray-800" : "bg-primary-100 text-primary-800"
                       }`}
                     >
                       {event.title}
