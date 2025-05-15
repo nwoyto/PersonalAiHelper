@@ -1,5 +1,5 @@
-import express, { type Express, Request, Response } from "express";
-import { authenticate, login } from "./auth";
+import express, { type Express, Request, Response, NextFunction } from "express";
+import { authenticate, login, AuthRequest } from "./auth";
 import bcrypt from "bcryptjs";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
@@ -39,9 +39,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  apiRouter.get("/auth/me", authenticate, async (req: any, res: Response) => {
+  apiRouter.get("/auth/me", authenticate, async (req: Request, res: Response) => {
     try {
-      const user = await storage.getUser(req.user.id);
+      const authReq = req as any;
+      if (!authReq.user || !authReq.user.id) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const user = await storage.getUser(authReq.user.id);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
