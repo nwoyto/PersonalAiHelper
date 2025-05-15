@@ -204,7 +204,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         content: text,
         category: "work", // Default category
         extractedTasks: result.tasks.length,
-        timestamp: new Date().toISOString(),
+        timestamp: new Date(),
       });
       
       // Create tasks from extracted tasks
@@ -215,7 +215,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           title: taskInfo.title,
           description: taskInfo.description || "",
           completed: false,
-          dueDate: taskInfo.dueDate,
+          dueDate: taskInfo.dueDate ? new Date(taskInfo.dueDate) : undefined,
           category: taskInfo.category || "work",
         });
         createdTasks.push(task);

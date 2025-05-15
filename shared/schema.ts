@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, varchar } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, varchar, date } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -23,12 +23,15 @@ export const tasks = pgTable("tasks", {
   title: text("title").notNull(),
   description: text("description"),
   completed: boolean("completed").notNull().default(false),
-  dueDate: timestamp("due_date"),
+  dueDate: date("due_date"),
   category: varchar("category", { length: 20 }).notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
-export const insertTaskSchema = createInsertSchema(tasks).omit({
+// Create schema with proper date handling
+export const insertTaskSchema = createInsertSchema(tasks, {
+  dueDate: z.date().optional(),
+}).omit({
   id: true,
   createdAt: true,
 });
@@ -44,7 +47,10 @@ export const notes = pgTable("notes", {
   timestamp: timestamp("timestamp").notNull().defaultNow(),
 });
 
-export const insertNoteSchema = createInsertSchema(notes).omit({
+// Create schema with proper date handling
+export const insertNoteSchema = createInsertSchema(notes, {
+  timestamp: z.date().optional(),
+}).omit({
   id: true,
 });
 

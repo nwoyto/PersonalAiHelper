@@ -2,8 +2,11 @@ import {
   User, InsertUser, 
   Task, InsertTask, 
   Note, InsertNote, 
-  Settings, InsertSettings 
+  Settings, InsertSettings,
+  users, tasks, notes, settings
 } from "@shared/schema";
+import { db } from "./db";
+import { eq, and } from "drizzle-orm";
 
 export interface IStorage {
   // Users
@@ -31,36 +34,125 @@ export interface IStorage {
   createSettings(settings: InsertSettings): Promise<Settings>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private tasks: Map<number, Task>;
-  private notes: Map<number, Note>;
-  private settings: Map<number, Settings>;
-  currentUserId: number;
-  currentTaskId: number;
-  currentNoteId: number;
-  currentSettingsId: number;
+export class DatabaseStorage implements IStorage {
+  // User methods
+  async getUser(id: number): Promise<User | undefined> {
+    const result = await db.select().from(users).where(eq(users.id, id));
+    return result.length > 0 ? result[0] : undefined;
+  }
 
-  constructor() {
-    this.users = new Map();
-    this.tasks = new Map();
-    this.notes = new Map();
-    this.settings = new Map();
-    this.currentUserId = 1;
-    this.currentTaskId = 1;
-    this.currentNoteId = 1;
-    this.currentSettingsId = 1;
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const result = await db.select().from(users).where(eq(users.username, username));
+    return result.length > 0 ? result[0] : undefined;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const result = await db.insert(users).values(insertUser).returning();
+    return result[0];
+  }
+  
+  // Task methods
+  async getTasks(userId: number): Promise<Task[]> {
+    return await db.select().from(tasks).where(eq(tasks.userId, userId));
+  }
+  
+  async getTaskById(id: number): Promise<Task | undefined> {
+    const result = await db.select().from(tasks).where(eq(tasks.id, id));
+    return result.length > 0 ? result[0] : undefined;
+  }
+  
+  async getTasksByCategory(userId: number, category: string): Promise<Task[]> {
+    return await db.select().from(tasks).where(
+      and(
+        eq(tasks.userId, userId),
+        eq(tasks.category, category)
+      )
+    );
+  }
+  
+  async createTask(insertTask: InsertTask): Promise<Task> {
+    const result = await db.insert(tasks).values(insertTask).returning();
+    return result[0];
+  }
+  
+  async updateTask(id: number, updatedFields: Partial<Task>): Promise<Task | undefined> {
+    const result = await db.update(tasks)
+      .set(updatedFields)
+      .where(eq(tasks.id, id))
+      .returning();
     
+    return result.length > 0 ? result[0] : undefined;
+  }
+  
+  async deleteTask(id: number): Promise<boolean> {
+    const result = await db.delete(tasks).where(eq(tasks.id, id)).returning();
+    return result.length > 0;
+  }
+  
+  // Note methods
+  async getNotes(userId: number): Promise<Note[]> {
+    return await db.select().from(notes)
+      .where(eq(notes.userId, userId))
+      .orderBy(notes.timestamp);
+  }
+  
+  async getNoteById(id: number): Promise<Note | undefined> {
+    const result = await db.select().from(notes).where(eq(notes.id, id));
+    return result.length > 0 ? result[0] : undefined;
+  }
+  
+  async createNote(insertNote: InsertNote): Promise<Note> {
+    const result = await db.insert(notes).values(insertNote).returning();
+    return result[0];
+  }
+  
+  async deleteNote(id: number): Promise<boolean> {
+    const result = await db.delete(notes).where(eq(notes.id, id)).returning();
+    return result.length > 0;
+  }
+  
+  // Settings methods
+  async getSettings(userId: number): Promise<Settings | undefined> {
+    const result = await db.select().from(settings).where(eq(settings.userId, userId));
+    return result.length > 0 ? result[0] : undefined;
+  }
+  
+  async updateSettings(userId: number, updatedFields: Partial<Settings>): Promise<Settings | undefined> {
+    const userSettings = await this.getSettings(userId);
+    
+    if (!userSettings) return undefined;
+    
+    const result = await db.update(settings)
+      .set(updatedFields)
+      .where(eq(settings.id, userSettings.id))
+      .returning();
+    
+    return result.length > 0 ? result[0] : undefined;
+  }
+  
+  async createSettings(insertSettings: InsertSettings): Promise<Settings> {
+    const result = await db.insert(settings).values(insertSettings).returning();
+    return result[0];
+  }
+
+  // Initialize the database with sample data
+  async initializeWithSampleData() {
+    // Check if we already have a user
+    const existingUsers = await db.select().from(users);
+    if (existingUsers.length > 0) {
+      return; // Already initialized
+    }
+
     // Create a default user
-    this.createUser({
+    const newUser = await this.createUser({
       username: "user",
       password: "password",
       email: "user@example.com"
     });
     
     // Create default settings for the user
-    this.createSettings({
-      userId: 1,
+    await this.createSettings({
+      userId: newUser.id,
       alwaysListening: true,
       wakeWord: "Hey Assistant",
       voiceGender: "female",
@@ -68,165 +160,61 @@ export class MemStorage implements IStorage {
     });
     
     // Add sample tasks for the user
-    this.createTask({
-      userId: 1,
+    await this.createTask({
+      userId: newUser.id,
       title: "Send quarterly report to Jim",
       description: "Complete the Q2 sales report and email it to Jim",
       completed: false,
-      dueDate: new Date(Date.now() + 86400000).toISOString(), // Tomorrow
+      dueDate: new Date(Date.now() + 86400000),
       category: "work"
     });
     
-    this.createTask({
-      userId: 1,
+    await this.createTask({
+      userId: newUser.id,
       title: "Book restaurant for anniversary",
       description: "Make a reservation at Bella Italia for 7:30 PM",
       completed: true,
-      dueDate: new Date().toISOString(),
+      dueDate: new Date(),
       category: "personal"
     });
     
-    this.createTask({
-      userId: 1,
+    await this.createTask({
+      userId: newUser.id,
       title: "Follow up on client proposal",
       description: "Call the client to discuss the proposal details",
       completed: false,
-      dueDate: new Date(Date.now() - 172800000).toISOString(), // 2 days ago
+      dueDate: new Date(Date.now() - 172800000),
       category: "urgent"
     });
     
     // Add sample notes
-    this.createNote({
-      userId: 1,
+    await this.createNote({
+      userId: newUser.id,
       title: "Team Standup",
       content: "Discussed current sprint progress. Michael reported backend API issues that might delay the launch. Sara will prepare updated timeline by EOD.",
       category: "work",
       extractedTasks: 2,
-      timestamp: new Date(Date.now() - 3600000).toISOString() // 1 hour ago
+      timestamp: new Date(Date.now() - 3600000)
     });
     
-    this.createNote({
-      userId: 1,
+    await this.createNote({
+      userId: newUser.id,
       title: "Client Call - Acme Corp",
       content: "Presented phase 1 deliverables. Client requested changes to the dashboard layout. Follow-up meeting scheduled for next Thursday to review revisions.",
       category: "work",
       extractedTasks: 3,
-      timestamp: new Date(Date.now() - 7200000).toISOString() // 2 hours ago
+      timestamp: new Date(Date.now() - 7200000)
     });
     
-    this.createNote({
-      userId: 1,
+    await this.createNote({
+      userId: newUser.id,
       title: "Doctor Appointment",
       content: "Annual checkup completed. Need to schedule blood work follow-up in 3 months. Remember to take vitamin D supplements daily.",
       category: "personal",
       extractedTasks: 1,
-      timestamp: new Date(Date.now() - 86400000).toISOString() // Yesterday
+      timestamp: new Date(Date.now() - 86400000)
     });
-  }
-
-  // User methods
-  async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
-  }
-
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.currentUserId++;
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
-    return user;
-  }
-  
-  // Task methods
-  async getTasks(userId: number): Promise<Task[]> {
-    return Array.from(this.tasks.values()).filter(
-      (task) => task.userId === userId,
-    );
-  }
-  
-  async getTaskById(id: number): Promise<Task | undefined> {
-    return this.tasks.get(id);
-  }
-  
-  async getTasksByCategory(userId: number, category: string): Promise<Task[]> {
-    return Array.from(this.tasks.values()).filter(
-      (task) => task.userId === userId && task.category === category,
-    );
-  }
-  
-  async createTask(insertTask: InsertTask): Promise<Task> {
-    const id = this.currentTaskId++;
-    const now = new Date().toISOString();
-    const task: Task = { ...insertTask, id, createdAt: now };
-    this.tasks.set(id, task);
-    return task;
-  }
-  
-  async updateTask(id: number, updatedFields: Partial<Task>): Promise<Task | undefined> {
-    const task = this.tasks.get(id);
-    if (!task) return undefined;
-    
-    const updatedTask = { ...task, ...updatedFields };
-    this.tasks.set(id, updatedTask);
-    return updatedTask;
-  }
-  
-  async deleteTask(id: number): Promise<boolean> {
-    return this.tasks.delete(id);
-  }
-  
-  // Note methods
-  async getNotes(userId: number): Promise<Note[]> {
-    return Array.from(this.notes.values())
-      .filter((note) => note.userId === userId)
-      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-  }
-  
-  async getNoteById(id: number): Promise<Note | undefined> {
-    return this.notes.get(id);
-  }
-  
-  async createNote(insertNote: InsertNote): Promise<Note> {
-    const id = this.currentNoteId++;
-    const note: Note = { ...insertNote, id };
-    this.notes.set(id, note);
-    return note;
-  }
-  
-  async deleteNote(id: number): Promise<boolean> {
-    return this.notes.delete(id);
-  }
-  
-  // Settings methods
-  async getSettings(userId: number): Promise<Settings | undefined> {
-    return Array.from(this.settings.values()).find(
-      (settings) => settings.userId === userId,
-    );
-  }
-  
-  async updateSettings(userId: number, updatedFields: Partial<Settings>): Promise<Settings | undefined> {
-    const userSettings = Array.from(this.settings.values()).find(
-      (settings) => settings.userId === userId,
-    );
-    
-    if (!userSettings) return undefined;
-    
-    const updatedSettings = { ...userSettings, ...updatedFields };
-    this.settings.set(userSettings.id, updatedSettings);
-    return updatedSettings;
-  }
-  
-  async createSettings(insertSettings: InsertSettings): Promise<Settings> {
-    const id = this.currentSettingsId++;
-    const settings: Settings = { ...insertSettings, id };
-    this.settings.set(id, settings);
-    return settings;
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
