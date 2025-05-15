@@ -1,11 +1,11 @@
 
 import { useEffect } from "react";
-import { useNavigate } from "wouter";
+import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 
 export default function Login() {
-  const navigate = useNavigate();
+  const [_, navigate] = useLocation();
   const { data: user } = useQuery({
     queryKey: ["/api/auth/me"],
     retry: false

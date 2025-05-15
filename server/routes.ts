@@ -39,6 +39,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  apiRouter.get("/auth/me", authenticate, async (req: any, res: Response) => {
+    try {
+      const user = await storage.getUser(req.user.id);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Don't send password in response
+      const { password, ...userWithoutPassword } = user;
+      return res.json(userWithoutPassword);
+    } catch (error) {
+      return res.status(500).json({ message: "Failed to fetch user data" });
+    }
+  });
+  
   // User endpoints
   apiRouter.get("/users/:id", async (req: Request, res: Response) => {
     const id = parseInt(req.params.id);

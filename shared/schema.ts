@@ -1,6 +1,17 @@
-import { pgTable, text, serial, integer, boolean, timestamp, varchar, date } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, boolean, timestamp, varchar, date, jsonb, index, integer } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+
+// Session storage table for Replit Auth
+export const sessions = pgTable(
+  "sessions",
+  {
+    sid: varchar("sid").primaryKey(),
+    sess: jsonb("sess").notNull(),
+    expire: timestamp("expire").notNull(),
+  },
+  (table) => [index("IDX_session_expire").on(table.expire)],
+);
 
 // Users table
 export const users = pgTable("users", {
@@ -8,12 +19,6 @@ export const users = pgTable("users", {
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
   email: text("email"),
-});
-
-export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  password: true,
-  email: true,
 });
 
 // Tasks table
@@ -43,7 +48,7 @@ export const notes = pgTable("notes", {
   title: text("title").notNull(),
   content: text("content").notNull(),
   category: varchar("category", { length: 20 }).notNull(),
-  extractedTasks: integer("extracted_tasks").notNull().default(0),
+  extractedTasks: serial("extracted_tasks").notNull().default(0),
   timestamp: timestamp("timestamp").notNull().defaultNow(),
 });
 
@@ -69,8 +74,8 @@ export const insertSettingsSchema = createInsertSchema(settings).omit({
 });
 
 // Types
+export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
-export type InsertUser = z.infer<typeof insertUserSchema>;
 
 export type Task = typeof tasks.$inferSelect;
 export type InsertTask = z.infer<typeof insertTaskSchema>;
