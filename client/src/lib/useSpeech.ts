@@ -342,11 +342,25 @@ export function useSpeech(options: UseSpeechOptions = {}) {
   // Cancel listening without processing
   const cancelListening = useCallback(() => {
     if (recognition) {
-      recognition.abort();
-      setTranscription('');
-      setIsActiveListening(false);
+      try {
+        recognition.abort();
+      } catch (err) {
+        console.error('Error aborting recognition:', err);
+      } finally {
+        setTranscription('');
+        setIsActiveListening(false);
+        setIsListening(false);
+      }
     }
   }, [recognition]);
+
+  // Reset recognition state if needed (can be called manually if issues occur)
+  const resetRecognitionState = useCallback(() => {
+    setIsListening(false);
+    setIsActiveListening(false);
+    setTranscription('');
+    setError(null);
+  }, []);
 
   // Toggle always-listening mode
   const toggleAlwaysListening = useCallback(() => {
@@ -375,6 +389,7 @@ export function useSpeech(options: UseSpeechOptions = {}) {
     startListening,             // Manually start active listening
     stopListening,              // Stop and process transcription
     cancelListening,            // Cancel without processing
+    resetRecognitionState,      // Reset the recognition state if issues occur
     toggleAlwaysListening,      // Toggle always-listening mode
   };
 }

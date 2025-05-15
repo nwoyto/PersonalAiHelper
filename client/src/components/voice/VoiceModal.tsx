@@ -18,7 +18,8 @@ export default function VoiceModal({ onClose, onComplete }: VoiceModalProps) {
     error,
     startListening,
     stopListening,
-    cancelListening
+    cancelListening,
+    resetRecognitionState
   } = useSpeech({
     onTranscriptionComplete: (result) => {
       setIsProcessing(false);
@@ -42,11 +43,26 @@ export default function VoiceModal({ onClose, onComplete }: VoiceModalProps) {
     }
   });
   
+  // Track initialization errors
+  const [initializationFailed, setInitializationFailed] = useState(false);
+  
   useEffect(() => {
     // We need to use a ref to track if we've already started listening
     // to avoid the effect running multiple times
     const timeoutId = setTimeout(() => {
-      startListening();
+      try {
+        // Reset state before starting
+        resetRecognitionState();
+        startListening();
+      } catch (err) {
+        console.error('Failed to start listening:', err);
+        setInitializationFailed(true);
+        toast({
+          title: "Speech Recognition Error",
+          description: "Unable to start speech recognition. Please try again.",
+          variant: "destructive",
+        });
+      }
     }, 500);
     
     return () => {
@@ -88,18 +104,38 @@ export default function VoiceModal({ onClose, onComplete }: VoiceModalProps) {
                 ? "Processing..." 
                 : isListening 
                   ? "Listening..." 
-                  : "Ready to listen"}
+                  : initializationFailed
+                    ? "Recognition failed" 
+                    : "Ready to listen"}
             </p>
             {isListening && <SoundWave />}
           </div>
           
           <div className="w-full max-w-md bg-surface rounded-xl p-5 mb-6">
-            <p className="text-text-secondary text-sm italic">
-              {transcription || "Say something..."}
-            </p>
+            {initializationFailed ? (
+              <div className="text-center">
+                <p className="text-text-secondary text-sm italic mb-4">
+                  Speech recognition could not be initialized. This might be due to browser permissions or compatibility issues.
+                </p>
+                <button 
+                  onClick={() => {
+                    setInitializationFailed(false);
+                    resetRecognitionState();
+                    setTimeout(() => startListening(), 300);
+                  }}
+                  className="px-4 py-2 bg-primary rounded-md text-white text-sm"
+                >
+                  Try Again
+                </button>
+              </div>
+            ) : (
+              <p className="text-text-secondary text-sm italic">
+                {transcription || "Say something..."}
+              </p>
+            )}
           </div>
           
-          {error && (
+          {error && !initializationFailed && (
             <div className="text-error text-sm mb-4">
               {error}
             </div>
