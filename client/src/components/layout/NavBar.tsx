@@ -21,28 +21,28 @@ export default function NavBar({ onVoiceClick }: NavBarProps) {
       {/* Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 bg-surface border-t border-surface-light flex justify-around items-center px-2 py-3 z-10">
         <Link href="/">
-          <a className={`flex flex-col items-center w-1/4 pt-1 pb-1 ${location === '/' ? 'text-primary' : 'text-text-secondary'}`}>
+          <div className={`flex flex-col items-center w-1/4 pt-1 pb-1 ${location === '/' ? 'text-primary' : 'text-text-secondary'}`}>
             <i className="ri-home-5-line text-xl"></i>
             <span className="text-xs mt-1">Home</span>
-          </a>
+          </div>
         </Link>
         <Link href="/tasks">
-          <a className={`flex flex-col items-center w-1/4 pt-1 pb-1 ${location === '/tasks' ? 'text-primary' : 'text-text-secondary'}`}>
+          <div className={`flex flex-col items-center w-1/4 pt-1 pb-1 ${location === '/tasks' ? 'text-primary' : 'text-text-secondary'}`}>
             <i className="ri-task-line text-xl"></i>
             <span className="text-xs mt-1">Tasks</span>
-          </a>
+          </div>
         </Link>
         <Link href="/notes">
-          <a className={`flex flex-col items-center w-1/4 pt-1 pb-1 ${location === '/notes' ? 'text-primary' : 'text-text-secondary'}`}>
+          <div className={`flex flex-col items-center w-1/4 pt-1 pb-1 ${location === '/notes' ? 'text-primary' : 'text-text-secondary'}`}>
             <i className="ri-file-list-line text-xl"></i>
             <span className="text-xs mt-1">Notes</span>
-          </a>
+          </div>
         </Link>
         <Link href="/settings">
-          <a className={`flex flex-col items-center w-1/4 pt-1 pb-1 ${location === '/settings' ? 'text-primary' : 'text-text-secondary'}`}>
+          <div className={`flex flex-col items-center w-1/4 pt-1 pb-1 ${location === '/settings' ? 'text-primary' : 'text-text-secondary'}`}>
             <i className="ri-settings-4-line text-xl"></i>
             <span className="text-xs mt-1">Settings</span>
-          </a>
+          </div>
         </Link>
       </nav>
     </>

@@ -4,6 +4,7 @@ import { Note } from "@/types";
 import NoteItem from "@/components/notes/NoteItem";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
+import Header from "@/components/layout/Header";
 
 export default function Notes() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -56,11 +57,8 @@ export default function Notes() {
   return (
     <div className="notes-screen px-4 py-6">
       {/* Header */}
-      <header className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-xl font-semibold">Notes</h1>
-          <p className="text-text-secondary text-sm">Your conversation history</p>
-        </div>
+      <div className="flex justify-between items-center mb-6">
+        <Header title="Notes" />
         <button 
           className="rounded-full bg-surface p-2"
           onClick={() => {
@@ -72,7 +70,7 @@ export default function Notes() {
         >
           <i className="ri-search-line text-xl"></i>
         </button>
-      </header>
+      </div>
       
       {/* Search */}
       <div className="mb-4">

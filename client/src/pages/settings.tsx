@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
+import Header from "@/components/layout/Header";
 
 export default function Settings() {
   const { toast } = useToast();
@@ -21,10 +22,7 @@ export default function Settings() {
   return (
     <div className="settings-screen px-4 py-6">
       {/* Header */}
-      <header className="mb-6">
-        <h1 className="text-xl font-semibold">Settings</h1>
-        <p className="text-text-secondary text-sm">Customize your assistant</p>
-      </header>
+      <Header title="Settings" />
 
       {/* Settings Sections */}
       <div className="space-y-6">

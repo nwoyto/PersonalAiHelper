@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'wouter';
+import Logo from './Logo';
 
 interface HeaderProps {
   title?: string;
@@ -22,9 +23,7 @@ export default function Header({
             </a>
           </Link>
         ) : (
-          <div className="bg-gradient-to-r from-primary to-secondary w-10 h-10 rounded-lg flex items-center justify-center mr-3">
-            <span className="text-white font-bold text-xl">J</span>
-          </div>
+          <Logo className="mr-3" />
         )}
         <div>
           <h1 className="text-xl font-semibold">{title}</h1>
