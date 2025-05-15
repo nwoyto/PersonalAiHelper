@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import NavBar from "./NavBar";
-import VoiceModal from "../voice/VoiceModal";
+import FloatingRecorder from "../voice/FloatingRecorder";
 
 interface LayoutProps {
   children: ReactNode;
@@ -30,7 +30,7 @@ export default function Layout({
       <NavBar onVoiceClick={handleVoiceClick} />
       
       {isVoiceModalOpen && (
-        <VoiceModal 
+        <FloatingRecorder 
           onClose={handleVoiceClose} 
           onComplete={(result) => {
             console.log("Transcription complete:", result);
