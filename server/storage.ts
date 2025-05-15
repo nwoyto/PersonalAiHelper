@@ -71,7 +71,12 @@ export class DatabaseStorage implements IStorage {
   }
   
   async createTask(insertTask: InsertTask): Promise<Task> {
-    const result = await db.insert(tasks).values(insertTask).returning();
+    const result = await db.insert(tasks).values({
+      ...insertTask,
+      // Convert any string dates to Date objects
+      dueDate: insertTask.dueDate instanceof Date ? insertTask.dueDate : 
+               (insertTask.dueDate ? new Date(insertTask.dueDate) : null)
+    }).returning();
     return result[0];
   }
   
@@ -102,7 +107,12 @@ export class DatabaseStorage implements IStorage {
   }
   
   async createNote(insertNote: InsertNote): Promise<Note> {
-    const result = await db.insert(notes).values(insertNote).returning();
+    const result = await db.insert(notes).values({
+      ...insertNote,
+      // Convert any string timestamps to Date objects
+      timestamp: insertNote.timestamp instanceof Date ? insertNote.timestamp :
+                (insertNote.timestamp ? new Date(insertNote.timestamp) : new Date())
+    }).returning();
     return result[0];
   }
   
