@@ -58,7 +58,9 @@ export default function Notes() {
     <div className="notes-screen px-4 py-6">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
-        <Header title="Notes" />
+        <div className="flex-1">
+          <Header title="Notes" showUserIcon={false} />
+        </div>
         <button 
           className="rounded-full bg-surface p-2"
           onClick={() => {

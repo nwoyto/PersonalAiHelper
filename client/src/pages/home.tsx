@@ -46,7 +46,9 @@ export default function Home() {
   return (
     <div className="home-screen px-4 py-6">
       {/* Header */}
-      <Header />
+      <div className="mb-6">
+        <Header title="Jibe AI" />
+      </div>
 
       {/* Greeting & Assistant Status */}
       <section className="mb-8 slide-up">

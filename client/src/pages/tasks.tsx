@@ -57,9 +57,11 @@ export default function Tasks() {
   
   return (
     <div className="tasks-screen px-4 py-6">
-      {/* Header */}
+      {/* Header with action button */}
       <div className="flex justify-between items-center mb-6">
-        <Header title="Tasks" />
+        <div className="flex-1">
+          <Header title="Tasks" showUserIcon={false} />
+        </div>
         <Button 
           className="rounded-full bg-primary p-2 text-white h-auto w-auto"
           onClick={() => setIsFormOpen(true)}

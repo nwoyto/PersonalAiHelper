@@ -22,7 +22,9 @@ export default function Settings() {
   return (
     <div className="settings-screen px-4 py-6">
       {/* Header */}
-      <Header title="Settings" />
+      <div className="mb-6">
+        <Header title="Settings" />
+      </div>
 
       {/* Settings Sections */}
       <div className="space-y-6">
