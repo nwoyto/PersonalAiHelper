@@ -63,10 +63,18 @@ export default function Home() {
           </div>
           <h2 className="text-lg font-medium mb-1">{greeting}, User</h2>
           <p className="text-text-secondary text-sm mb-3">I'm listening and ready to help</p>
-          <div className="flex items-center text-xs text-primary font-medium">
-            <span className="w-2 h-2 bg-primary rounded-full mr-2"></span>
-            Active and listening
+          
+          <div className="flex items-center text-xs text-primary font-medium mb-2">
+            <span className="w-2 h-2 bg-primary rounded-full mr-2 animate-pulse"></span>
+            Active and listening for wake word
           </div>
+          
+          {window.location.hostname.includes('replit') && (
+            <div className="text-xs text-amber-500 max-w-xs text-center px-2">
+              <p>In the Replit environment, use the microphone button to activate the voice assistant.</p>
+              <p className="mt-1">In production, the assistant listens continuously for the wake word.</p>
+            </div>
+          )}
         </div>
       </section>
 

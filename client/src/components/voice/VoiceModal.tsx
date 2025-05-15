@@ -58,11 +58,17 @@ export default function VoiceModal({ onClose, onComplete }: VoiceModalProps) {
               <p className="text-xl font-medium mb-2">
                 {isProcessing 
                   ? "Processing..." 
-                  : "Demo Mode"}
+                  : "Voice Assistant"}
               </p>
-              <p className="text-sm text-text-secondary">
-                Speech recognition is limited in this environment.
-              </p>
+              <div className="flex flex-col items-center">
+                <p className="text-sm text-text-secondary mb-1">
+                  Replit Demo Environment
+                </p>
+                <p className="text-xs text-amber-500 max-w-xs text-center">
+                  Note: In production, this would use always-on speech recognition with wake word detection. 
+                  Type your command below for the demo.
+                </p>
+              </div>
             </div>
             
             <div className="w-full max-w-md bg-surface rounded-xl p-5 mb-6">

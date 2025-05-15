@@ -42,12 +42,19 @@ export default function SettingsForm() {
   
   // Update form when settings are loaded
   useEffect(() => {
-    if (settings) {
+    if (settings && typeof settings === 'object') {
+      const settingsObj = settings as {
+        alwaysListening?: boolean;
+        wakeWord?: string;
+        voiceGender?: 'female' | 'male' | 'neutral';
+        saveConversations?: boolean;
+      };
+      
       form.reset({
-        alwaysListening: settings.alwaysListening,
-        wakeWord: settings.wakeWord,
-        voiceGender: settings.voiceGender,
-        saveConversations: settings.saveConversations,
+        alwaysListening: settingsObj.alwaysListening ?? true,
+        wakeWord: settingsObj.wakeWord ?? 'Hey Assistant',
+        voiceGender: (settingsObj.voiceGender as 'female' | 'male' | 'neutral') ?? 'female',
+        saveConversations: settingsObj.saveConversations ?? true,
       });
     }
   }, [settings, form]);
@@ -105,8 +112,14 @@ export default function SettingsForm() {
               <div className="space-y-0.5">
                 <FormLabel className="text-base">Always Listening Mode</FormLabel>
                 <FormDescription className="text-xs">
-                  Automatically detect wake word
+                  Automatically detect wake word and process speech in the background
                 </FormDescription>
+                {window.location.hostname.includes('replit') && (
+                  <p className="text-xs italic text-amber-500 mt-1">
+                    Note: Always-on listening is designed to run in production environments.
+                    Some browsers may limit this functionality in development environments.
+                  </p>
+                )}
               </div>
               <FormControl>
                 <Switch

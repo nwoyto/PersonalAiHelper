@@ -127,9 +127,10 @@ export function useSpeech(options: UseSpeechOptions = {}) {
       console.log('Background listening started');
     };
     
-    backgroundRecognitionInstance.onresult = (event) => {
-      const transcript = Array.from(event.results)
-        .map(result => result[0].transcript)
+    backgroundRecognitionInstance.onresult = (event: any) => {
+      const results = event.results as SpeechRecognitionResultList;
+      const transcript = Array.from(results)
+        .map((result: any) => result[0].transcript)
         .join('');
       
       setBackgroundTranscription(transcript);
@@ -141,7 +142,7 @@ export function useSpeech(options: UseSpeechOptions = {}) {
       }
     };
     
-    backgroundRecognitionInstance.onerror = (event) => {
+    backgroundRecognitionInstance.onerror = (event: any) => {
       if (event.error === 'no-speech') {
         // Ignore "no speech" errors
         return;
@@ -218,15 +219,16 @@ export function useSpeech(options: UseSpeechOptions = {}) {
       }
     };
     
-    recognitionInstance.onresult = (event) => {
-      const transcript = Array.from(event.results)
-        .map(result => result[0].transcript)
+    recognitionInstance.onresult = (event: any) => {
+      const results = event.results as SpeechRecognitionResultList;
+      const transcript = Array.from(results)
+        .map((result: any) => result[0].transcript)
         .join('');
       
       setTranscription(transcript);
     };
     
-    recognitionInstance.onerror = (event) => {
+    recognitionInstance.onerror = (event: any) => {
       if (event.error === 'no-speech') {
         // Ignore "no speech" errors
         return;
