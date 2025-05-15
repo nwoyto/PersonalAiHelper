@@ -1,4 +1,6 @@
 import express, { type Express, Request, Response } from "express";
+import { authenticate, login } from "./auth";
+import bcrypt from "bcryptjs";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertTaskSchema, insertNoteSchema } from "@shared/schema";
@@ -7,6 +9,35 @@ import { analyzeTranscription } from "./openai";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const apiRouter = express.Router();
+
+  // Auth endpoints
+  apiRouter.post("/auth/register", async (req: Request, res: Response) => {
+    try {
+      const { username, password, email } = req.body;
+      const hashedPassword = await bcrypt.hash(password, 10);
+      
+      const user = await storage.createUser({
+        username,
+        password: hashedPassword,
+        email
+      });
+
+      const { password: _, ...userWithoutPassword } = user;
+      res.status(201).json(userWithoutPassword);
+    } catch (error) {
+      res.status(400).json({ message: "Failed to create user" });
+    }
+  });
+
+  apiRouter.post("/auth/login", async (req: Request, res: Response) => {
+    try {
+      const { username, password } = req.body;
+      const result = await login(username, password);
+      res.json(result);
+    } catch (error) {
+      res.status(401).json({ message: "Invalid credentials" });
+    }
+  });
   
   // User endpoints
   apiRouter.get("/users/:id", async (req: Request, res: Response) => {
