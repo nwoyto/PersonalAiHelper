@@ -3,6 +3,7 @@ import { Task } from "@/types";
 import { apiRequest } from "@/lib/queryClient";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { ContentCard } from "@/components/ui/content-card";
 
 interface TaskItemProps {
   task: Task;
@@ -91,7 +92,7 @@ export default function TaskItem({ task }: TaskItemProps) {
   };
   
   return (
-    <div className="bg-surface rounded-lg p-4">
+    <ContentCard className={task.completed ? "opacity-80" : ""}>
       <div className="flex items-start">
         <button 
           className={`shrink-0 w-5 h-5 rounded-full border-2 mt-0.5 mr-3 flex-none ${
@@ -130,6 +131,6 @@ export default function TaskItem({ task }: TaskItemProps) {
           </div>
         </div>
       </div>
-    </div>
+    </ContentCard>
   );
 }

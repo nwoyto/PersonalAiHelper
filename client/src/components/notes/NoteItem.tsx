@@ -1,5 +1,6 @@
 import { Note } from "@/types";
 import { formatDistanceToNow } from "date-fns";
+import { ContentCard } from "@/components/ui/content-card";
 
 interface NoteItemProps {
   note: Note;
@@ -27,7 +28,7 @@ export default function NoteItem({ note }: NoteItemProps) {
   };
   
   return (
-    <div className="bg-surface rounded-lg p-4">
+    <ContentCard>
       <div className="flex justify-between items-start mb-2">
         <h4 className="font-medium">{note.title}</h4>
         <span className="text-xs text-text-secondary">{formatTimestamp(note.timestamp)}</span>
@@ -44,6 +45,6 @@ export default function NoteItem({ note }: NoteItemProps) {
           </div>
         )}
       </div>
-    </div>
+    </ContentCard>
   );
 }

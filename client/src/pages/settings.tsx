@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/layout/Header";
+import { ContentCard } from "@/components/ui/content-card";
 
 export default function Settings() {
   const { toast } = useToast();
@@ -29,7 +30,7 @@ export default function Settings() {
       {/* Settings Sections */}
       <div className="space-y-6">
         {/* Account Section */}
-        <section className="bg-surface rounded-lg p-4">
+        <ContentCard>
           <h3 className="font-medium mb-4">Account</h3>
           
           <div className="flex items-center mb-4">
@@ -56,17 +57,17 @@ export default function Settings() {
               <i className="ri-arrow-right-s-line"></i>
             </button>
           </div>
-        </section>
+        </ContentCard>
         
         {/* Voice Assistant Section */}
-        <section className="bg-surface rounded-lg p-4">
+        <ContentCard>
           <h3 className="font-medium mb-4">Voice Assistant</h3>
           
           <SettingsForm />
-        </section>
+        </ContentCard>
         
         {/* Privacy Section */}
-        <section className="bg-surface rounded-lg p-4">
+        <ContentCard>
           <h3 className="font-medium mb-4">Privacy & Data</h3>
           
           <div className="space-y-4">
@@ -83,10 +84,10 @@ export default function Settings() {
               <i className="ri-delete-bin-line"></i>
             </button>
           </div>
-        </section>
+        </ContentCard>
         
         {/* About Section */}
-        <section className="bg-surface rounded-lg p-4">
+        <ContentCard>
           <h3 className="font-medium mb-4">About</h3>
           
           <div className="space-y-3">
@@ -109,7 +110,7 @@ export default function Settings() {
               <i className="ri-arrow-right-s-line"></i>
             </button>
           </div>
-        </section>
+        </ContentCard>
         
         {/* Sign Out Button */}
         <Button 
