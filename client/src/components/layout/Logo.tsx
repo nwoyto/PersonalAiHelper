@@ -1,4 +1,5 @@
 import React from 'react';
+import logoImg from '../../assets/jibe-logo.png';
 
 interface LogoProps {
   size?: number;
@@ -8,12 +9,18 @@ interface LogoProps {
 export default function Logo({ size = 40, className = '' }: LogoProps) {
   return (
     <div 
-      className={`bg-gradient-to-r from-primary to-secondary rounded-lg flex items-center justify-center ${className}`}
+      className={`flex items-center justify-center ${className}`}
       style={{ width: size, height: size }}
     >
-      <div className="text-white font-bold" style={{ fontSize: size * 0.5 }}>
-        J
-      </div>
+      <img 
+        src={logoImg} 
+        alt="Jibe AI Logo" 
+        style={{ 
+          width: size,
+          height: 'auto'
+        }}
+        className="object-contain"
+      />
     </div>
   );
 }
