@@ -43,14 +43,18 @@ export default function VoiceModal({ onClose, onComplete }: VoiceModalProps) {
   });
   
   useEffect(() => {
-    // Start listening when component mounts
-    startListening();
+    // We need to use a ref to track if we've already started listening
+    // to avoid the effect running multiple times
+    const timeoutId = setTimeout(() => {
+      startListening();
+    }, 500);
     
     return () => {
       // Clean up when component unmounts
+      clearTimeout(timeoutId);
       cancelListening();
     };
-  }, [startListening, cancelListening]);
+  }, []); // Empty dependency array to run only once
   
   const handleCancelClick = () => {
     cancelListening();

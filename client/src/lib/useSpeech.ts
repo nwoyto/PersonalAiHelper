@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { processTranscription } from './openai';
-import { useSettings } from './useSettings';
+import { useSettings } from '@/lib/useSettings';
 
 // Add type declarations for the Web Speech API since TypeScript doesn't include them by default
 declare global {
@@ -162,13 +162,16 @@ export function useSpeech(options: UseSpeechOptions = {}) {
     backgroundRecognitionInstance.onend = () => {
       // Restart background recognition if it's not because we're actively listening
       if (!isActiveListening && settings?.alwaysListening) {
-        try {
-          setTimeout(() => {
-            backgroundRecognitionInstance.start();
-          }, 500);
-        } catch (err) {
-          console.error('Failed to restart background recognition:', err);
-        }
+        // Add a slightly longer delay to make sure the system is ready
+        setTimeout(() => {
+          try {
+            if (!isActiveListening) {
+              backgroundRecognitionInstance.start();
+            }
+          } catch (err) {
+            console.error('Failed to restart background recognition:', err);
+          }
+        }, 1000);
       }
     };
     
@@ -244,11 +247,16 @@ export function useSpeech(options: UseSpeechOptions = {}) {
       
       // Restart background listening if always-listening is enabled
       if (settings?.alwaysListening && backgroundRecognition) {
-        try {
-          backgroundRecognition.start();
-        } catch (err) {
-          console.error('Failed to restart background recognition after active listening:', err);
-        }
+        // Add a longer delay to ensure recognition has fully ended
+        setTimeout(() => {
+          try {
+            if (!isListening) {
+              backgroundRecognition.start();
+            }
+          } catch (err) {
+            console.error('Failed to restart background recognition after active listening:', err);
+          }
+        }, 1500);
       }
     };
     
@@ -263,6 +271,12 @@ export function useSpeech(options: UseSpeechOptions = {}) {
 
   // Start active listening (for conversation transcription)
   const startActiveListening = useCallback(() => {
+    // First check if recognition is already running
+    if (isListening) {
+      console.log('Recognition already active, no need to start again');
+      return;
+    }
+    
     // Stop background recognition first
     if (backgroundRecognition) {
       try {
@@ -274,20 +288,24 @@ export function useSpeech(options: UseSpeechOptions = {}) {
     
     // Start active recognition
     if (recognition) {
-      try {
-        setTranscription(''); // Clear previous transcription
-        recognition.start();
-      } catch (err) {
-        // If already started, ignore
-        if ((err as Error).message !== 'Failed to execute \'start\' on \'SpeechRecognition\': recognition has already started.') {
-          setError((err as Error).message);
-          if (options.onError) {
-            options.onError((err as Error).message);
+      // Add a slight delay to ensure the previous recognition has fully stopped
+      setTimeout(() => {
+        try {
+          setTranscription(''); // Clear previous transcription
+          recognition.start();
+        } catch (err) {
+          console.error('Failed to start recognition:', err);
+          // If already started, ignore
+          if ((err as Error).message !== 'Failed to execute \'start\' on \'SpeechRecognition\': recognition has already started.') {
+            setError((err as Error).message);
+            if (options.onError) {
+              options.onError((err as Error).message);
+            }
           }
         }
-      }
+      }, 300);
     }
-  }, [recognition, backgroundRecognition, options]);
+  }, [recognition, backgroundRecognition, options, isListening]);
 
   // Start manually triggered listening
   const startListening = useCallback(() => {
