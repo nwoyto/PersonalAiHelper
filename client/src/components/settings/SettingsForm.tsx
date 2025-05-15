@@ -114,7 +114,7 @@ export default function SettingsForm() {
                 <FormDescription className="text-xs">
                   Automatically detect wake word and process speech in the background
                 </FormDescription>
-                {window.location.hostname.includes('replit') && (
+                {typeof window !== 'undefined' && window.location.hostname.includes('replit') && (
                   <p className="text-xs italic text-amber-500 mt-1">
                     Note: Always-on listening is designed to run in production environments.
                     Some browsers may limit this functionality in development environments.

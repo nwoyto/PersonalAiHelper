@@ -69,7 +69,7 @@ export default function Home() {
             Active and listening for wake word
           </div>
           
-          {window.location.hostname.includes('replit') && (
+          {typeof window !== 'undefined' && window.location.hostname.includes('replit') && (
             <div className="text-xs text-amber-500 max-w-xs text-center px-2">
               <p>In the Replit environment, use the microphone button to activate the voice assistant.</p>
               <p className="mt-1">In production, the assistant listens continuously for the wake word.</p>
