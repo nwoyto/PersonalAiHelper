@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { Link } from 'wouter';
 import Logo from './Logo';
 
@@ -6,12 +6,14 @@ interface HeaderProps {
   title?: string;
   showBackButton?: boolean;
   showUserIcon?: boolean;
+  children?: ReactNode;
 }
 
 export default function Header({ 
   title = "Jibe AI", 
   showBackButton = false,
-  showUserIcon = true
+  showUserIcon = true,
+  children
 }: HeaderProps) {
   return (
     <header className="flex justify-between items-center mb-6 pt-2">
@@ -31,11 +33,15 @@ export default function Header({
         </div>
       </div>
       
-      {showUserIcon && (
-        <button className="rounded-full bg-surface p-2">
-          <i className="ri-user-line text-text-primary text-xl"></i>
-        </button>
-      )}
+      <div className="flex items-center gap-3">
+        {children}
+        
+        {showUserIcon && (
+          <button className="rounded-full bg-surface p-2">
+            <i className="ri-user-line text-text-primary text-xl"></i>
+          </button>
+        )}
+      </div>
     </header>
   );
 }

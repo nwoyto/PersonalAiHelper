@@ -39,3 +39,22 @@ export interface TranscriptionResult {
     category: "work" | "personal" | "urgent";
   }[];
 }
+
+export interface ExternalCalendarEvent {
+  id: string;
+  title: string;
+  description?: string;
+  startTime?: string;
+  endTime?: string;
+  allDay?: boolean;
+  location?: string;
+  provider: "google" | "outlook" | "apple";
+  externalId: string;
+  url?: string;
+}
+
+export interface CalendarIntegrationState {
+  google: boolean;
+  outlook: boolean;
+  apple: boolean;
+}
