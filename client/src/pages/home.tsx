@@ -8,7 +8,7 @@ import { Link } from "wouter";
 import { Skeleton } from "@/components/ui/skeleton";
 import Header from "@/components/layout/Header";
 import { queryClient } from "@/lib/queryClient";
-import { VoiceModalContext } from "../App";
+import { VoiceModalContext } from "@/App";
 
 export default function Home() {
   const [greeting, setGreeting] = useState("Good day");
