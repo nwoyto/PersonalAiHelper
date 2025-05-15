@@ -3,12 +3,17 @@ import { useQuery } from "@tanstack/react-query";
 import { Task, Note } from "@/types";
 import TaskItem from "@/components/tasks/TaskItem";
 import NoteItem from "@/components/notes/NoteItem";
+import TaskForm from "@/components/tasks/TaskForm";
+import VoiceModal from "@/components/voice/VoiceModal";
 import { Link } from "wouter";
 import { Skeleton } from "@/components/ui/skeleton";
 import Header from "@/components/layout/Header";
+import { queryClient } from "@/lib/queryClient";
 
 export default function Home() {
   const [greeting, setGreeting] = useState("Good day");
+  const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
+  const [isTaskFormOpen, setIsTaskFormOpen] = useState(false);
   
   // Set greeting based on time of day
   useEffect(() => {
@@ -77,22 +82,30 @@ export default function Home() {
       <section className="mb-8 slide-up" style={{ animationDelay: '0.1s' }}>
         <h3 className="text-sm font-medium text-text-secondary uppercase mb-3">Quick Actions</h3>
         <div className="grid grid-cols-2 gap-3">
-          <button className="bg-surface hover:bg-surface-light rounded-lg p-4 flex flex-col items-center transition">
-            <i className="ri-mic-line text-primary text-xl mb-2"></i>
-            <span className="text-sm">New Voice Note</span>
-          </button>
-          <button className="bg-surface hover:bg-surface-light rounded-lg p-4 flex flex-col items-center transition">
-            <i className="ri-calendar-line text-accent text-xl mb-2"></i>
-            <span className="text-sm">Schedule Meeting</span>
-          </button>
-          <button className="bg-surface hover:bg-surface-light rounded-lg p-4 flex flex-col items-center transition">
-            <i className="ri-add-line text-secondary text-xl mb-2"></i>
-            <span className="text-sm">New Task</span>
-          </button>
-          <button className="bg-surface hover:bg-surface-light rounded-lg p-4 flex flex-col items-center transition">
-            <i className="ri-search-line text-warning text-xl mb-2"></i>
-            <span className="text-sm">Find Notes</span>
-          </button>
+          <Link href="#" onClick={() => setIsVoiceModalOpen(true)}>
+            <button className="w-full bg-surface hover:bg-surface-light rounded-lg p-4 flex flex-col items-center transition">
+              <i className="ri-mic-line text-primary text-xl mb-2"></i>
+              <span className="text-sm">New Voice Note</span>
+            </button>
+          </Link>
+          <Link href="/calendar">
+            <button className="w-full bg-surface hover:bg-surface-light rounded-lg p-4 flex flex-col items-center transition">
+              <i className="ri-calendar-line text-accent text-xl mb-2"></i>
+              <span className="text-sm">Schedule Meeting</span>
+            </button>
+          </Link>
+          <Link href="#" onClick={() => setIsTaskFormOpen(true)}>
+            <button className="w-full bg-surface hover:bg-surface-light rounded-lg p-4 flex flex-col items-center transition">
+              <i className="ri-add-line text-secondary text-xl mb-2"></i>
+              <span className="text-sm">New Task</span>
+            </button>
+          </Link>
+          <Link href="/notes">
+            <button className="w-full bg-surface hover:bg-surface-light rounded-lg p-4 flex flex-col items-center transition">
+              <i className="ri-search-line text-warning text-xl mb-2"></i>
+              <span className="text-sm">Find Notes</span>
+            </button>
+          </Link>
         </div>
       </section>
 
@@ -172,6 +185,29 @@ export default function Home() {
           )}
         </div>
       </section>
+      
+      {/* Task Form Modal */}
+      {isTaskFormOpen && (
+        <TaskForm 
+          isOpen={isTaskFormOpen} 
+          onClose={() => setIsTaskFormOpen(false)} 
+        />
+      )}
+      
+      {/* Voice Modal */}
+      {isVoiceModalOpen && (
+        <VoiceModal 
+          onClose={() => setIsVoiceModalOpen(false)}
+          onComplete={(result) => {
+            console.log("Transcription complete:", result);
+            // Process the transcription and extract tasks
+            if (result.tasks && result.tasks.length > 0) {
+              queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
+            }
+            setIsVoiceModalOpen(false);
+          }}
+        />
+      )}
     </div>
   );
 }
