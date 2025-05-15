@@ -6,6 +6,7 @@ import Layout from "@/components/layout/Layout";
 import Home from "@/pages/home";
 import Tasks from "@/pages/tasks";
 import Notes from "@/pages/notes";
+import Calendar from "@/pages/calendar";
 import Settings from "@/pages/settings";
 import NotFound from "@/pages/not-found";
 import Login from "@/pages/login";
@@ -38,6 +39,7 @@ function App() {
               <Route path="/" component={Home} />
               <Route path="/tasks" component={Tasks} />
               <Route path="/notes" component={Notes} />
+              <Route path="/calendar" component={Calendar} />
               <Route path="/settings" component={Settings} />
               <Route component={NotFound} />
             </>
