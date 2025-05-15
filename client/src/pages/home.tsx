@@ -1,19 +1,19 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Task, Note } from "@/types";
 import TaskItem from "@/components/tasks/TaskItem";
 import NoteItem from "@/components/notes/NoteItem";
 import TaskForm from "@/components/tasks/TaskForm";
-import VoiceModal from "@/components/voice/VoiceModal";
 import { Link } from "wouter";
 import { Skeleton } from "@/components/ui/skeleton";
 import Header from "@/components/layout/Header";
 import { queryClient } from "@/lib/queryClient";
+import { VoiceModalContext } from "../App";
 
 export default function Home() {
   const [greeting, setGreeting] = useState("Good day");
-  const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
   const [isTaskFormOpen, setIsTaskFormOpen] = useState(false);
+  const { setIsVoiceModalOpen } = useContext(VoiceModalContext);
   
   // Set greeting based on time of day
   useEffect(() => {
@@ -191,21 +191,6 @@ export default function Home() {
         <TaskForm 
           isOpen={isTaskFormOpen} 
           onClose={() => setIsTaskFormOpen(false)} 
-        />
-      )}
-      
-      {/* Voice Modal */}
-      {isVoiceModalOpen && (
-        <VoiceModal 
-          onClose={() => setIsVoiceModalOpen(false)}
-          onComplete={(result) => {
-            console.log("Transcription complete:", result);
-            // Process the transcription and extract tasks
-            if (result.tasks && result.tasks.length > 0) {
-              queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
-            }
-            setIsVoiceModalOpen(false);
-          }}
         />
       )}
     </div>
