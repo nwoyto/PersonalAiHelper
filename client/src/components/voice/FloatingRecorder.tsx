@@ -2,10 +2,11 @@ import { useState, useEffect } from "react";
 import SoundWave from "@/components/ui/sound-wave";
 import { useSpeech } from "@/lib/useSpeech";
 import { useToast } from "@/hooks/use-toast";
+import { TranscriptionResult } from "@/types";
 
 interface FloatingRecorderProps {
   onClose: () => void;
-  onComplete: (result: { text: string, tasks: any[] }) => void;
+  onComplete: (result: TranscriptionResult) => void;
 }
 
 export default function FloatingRecorder({ onClose, onComplete }: FloatingRecorderProps) {
