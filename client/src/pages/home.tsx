@@ -5,6 +5,7 @@ import TaskItem from "@/components/tasks/TaskItem";
 import NoteItem from "@/components/notes/NoteItem";
 import { Link } from "wouter";
 import { Skeleton } from "@/components/ui/skeleton";
+import Header from "@/components/layout/Header";
 
 export default function Home() {
   const [greeting, setGreeting] = useState("Good day");
@@ -45,15 +46,7 @@ export default function Home() {
   return (
     <div className="home-screen px-4 py-6">
       {/* Header */}
-      <header className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-xl font-semibold">VoiceFlow</h1>
-          <p className="text-text-secondary text-sm">Your AI Assistant</p>
-        </div>
-        <button className="rounded-full bg-surface p-2">
-          <i className="ri-user-line text-text-primary text-xl"></i>
-        </button>
-      </header>
+      <Header />
 
       {/* Greeting & Assistant Status */}
       <section className="mb-8 slide-up">

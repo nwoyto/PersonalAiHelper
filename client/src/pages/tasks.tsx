@@ -5,6 +5,7 @@ import TaskItem from "@/components/tasks/TaskItem";
 import TaskForm from "@/components/tasks/TaskForm";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import Header from "@/components/layout/Header";
 
 export default function Tasks() {
   const [filter, setFilter] = useState<"all" | "today" | "upcoming" | "completed">("all");
@@ -57,18 +58,15 @@ export default function Tasks() {
   return (
     <div className="tasks-screen px-4 py-6">
       {/* Header */}
-      <header className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-xl font-semibold">Tasks</h1>
-          <p className="text-text-secondary text-sm">Manage your to-dos</p>
-        </div>
+      <div className="flex justify-between items-center mb-6">
+        <Header title="Tasks" />
         <Button 
           className="rounded-full bg-primary p-2 text-white h-auto w-auto"
           onClick={() => setIsFormOpen(true)}
         >
           <i className="ri-add-line text-xl"></i>
         </Button>
-      </header>
+      </div>
 
       {/* Filter Tabs */}
       <div className="flex space-x-2 mb-6 overflow-x-auto pb-2">
