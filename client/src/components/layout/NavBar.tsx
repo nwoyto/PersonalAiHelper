@@ -10,10 +10,10 @@ export default function NavBar({ onVoiceClick }: NavBarProps) {
   return (
     <>
       {/* Floating Voice Button */}
-      <div className="fixed bottom-20 left-0 right-0 flex justify-center z-10">
+      <div className="fixed bottom-24 left-0 right-0 flex justify-center z-10">
         <button 
           onClick={onVoiceClick}
-          className="bg-primary w-16 h-16 rounded-full flex items-center justify-center shadow-lg hover:bg-primary/90 transition-colors"
+          className="bg-primary w-16 h-16 rounded-full flex items-center justify-center shadow-xl hover:bg-primary/90 transition-colors border-4 border-white"
           aria-label="Voice input"
         >
           <i className="ri-mic-line text-white text-2xl"></i>

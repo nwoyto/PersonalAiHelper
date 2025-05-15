@@ -23,7 +23,7 @@ export default function Layout({
 
   return (
     <div className="flex flex-col h-screen bg-background text-text-primary">
-      <main className="flex-1 overflow-y-auto pb-20" id="main-content">
+      <main className="flex-1 overflow-y-auto pb-28" id="main-content">
         {children}
       </main>
       
