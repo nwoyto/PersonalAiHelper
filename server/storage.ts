@@ -3,7 +3,9 @@ import {
   Task, InsertTask, 
   Note, InsertNote, 
   Settings, InsertSettings,
-  users, tasks, notes, settings
+  CalendarIntegration, InsertCalendarIntegration,
+  CalendarEvent, InsertCalendarEvent,
+  users, tasks, notes, settings, calendarIntegrations, calendarEvents
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and } from "drizzle-orm";
@@ -32,6 +34,22 @@ export interface IStorage {
   getSettings(userId: number): Promise<Settings | undefined>;
   updateSettings(userId: number, settings: Partial<Settings>): Promise<Settings | undefined>;
   createSettings(settings: InsertSettings): Promise<Settings>;
+  
+  // Calendar Integrations
+  getCalendarIntegrations(userId: number): Promise<CalendarIntegration[]>;
+  getCalendarIntegrationsByProvider(userId: number, provider: string): Promise<CalendarIntegration[]>;
+  createCalendarIntegration(integration: InsertCalendarIntegration): Promise<CalendarIntegration>;
+  updateCalendarIntegration(id: number, integration: Partial<CalendarIntegration>): Promise<CalendarIntegration | undefined>;
+  deleteCalendarIntegration(id: number): Promise<boolean>;
+  
+  // Calendar Events
+  getCalendarEvents(userId: number): Promise<CalendarEvent[]>;
+  getCalendarEventsByIntegration(integrationId: number): Promise<CalendarEvent[]>;
+  getCalendarEventByExternalId(externalId: string): Promise<CalendarEvent | undefined>;
+  createCalendarEvent(event: InsertCalendarEvent): Promise<CalendarEvent>;
+  updateCalendarEvent(id: number, event: Partial<CalendarEvent>): Promise<CalendarEvent | undefined>;
+  deleteCalendarEvent(id: number): Promise<boolean>;
+  deleteCalendarEventsByIntegration(integrationId: number): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {

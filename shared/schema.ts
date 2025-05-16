@@ -83,5 +83,62 @@ export type InsertTask = z.infer<typeof insertTaskSchema>;
 export type Note = typeof notes.$inferSelect;
 export type InsertNote = z.infer<typeof insertNoteSchema>;
 
+// Calendar Integrations table
+export const calendarIntegrations = pgTable("calendar_integrations", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id),
+  provider: varchar("provider", { length: 20 }).notNull(), // "google", "outlook", "apple"
+  accessToken: text("access_token").notNull(),
+  refreshToken: text("refresh_token"),
+  tokenExpiry: timestamp("token_expiry"),
+  calendarId: text("calendar_id"),
+  enabled: boolean("enabled").notNull().default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Calendar Events table (for caching external events)
+export const calendarEvents = pgTable("calendar_events", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id),
+  integrationId: integer("integration_id").references(() => calendarIntegrations.id),
+  externalId: text("external_id").notNull(),
+  title: text("title").notNull(),
+  description: text("description"),
+  startTime: timestamp("start_time"),
+  endTime: timestamp("end_time"),
+  allDay: boolean("all_day").default(false),
+  location: text("location"),
+  url: text("url"),
+  lastSynced: timestamp("last_synced").notNull().defaultNow(),
+});
+
+// Insert schemas
+export const insertCalendarIntegrationSchema = createInsertSchema(calendarIntegrations, {
+  tokenExpiry: z.date().optional(),
+  createdAt: z.date().optional(),
+  updatedAt: z.date().optional(),
+}).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertCalendarEventSchema = createInsertSchema(calendarEvents, {
+  startTime: z.date().optional(),
+  endTime: z.date().optional(),
+  lastSynced: z.date().optional(),
+}).omit({
+  id: true,
+  lastSynced: true,
+});
+
 export type Settings = typeof settings.$inferSelect;
 export type InsertSettings = z.infer<typeof insertSettingsSchema>;
+
+// Calendar types
+export type CalendarIntegration = typeof calendarIntegrations.$inferSelect;
+export type InsertCalendarIntegration = z.infer<typeof insertCalendarIntegrationSchema>;
+
+export type CalendarEvent = typeof calendarEvents.$inferSelect;
+export type InsertCalendarEvent = z.infer<typeof insertCalendarEventSchema>;
