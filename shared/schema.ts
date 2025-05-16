@@ -30,12 +30,24 @@ export const tasks = pgTable("tasks", {
   completed: boolean("completed").notNull().default(false),
   dueDate: date("due_date"),
   category: varchar("category", { length: 20 }).notNull(),
+  priority: varchar("priority", { length: 10 }).default("medium"),
+  estimatedMinutes: integer("estimated_minutes"),
+  location: text("location"),
+  people: text("people").array(),
+  recurring: boolean("recurring").default(false),
+  recurringPattern: text("recurring_pattern"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 // Create schema with proper date handling
 export const insertTaskSchema = createInsertSchema(tasks, {
   dueDate: z.date().optional(),
+  priority: z.enum(["high", "medium", "low"]).optional(),
+  estimatedMinutes: z.number().positive().optional(),
+  location: z.string().optional(),
+  people: z.array(z.string()).optional(),
+  recurring: z.boolean().optional(),
+  recurringPattern: z.string().optional(),
 }).omit({
   id: true,
   createdAt: true,
