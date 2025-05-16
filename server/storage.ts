@@ -10,7 +10,7 @@ import type {
   CalendarEvent, InsertCalendarEvent
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and } from "drizzle-orm";
+import { eq, and, inArray } from "drizzle-orm";
 
 export interface IStorage {
   // Users
@@ -359,33 +359,138 @@ export class DatabaseStorage implements IStorage {
   
   // Calendar Events methods
   async getCalendarEvents(userId: number): Promise<CalendarEvent[]> {
-    return await db
-      .select()
-      .from(calendarEvents)
-      .where(eq(calendarEvents.userId, userId));
+    try {
+      // Using direct SQL for more reliable query
+      const { pool } = await import('./db');
+      const result = await pool.query(
+        `SELECT ce.* FROM calendar_events ce
+         JOIN calendar_integrations ci ON ce.integration_id = ci.id
+         WHERE ci.user_id = $1`,
+        [userId]
+      );
+      
+      return result.rows.map(row => ({
+        id: row.id,
+        userId: row.user_id,
+        integrationId: row.integration_id,
+        externalId: row.external_id,
+        title: row.title,
+        description: row.description,
+        startTime: row.start_time,
+        endTime: row.end_time,
+        allDay: row.all_day,
+        location: row.location,
+        url: row.url,
+        lastSynced: row.last_synced
+      }));
+    } catch (error) {
+      console.error("Error fetching calendar events:", error);
+      return [];
+    }
   }
   
   async getCalendarEventsByIntegration(integrationId: number): Promise<CalendarEvent[]> {
-    return await db
-      .select()
-      .from(calendarEvents)
-      .where(eq(calendarEvents.integrationId, integrationId));
+    try {
+      // Using direct SQL for more reliability
+      const { pool } = await import('./db');
+      const result = await pool.query(
+        `SELECT * FROM calendar_events WHERE integration_id = $1`,
+        [integrationId]
+      );
+      
+      return result.rows.map(row => ({
+        id: row.id,
+        userId: row.user_id || null,
+        integrationId: row.integration_id,
+        externalId: row.external_id,
+        title: row.title,
+        description: row.description,
+        startTime: row.start_time,
+        endTime: row.end_time,
+        allDay: row.all_day,
+        location: row.location,
+        url: row.url,
+        lastSynced: row.last_synced
+      }));
+    } catch (error) {
+      console.error("Error fetching calendar events by integration:", error);
+      return [];
+    }
   }
   
   async getCalendarEventByExternalId(externalId: string): Promise<CalendarEvent | undefined> {
-    const [event] = await db
-      .select()
-      .from(calendarEvents)
-      .where(eq(calendarEvents.externalId, externalId));
-    return event;
+    try {
+      // Using direct SQL for more reliability
+      const { pool } = await import('./db');
+      const result = await pool.query(
+        `SELECT * FROM calendar_events WHERE external_id = $1 LIMIT 1`,
+        [externalId]
+      );
+      
+      if (result.rows.length === 0) return undefined;
+      
+      const row = result.rows[0];
+      return {
+        id: row.id,
+        userId: row.user_id || null,
+        integrationId: row.integration_id,
+        externalId: row.external_id,
+        title: row.title,
+        description: row.description,
+        startTime: row.start_time,
+        endTime: row.end_time,
+        allDay: row.all_day,
+        location: row.location,
+        url: row.url,
+        lastSynced: row.last_synced
+      };
+    } catch (error) {
+      console.error("Error fetching calendar event by externalId:", error);
+      return undefined;
+    }
   }
   
   async createCalendarEvent(event: InsertCalendarEvent): Promise<CalendarEvent> {
-    const [newEvent] = await db
-      .insert(calendarEvents)
-      .values(event)
-      .returning();
-    return newEvent;
+    try {
+      // Using direct SQL for more reliable creation
+      const { pool } = await import('./db');
+      const result = await pool.query(
+        `INSERT INTO calendar_events 
+         (integration_id, external_id, title, description, start_time, end_time, all_day, location, url)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+         RETURNING *`,
+        [
+          event.integrationId,
+          event.externalId,
+          event.title,
+          event.description || null,
+          event.startTime || null,
+          event.endTime || null,
+          event.allDay || false,
+          event.location || null,
+          event.url || null
+        ]
+      );
+      
+      const row = result.rows[0];
+      return {
+        id: row.id,
+        userId: row.user_id || null,
+        integrationId: row.integration_id,
+        externalId: row.external_id,
+        title: row.title,
+        description: row.description,
+        startTime: row.start_time,
+        endTime: row.end_time,
+        allDay: row.all_day,
+        location: row.location,
+        url: row.url,
+        lastSynced: row.last_synced || new Date()
+      };
+    } catch (error) {
+      console.error("Error creating calendar event:", error);
+      throw error;
+    }
   }
   
   async updateCalendarEvent(id: number, event: Partial<CalendarEvent>): Promise<CalendarEvent | undefined> {
