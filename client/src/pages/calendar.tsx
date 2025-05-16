@@ -10,7 +10,7 @@ import CalendarIntegration from "@/components/calendar/CalendarIntegration";
 import CalendarViews from "@/components/calendar/CalendarViews";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, Calendar as CalendarIcon } from "lucide-react";
+import { AlertCircle, Calendar as CalendarIcon, Loader2 } from "lucide-react";
 
 type CalendarViewType = "day" | "week" | "month" | "year";
 
@@ -25,49 +25,14 @@ export default function Calendar() {
     queryKey: ["/api/tasks"],
   });
 
-  // Get synchronized external calendar events (mock data for demo)
-  const { data: externalEvents = [], isError: isExternalEventsError } = useQuery<ExternalCalendarEvent[]>({
+  // Get synchronized external calendar events
+  const { data: externalEvents = [], isError: isExternalEventsError, isLoading: isLoadingEvents } = useQuery<ExternalCalendarEvent[]>({
     queryKey: ["/api/calendar/events"],
-    // Mock external events - in a real app, this would come from the backend
-    initialData: [
-      {
-        id: "ext-1",
-        title: "Weekly Team Meeting",
-        description: "Discuss project progress and roadmap",
-        startTime: new Date(new Date().setHours(10, 0, 0, 0)).toISOString(),
-        endTime: new Date(new Date().setHours(11, 0, 0, 0)).toISOString(),
-        location: "Conference Room A",
-        provider: "outlook",
-        externalId: "outlook-123",
-      },
-      {
-        id: "ext-2",
-        title: "Dentist Appointment",
-        startTime: new Date(new Date().getTime() + 24 * 60 * 60 * 1000).toISOString(),
-        endTime: new Date(new Date().getTime() + 24 * 60 * 60 * 1000).toISOString(),
-        location: "123 Medical Plaza",
-        provider: "google",
-        externalId: "google-456",
-      },
-      {
-        id: "ext-3",
-        title: "Annual Company Picnic",
-        description: "Bring the family! Food and games provided.",
-        allDay: true,
-        startTime: new Date(new Date().setDate(new Date().getDate() + 7)).toISOString(),
-        location: "Central Park",
-        provider: "apple",
-        externalId: "apple-789",
-      }
-    ],
-    enabled: false, // Disabled until backend implementation
   });
 
-  // Get integration status (mock data for demo)
-  const { data: integrationState = { google: false, outlook: false, apple: false } } = useQuery<CalendarIntegrationState>({
+  // Get integration status from API
+  const { data: integrationState = { google: false, outlook: false, apple: false }, isLoading: isLoadingIntegrationState } = useQuery<CalendarIntegrationState>({
     queryKey: ["/api/calendar/integration-status"],
-    initialData: { google: true, outlook: true, apple: false }, // Mock data
-    enabled: false, // Disabled until backend implementation
   });
 
   // Convert tasks with dueDate to events for appropriate display
