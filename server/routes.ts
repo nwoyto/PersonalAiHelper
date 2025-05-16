@@ -6,6 +6,7 @@ import { storage } from "./storage";
 import { insertTaskSchema, insertNoteSchema } from "@shared/schema";
 import { z, ZodError } from "zod";
 import { analyzeTranscription } from "./openai";
+import { syncGoogleCalendar, syncOutlookCalendar } from "./calendar";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const apiRouter = express.Router();
@@ -291,6 +292,183 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid transcription data", errors: error.format() });
       }
       return res.status(500).json({ message: "Failed to process transcription" });
+    }
+  });
+  
+  // Calendar integration endpoints
+  apiRouter.get("/calendar/integrations", async (req: Request, res: Response) => {
+    // For now, we'll use the default user (id: 1)
+    const userId = 1;
+    
+    try {
+      const integrations = await storage.getCalendarIntegrations(userId);
+      
+      // Create a sanitized response that doesn't include tokens
+      const safeIntegrations = integrations.map(integration => ({
+        id: integration.id,
+        provider: integration.provider,
+        enabled: integration.enabled,
+        createdAt: integration.createdAt
+      }));
+      
+      return res.json(safeIntegrations);
+    } catch (error) {
+      console.error("Failed to fetch calendar integrations:", error);
+      return res.status(500).json({ message: "Failed to fetch calendar integrations" });
+    }
+  });
+  
+  apiRouter.post("/calendar/connect", async (req: Request, res: Response) => {
+    // For now, we'll use the default user (id: 1)
+    const userId = 1;
+    
+    try {
+      const { providers } = req.body;
+      
+      if (!providers || !Array.isArray(providers)) {
+        return res.status(400).json({ message: "Invalid providers list" });
+      }
+      
+      // In a real implementation, we would:
+      // 1. Initiate OAuth flows for each provider
+      // 2. Store tokens securely
+      // 3. Set up webhook subscriptions for calendar updates
+      
+      // For demonstration purposes, we'll create mock integrations
+      const results = [];
+      
+      for (const provider of providers) {
+        if (!["google", "outlook", "apple"].includes(provider)) {
+          continue;
+        }
+        
+        // Check if integration already exists
+        const existingIntegrations = await storage.getCalendarIntegrationsByProvider(userId, provider);
+        
+        let integration;
+        let status: "updated" | "connected" = "connected";
+        
+        if (existingIntegrations.length > 0) {
+          // Update existing integration
+          integration = await storage.updateCalendarIntegration(
+            existingIntegrations[0].id,
+            { enabled: true }
+          );
+          status = "updated";
+        } else {
+          // Mock integration - in a real app, these values would come from OAuth
+          integration = await storage.createCalendarIntegration({
+            userId,
+            provider,
+            accessToken: "mock-access-token",
+            refreshToken: "mock-refresh-token",
+            tokenExpiry: new Date(Date.now() + 3600000), // 1 hour from now
+            calendarId: `primary-${provider}`,
+            enabled: true
+          });
+        }
+        
+        if (integration) {
+          // Sync calendar events
+          let eventCount = 0;
+          
+          if (provider === "google") {
+            eventCount = await syncGoogleCalendar(integration);
+          } else if (provider === "outlook") {
+            eventCount = await syncOutlookCalendar(integration);
+          }
+          
+          results.push({
+            provider,
+            status,
+            id: integration.id,
+            eventCount
+          });
+        }
+      }
+      
+      return res.json({ success: true, connections: results });
+    } catch (error) {
+      console.error("Failed to connect calendar:", error);
+      return res.status(500).json({ message: "Failed to connect calendar" });
+    }
+  });
+  
+  apiRouter.get("/calendar/events", async (req: Request, res: Response) => {
+    // For now, we'll use the default user (id: 1)
+    const userId = 1;
+    
+    try {
+      const events = await storage.getCalendarEvents(userId);
+      
+      // Format events for frontend consumption
+      const formattedEvents = events.map(event => ({
+        id: event.id.toString(),
+        title: event.title,
+        description: event.description || undefined,
+        startTime: event.startTime?.toISOString() || undefined,
+        endTime: event.endTime?.toISOString() || undefined,
+        allDay: event.allDay || false,
+        location: event.location || undefined,
+        provider: "google", // This should come from the integration lookup in a real implementation
+        externalId: event.externalId,
+        url: event.url || undefined
+      }));
+      
+      return res.json(formattedEvents);
+    } catch (error) {
+      console.error("Failed to fetch calendar events:", error);
+      return res.status(500).json({ message: "Failed to fetch calendar events" });
+    }
+  });
+  
+  apiRouter.delete("/calendar/integrations/:id", async (req: Request, res: Response) => {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({ message: "Invalid integration ID" });
+    }
+    
+    try {
+      // Delete all events associated with this integration
+      await storage.deleteCalendarEventsByIntegration(id);
+      
+      // Delete the integration
+      const success = await storage.deleteCalendarIntegration(id);
+      if (!success) {
+        return res.status(404).json({ message: "Calendar integration not found" });
+      }
+      
+      return res.status(204).send();
+    } catch (error) {
+      console.error("Failed to delete calendar integration:", error);
+      return res.status(500).json({ message: "Failed to delete calendar integration" });
+    }
+  });
+  
+  apiRouter.get("/calendar/integration-status", async (req: Request, res: Response) => {
+    // For now, we'll use the default user (id: 1)
+    const userId = 1;
+    
+    try {
+      const integrations = await storage.getCalendarIntegrations(userId);
+      
+      // Create a map of provider to enabled status
+      const statusMap: Record<string, boolean> = {
+        google: false,
+        outlook: false,
+        apple: false
+      };
+      
+      integrations.forEach(integration => {
+        if (["google", "outlook", "apple"].includes(integration.provider)) {
+          statusMap[integration.provider] = integration.enabled;
+        }
+      });
+      
+      return res.json(statusMap);
+    } catch (error) {
+      console.error("Failed to fetch integration status:", error);
+      return res.status(500).json({ message: "Failed to fetch integration status" });
     }
   });
   
