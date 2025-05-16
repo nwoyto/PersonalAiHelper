@@ -80,17 +80,29 @@ export default function Calendar() {
         )}
         
         {/* Calendar View */}
-        <CalendarViews
-          viewType={viewType}
-          date={date}
-          onDateChange={setDate}
-          events={eventsForSelectedDate}
-          tasks={tasks}
-          activeTab={activeTab}
-        />
+        {isLoadingEvents ? (
+          <ContentCard className="flex flex-col items-center justify-center py-12">
+            <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
+            <p className="text-text-secondary">Loading calendar events...</p>
+          </ContentCard>
+        ) : (
+          <CalendarViews
+            viewType={viewType}
+            date={date}
+            onDateChange={setDate}
+            events={eventsForSelectedDate}
+            tasks={tasks}
+            activeTab={activeTab}
+          />
+        )}
         
         {/* Connected Calendar Services */}
-        {anyIntegrationsEnabled && (
+        {isLoadingIntegrationState ? (
+          <ContentCard className="mt-4 flex items-center justify-center py-4">
+            <Loader2 className="h-6 w-6 animate-spin text-primary mr-2" />
+            <p className="text-text-secondary">Loading integrations...</p>
+          </ContentCard>
+        ) : anyIntegrationsEnabled && (
           <ContentCard className="mt-4">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-medium">Connected Calendars</h3>
