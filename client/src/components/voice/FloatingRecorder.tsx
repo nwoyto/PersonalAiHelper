@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import SoundWave from "@/components/ui/sound-wave";
 import { useSpeech } from "@/lib/useSpeech";
 import { useToast } from "@/hooks/use-toast";
+import { processTranscription } from "@/lib/openai";
 import { TranscriptionResult } from "@/types";
 
 interface FloatingRecorderProps {
@@ -22,20 +23,40 @@ export default function FloatingRecorder({ onClose, onComplete }: FloatingRecord
   
   // For demonstration purposes in Replit where speech recognition has limitations
   if (isReplitEnvironment) {
-    const handleSubmitDemo = () => {
+    const handleSubmitDemo = async () => {
       setIsProcessing(true);
       
-      // Simulate processing
-      setTimeout(() => {
-        const result = { 
+      try {
+        // Process the transcription with AI to extract tasks
+        const aiProcessedResult = await processTranscription(
+          mockTranscription || "Schedule a team meeting for next Monday at 2pm to discuss the marketing strategy."
+        );
+        
+        setIsProcessing(false);
+        onComplete(aiProcessedResult);
+        
+        toast({
+          title: "Tasks extracted",
+          description: `Created ${aiProcessedResult.tasks.length} new task(s)`,
+          variant: "default",
+        });
+      } catch (error) {
+        console.error("Error processing transcription:", error);
+        
+        // Fallback if AI processing fails
+        const result: TranscriptionResult = { 
           text: mockTranscription || "Schedule a team meeting for next Monday at 2pm to discuss the marketing strategy.", 
           tasks: [{
             title: "Team Meeting: Marketing Strategy",
             dueDate: "2025-05-20T14:00:00",
-            category: "work"
+            category: "work",
+            priority: "medium",
+            estimatedMinutes: 60,
+            people: ["Marketing Team"],
+            recurring: false
           }]
         };
-        
+      
         setIsProcessing(false);
         onComplete(result);
         
@@ -44,7 +65,7 @@ export default function FloatingRecorder({ onClose, onComplete }: FloatingRecord
           description: `Created ${result.tasks.length} new task(s)`,
           variant: "default",
         });
-      }, 1500);
+      }
     };
     
     // Provide a demo interface that doesn't rely on actual speech recognition

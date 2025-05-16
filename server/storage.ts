@@ -115,6 +115,9 @@ export class DatabaseStorage implements IStorage {
         RETURNING *
       `;
       
+      // Import pool from db
+      const { pool } = await import('./db');
+      
       const { rows } = await pool.query(query, [
         insertTask.userId,
         insertTask.title,
