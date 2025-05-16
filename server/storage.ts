@@ -345,7 +345,7 @@ export class DatabaseStorage implements IStorage {
     const result = await db
       .delete(calendarIntegrations)
       .where(eq(calendarIntegrations.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount ?? 0) > 0;
   }
   
   // Calendar Events methods
@@ -392,14 +392,14 @@ export class DatabaseStorage implements IStorage {
     const result = await db
       .delete(calendarEvents)
       .where(eq(calendarEvents.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount ?? 0) > 0;
   }
   
   async deleteCalendarEventsByIntegration(integrationId: number): Promise<boolean> {
     const result = await db
       .delete(calendarEvents)
       .where(eq(calendarEvents.integrationId, integrationId));
-    return result.rowCount > 0;
+    return (result.rowCount ?? 0) > 0;
   }
 }
 
