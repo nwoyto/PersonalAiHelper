@@ -278,6 +278,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           completed: false,
           dueDate: taskInfo.dueDate ? new Date(taskInfo.dueDate) : undefined,
           category: taskInfo.category || "work",
+          priority: taskInfo.priority || "medium",
+          estimatedMinutes: taskInfo.estimatedMinutes,
+          location: taskInfo.location,
+          people: taskInfo.people,
+          recurring: taskInfo.recurring || false,
+          recurringPattern: taskInfo.recurringPattern,
         });
         createdTasks.push(task);
       }

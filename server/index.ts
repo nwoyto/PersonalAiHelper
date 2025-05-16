@@ -1,8 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
-import { db } from "./db";
-import { migrate } from "drizzle-orm/neon-serverless/migrator";
+import { db, runMigrations } from "./db";
 import { storage } from "./storage";
 
 const app = express();
@@ -50,6 +49,9 @@ async function initializeDatabase() {
     
     // Execute the SQL directly
     await db.execute(sqlContent);
+    
+    // Run additional schema migrations
+    await runMigrations();
     
     // Initialize sample data
     if (storage instanceof DatabaseStorage) {

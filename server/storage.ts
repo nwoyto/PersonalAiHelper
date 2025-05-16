@@ -91,13 +91,70 @@ export class DatabaseStorage implements IStorage {
   }
   
   async createTask(insertTask: InsertTask): Promise<Task> {
-    const result = await db.insert(tasks).values({
-      ...insertTask,
+    // Prepare base task data
+    const taskData: any = {
+      userId: insertTask.userId,
+      title: insertTask.title,
+      description: insertTask.description || "",
+      completed: insertTask.completed || false,
+      category: insertTask.category,
       // Convert any string dates to Date objects
       dueDate: insertTask.dueDate instanceof Date ? insertTask.dueDate : 
                (insertTask.dueDate ? new Date(insertTask.dueDate) : null)
-    }).returning();
-    return result[0];
+    };
+    
+    // Add the new fields if they exist in the schema
+    try {
+      // Use raw query to insert with all fields to handle schema changes gracefully
+      const query = `
+        INSERT INTO tasks 
+        (user_id, title, description, completed, category, due_date, 
+         priority, estimated_minutes, location, people, recurring, recurring_pattern)
+        VALUES 
+        ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+        RETURNING *
+      `;
+      
+      const { rows } = await pool.query(query, [
+        insertTask.userId,
+        insertTask.title,
+        insertTask.description || "",
+        insertTask.completed || false,
+        insertTask.category,
+        insertTask.dueDate instanceof Date ? insertTask.dueDate : 
+               (insertTask.dueDate ? new Date(insertTask.dueDate) : null),
+        insertTask.priority || "medium",
+        insertTask.estimatedMinutes || null,
+        insertTask.location || null,
+        insertTask.people || null,
+        insertTask.recurring || false,
+        insertTask.recurringPattern || null
+      ]);
+      
+      // Convert the returned row to a Task object
+      return {
+        id: rows[0].id,
+        userId: rows[0].user_id,
+        title: rows[0].title,
+        description: rows[0].description,
+        completed: rows[0].completed,
+        dueDate: rows[0].due_date,
+        category: rows[0].category,
+        priority: rows[0].priority,
+        estimatedMinutes: rows[0].estimated_minutes,
+        location: rows[0].location,
+        people: rows[0].people,
+        recurring: rows[0].recurring,
+        recurringPattern: rows[0].recurring_pattern,
+        createdAt: rows[0].created_at
+      };
+    } catch (error) {
+      console.error("Error creating task with extended fields, falling back to basic insert:", error);
+      
+      // Fallback to basic insert if the new columns don't exist yet
+      const result = await db.insert(tasks).values(taskData).returning();
+      return result[0];
+    }
   }
   
   async updateTask(id: number, updatedFields: Partial<Task>): Promise<Task | undefined> {
