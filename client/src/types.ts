@@ -5,6 +5,12 @@ export interface Task {
   completed: boolean;
   dueDate?: string;
   category: "work" | "personal" | "urgent";
+  priority?: "high" | "medium" | "low";
+  estimatedMinutes?: number;
+  location?: string;
+  people?: string[];
+  recurring?: boolean;
+  recurringPattern?: string;
   createdAt: string;
 }
 
@@ -35,8 +41,15 @@ export interface TranscriptionResult {
   text: string;
   tasks: {
     title: string;
+    description?: string;
     dueDate?: string;
     category: "work" | "personal" | "urgent";
+    priority?: "high" | "medium" | "low";
+    estimatedMinutes?: number;
+    location?: string;
+    people?: string[];
+    recurring?: boolean;
+    recurringPattern?: string;
   }[];
 }
 
