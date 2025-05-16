@@ -333,12 +333,21 @@ export class DatabaseStorage implements IStorage {
   }
   
   async updateCalendarIntegration(id: number, integration: Partial<CalendarIntegration>): Promise<CalendarIntegration | undefined> {
-    const [updatedIntegration] = await db
-      .update(calendarIntegrations)
-      .set({ ...integration, updatedAt: new Date() })
-      .where(eq(calendarIntegrations.id, id))
-      .returning();
-    return updatedIntegration;
+    try {
+      // Create update data without updatedAt to avoid errors
+      const updateData = { ...integration };
+      delete updateData.updatedAt;
+      
+      const [updatedIntegration] = await db
+        .update(calendarIntegrations)
+        .set(updateData)
+        .where(eq(calendarIntegrations.id, id))
+        .returning();
+      return updatedIntegration;
+    } catch (error) {
+      console.error("Error updating calendar integration:", error);
+      return undefined;
+    }
   }
   
   async deleteCalendarIntegration(id: number): Promise<boolean> {

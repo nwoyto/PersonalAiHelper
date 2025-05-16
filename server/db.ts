@@ -41,8 +41,15 @@ export async function runMigrations() {
         token_expiry TIMESTAMP,
         calendar_id TEXT,
         enabled BOOLEAN DEFAULT true,
-        created_at TIMESTAMP DEFAULT NOW()
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
       );
+    `);
+    
+    // Ensure updated_at column exists in calendar_integrations
+    await pool.query(`
+      ALTER TABLE calendar_integrations
+      ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT NOW();
     `);
     
     console.log('[Migration] Successfully created calendar_integrations table');
