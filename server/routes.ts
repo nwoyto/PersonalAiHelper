@@ -6,8 +6,7 @@ import { storage } from "./storage";
 import { insertTaskSchema, insertNoteSchema } from "@shared/schema";
 import { z, ZodError } from "zod";
 import { analyzeTranscription } from "./openai";
-import { syncOutlookCalendar } from "./calendar";
-import * as googleCalendar from "./integrations/google-calendar";
+import calendarRoutes from "./routes/calendar";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const apiRouter = express.Router();
