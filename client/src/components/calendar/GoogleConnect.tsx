@@ -15,7 +15,7 @@ export default function GoogleConnect() {
     refetchOnWindowFocus: false,
   });
   
-  const isConnected = integrationStatus?.google === true;
+  const isConnected = integrationStatus && 'google' in integrationStatus && integrationStatus.google === true;
 
   const handleConnect = async () => {
     setIsConnecting(true);
@@ -26,7 +26,7 @@ export default function GoogleConnect() {
         data: { provider: 'google' }
       });
       
-      if (response.authUrl) {
+      if (response && typeof response === 'object' && 'authUrl' in response) {
         // Open the Google OAuth URL in a new window
         window.open(response.authUrl, 'googleAuthPopup', 'width=600,height=700');
         
@@ -41,13 +41,12 @@ export default function GoogleConnect() {
           await queryClient.invalidateQueries({ queryKey: ['/api/calendar/integration-status'] });
           const newStatus = queryClient.getQueryData(['/api/calendar/integration-status']);
           
-          if (newStatus?.google === true) {
+          if (newStatus && 'google' in newStatus && newStatus.google === true) {
             clearInterval(checkInterval);
             
             toast({
               title: 'Calendar Connected!',
               description: 'Your Google Calendar has been connected successfully.',
-              variant: 'success',
             });
             
             // Also refresh calendar events
@@ -77,22 +76,25 @@ export default function GoogleConnect() {
     
     try {
       // Find the integration ID first
-      const integrations = await apiRequest('/api/calendar/integrations');
-      const googleIntegration = integrations.find((i: any) => i.provider === 'google');
+      const integrations = await apiRequest('/api/calendar/integrations', {});
       
-      if (googleIntegration) {
-        await apiRequest(`/api/calendar/integrations/${googleIntegration.id}`, {
-          method: 'DELETE'
-        });
+      if (Array.isArray(integrations)) {
+        const googleIntegration = integrations.find((i: any) => i.provider === 'google');
         
-        toast({
-          title: 'Calendar Disconnected',
-          description: 'Your Google Calendar has been disconnected successfully.',
-        });
-        
-        // Refresh integration status and events
-        queryClient.invalidateQueries({ queryKey: ['/api/calendar/integration-status'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/calendar/events'] });
+        if (googleIntegration) {
+          await apiRequest(`/api/calendar/integrations/${googleIntegration.id}`, {
+            method: 'DELETE'
+          });
+          
+          toast({
+            title: 'Calendar Disconnected',
+            description: 'Your Google Calendar has been disconnected successfully.',
+          });
+          
+          // Refresh integration status and events
+          queryClient.invalidateQueries({ queryKey: ['/api/calendar/integration-status'] });
+          queryClient.invalidateQueries({ queryKey: ['/api/calendar/events'] });
+        }
       }
     } catch (error) {
       console.error('Failed to disconnect calendar:', error);

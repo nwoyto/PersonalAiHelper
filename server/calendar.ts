@@ -43,64 +43,101 @@ export interface OutlookCalendarEvent {
  */
 export async function syncGoogleCalendar(integration: CalendarIntegration): Promise<number> {
   try {
-    // In a real implementation, this would:
-    // 1. Refresh the access token if expired
-    // 2. Call the Google Calendar API with the access token
-    // 3. Process the results and update our local database
+    // Get Google API client
+    const { google } = await import('googleapis');
+    const { OAuth2 } = google.auth;
     
-    // For demonstration purposes, we'll create synthetic events
-    const now = new Date();
-    const userId = integration.userId;
+    const oauth2Client = new OAuth2(
+      process.env.GOOGLE_CLIENT_ID,
+      process.env.GOOGLE_CLIENT_SECRET,
+      `https://${process.env.REPLIT_DOMAINS?.split(',')[0]}/api/calendar/callback/google`
+    );
+    
+    // Set up credentials
+    oauth2Client.setCredentials({
+      access_token: integration.accessToken,
+      refresh_token: integration.refreshToken
+    });
+    
+    // Create calendar client
+    const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
     
     // Clear existing events for this integration
     await storage.deleteCalendarEventsByIntegration(integration.id);
     
-    // Create mock events
-    const mockEvents: InsertCalendarEvent[] = [
-      {
-        userId,
-        integrationId: integration.id,
-        externalId: `google-event-1-${integration.id}`,
-        title: "Team Weekly Sync",
-        description: "Regular team check-in to discuss progress and blockers",
-        startTime: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 10, 0),
-        endTime: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 11, 0),
-        location: "Google Meet",
-        url: "https://meet.google.com/mock-link"
-      },
-      {
-        userId,
-        integrationId: integration.id,
-        externalId: `google-event-2-${integration.id}`,
-        title: "Product Review",
-        description: "Monthly product review with stakeholders",
-        startTime: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 3, 14, 0),
-        endTime: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 3, 15, 30),
-        location: "Conference Room A",
-        url: "https://calendar.google.com/mock-link"
-      },
-      {
-        userId,
-        integrationId: integration.id,
-        externalId: `google-event-3-${integration.id}`,
-        title: "All-day Company Event",
-        description: "Annual company retreat",
-        startTime: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 10),
-        endTime: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 10),
-        allDay: true,
-        location: "Central Park"
+    try {
+      // Get events from primary calendar for next 30 days
+      const now = new Date();
+      const thirtyDaysLater = new Date();
+      thirtyDaysLater.setDate(now.getDate() + 30);
+      
+      const response = await calendar.events.list({
+        calendarId: 'primary',
+        timeMin: now.toISOString(),
+        timeMax: thirtyDaysLater.toISOString(),
+        maxResults: 100,
+        singleEvents: true,
+        orderBy: 'startTime'
+      });
+      
+      // Convert events to our format
+      const events = response.data.items || [];
+      console.log(`Retrieved ${events.length} real events from Google Calendar`);
+      
+      const calendarEvents = convertGoogleEvents(events as GoogleCalendarEvent[]);
+      
+      // Save events to database
+      let counter = 0;
+      for (const event of calendarEvents) {
+        await storage.createCalendarEvent({
+          ...event,
+          userId: integration.userId,
+          integrationId: integration.id
+        });
+        counter++;
       }
-    ];
-    
-    // Save mock events to database
-    for (const event of mockEvents) {
-      await storage.createCalendarEvent(event);
+      
+      return counter;
+    } catch (apiError: any) {
+      // If token expired, try to refresh
+      if (apiError.code === 401 && integration.refreshToken) {
+        // Create new OAuth client for refresh
+        const refreshClient = new OAuth2(
+          process.env.GOOGLE_CLIENT_ID,
+          process.env.GOOGLE_CLIENT_SECRET
+        );
+        
+        refreshClient.setCredentials({
+          refresh_token: integration.refreshToken
+        });
+        
+        try {
+          const response = await refreshClient.getAccessToken();
+          const tokens = response.tokens;
+          
+          // Update tokens in database
+          if (tokens.access_token) {
+            await storage.updateCalendarIntegration(integration.id, {
+              accessToken: tokens.access_token,
+              tokenExpiry: tokens.expiry_date ? new Date(tokens.expiry_date) : undefined
+            });
+            
+            // Recursively try again with new token
+            const updatedIntegration = await storage.getCalendarIntegrationById(integration.id);
+            if (updatedIntegration) {
+              return syncGoogleCalendar(updatedIntegration);
+            }
+          }
+        } catch (refreshError) {
+          console.error("Failed to refresh token:", refreshError);
+        }
+      }
+      
+      throw apiError;
     }
-    
-    return mockEvents.length;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Failed to sync Google Calendar:", error);
-    throw error;
+    throw new Error(`Failed to sync calendar: ${error.message || 'Unknown error'}`);
   }
 }
 

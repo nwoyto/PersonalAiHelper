@@ -1,6 +1,6 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { format, parseISO, isToday, isTomorrow, addDays, startOfDay, endOfDay } from 'date-fns';
+import { format, parseISO, isToday, isTomorrow, addDays } from 'date-fns';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { CalendarIcon, MapPinIcon, ClockIcon, ExternalLinkIcon } from "lucide-react";
@@ -47,7 +47,7 @@ function getRelativeDay(dateStr?: string) {
 }
 
 export default function CalendarEventsList() {
-  const { data: events, isLoading, error } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ['/api/calendar/events'],
     refetchOnWindowFocus: false,
   });
@@ -70,7 +70,10 @@ export default function CalendarEventsList() {
     );
   }
   
-  if (!events || events.length === 0) {
+  // Parse events into correct format
+  const events: Event[] = Array.isArray(data) ? data : [];
+  
+  if (events.length === 0) {
     return (
       <div className="text-center p-8 text-gray-500">
         <CalendarIcon className="w-10 h-10 mx-auto mb-3 opacity-30" />
@@ -81,9 +84,9 @@ export default function CalendarEventsList() {
   }
   
   // Group events by date
-  const groupedEvents: { [date: string]: Event[] } = {};
+  const groupedEvents: Record<string, Event[]> = {};
   
-  events.forEach((event: Event) => {
+  events.forEach((event) => {
     if (!event.startTime) return;
     
     const startDate = format(parseISO(event.startTime), 'yyyy-MM-dd');
@@ -106,21 +109,30 @@ export default function CalendarEventsList() {
       upcoming.push(dateKey);
     }
   }
+
+  // Sort dates chronologically  
+  upcoming.sort();
   
   return (
     <div className="space-y-6">
-      {upcoming.map(dateKey => (
-        <div key={dateKey}>
-          <h3 className="text-md font-medium mb-2">
-            {getRelativeDay(dateKey)}
-          </h3>
-          <div className="space-y-3">
-            {groupedEvents[dateKey].map(event => (
-              <EventCard key={event.id} event={event} />
-            ))}
+      {upcoming.length > 0 ? (
+        upcoming.map(dateKey => (
+          <div key={dateKey}>
+            <h3 className="text-md font-medium mb-2">
+              {getRelativeDay(dateKey)}
+            </h3>
+            <div className="space-y-3">
+              {groupedEvents[dateKey].map(event => (
+                <EventCard key={event.id} event={event} />
+              ))}
+            </div>
           </div>
+        ))
+      ) : (
+        <div className="text-center p-4 text-gray-500">
+          <p>No upcoming events in the next 7 days</p>
         </div>
-      ))}
+      )}
     </div>
   );
 }
