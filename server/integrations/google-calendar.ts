@@ -142,36 +142,34 @@ export function convertGoogleEvents(events: any[], integrationId: number): Inser
 // Synchronize Google Calendar events for a user
 export async function syncGoogleCalendar(integration: CalendarIntegration): Promise<number> {
   try {
-    // Fetch events from Google
+    // First, delete existing events for this integration so we start fresh
+    await storage.deleteCalendarEventsByIntegration(integration.id);
+    
+    // Fetch real events from Google Calendar API
     const googleEvents = await fetchCalendarEvents(integration);
     
     // Convert to our internal format
     const calendarEvents = convertGoogleEvents(googleEvents, integration.id);
     
-    // Get existing events for this integration
-    const existingEvents = await storage.getCalendarEventsByIntegration(integration.id);
-    const existingEventMap = new Map(existingEvents.map(event => [event.externalId, event]));
-    
-    // Track how many new events we create
-    let newEventsCount = 0;
-    
     // Process each event from Google
+    let addedEventsCount = 0;
+    
     for (const event of calendarEvents) {
-      const existingEvent = existingEventMap.get(event.externalId);
+      // Add userId from the integration
+      const eventWithUser = {
+        ...event,
+        userId: integration.userId
+      };
       
-      if (existingEvent) {
-        // Update existing event if needed
-        await storage.updateCalendarEvent(existingEvent.id, event);
-      } else {
-        // Create new event
-        await storage.createCalendarEvent(event);
-        newEventsCount++;
-      }
+      // Create event in our database
+      await storage.createCalendarEvent(eventWithUser);
+      addedEventsCount++;
     }
     
-    return newEventsCount;
-  } catch (error) {
+    console.log(`Synchronized ${addedEventsCount} events from Google Calendar for integration ${integration.id}`);
+    return addedEventsCount;
+  } catch (error: any) {
     console.error('Error syncing Google Calendar:', error);
-    throw error;
+    throw new Error(`Failed to sync Google Calendar: ${error.message || 'Unknown error'}`);
   }
 }
