@@ -55,16 +55,16 @@ export default function CalendarEventsList() {
   if (isLoading) {
     return (
       <div className="space-y-3">
-        <Skeleton className="h-[120px] w-full rounded-md" />
-        <Skeleton className="h-[120px] w-full rounded-md" />
-        <Skeleton className="h-[120px] w-full rounded-md" />
+        <Skeleton className="h-[120px] w-full rounded-md bg-gray-800" />
+        <Skeleton className="h-[120px] w-full rounded-md bg-gray-800" />
+        <Skeleton className="h-[120px] w-full rounded-md bg-gray-800" />
       </div>
     );
   }
   
   if (error) {
     return (
-      <div className="text-center p-4 text-red-500">
+      <div className="text-center p-4 text-red-400">
         Failed to load calendar events
       </div>
     );
@@ -75,7 +75,7 @@ export default function CalendarEventsList() {
   
   if (events.length === 0) {
     return (
-      <div className="text-center p-8 text-gray-500">
+      <div className="text-center p-8 text-gray-400">
         <CalendarIcon className="w-10 h-10 mx-auto mb-3 opacity-30" />
         <p>No calendar events found</p>
         <p className="text-sm mt-1">Connect your calendar to see events here</p>
@@ -118,7 +118,7 @@ export default function CalendarEventsList() {
       {upcoming.length > 0 ? (
         upcoming.map(dateKey => (
           <div key={dateKey}>
-            <h3 className="text-md font-medium mb-2">
+            <h3 className="text-md font-medium mb-2 text-white">
               {getRelativeDay(dateKey)}
             </h3>
             <div className="space-y-3">
@@ -129,7 +129,7 @@ export default function CalendarEventsList() {
           </div>
         ))
       ) : (
-        <div className="text-center p-4 text-gray-500">
+        <div className="text-center p-4 text-gray-400">
           <p>No upcoming events in the next 7 days</p>
         </div>
       )}
@@ -138,26 +138,26 @@ export default function CalendarEventsList() {
 }
 
 function EventCard({ event }: { event: Event }) {
-  const providerColor = event.provider === 'google' ? 'bg-green-50 border-green-200' : '';
+  const providerColor = event.provider === 'google' ? 'border-blue-800 bg-blue-950/50' : 'border-purple-800 bg-purple-950/50';
   
   return (
-    <Card className={cn("border", providerColor)}>
+    <Card className={cn("border bg-gray-900", providerColor)}>
       <CardHeader className="py-3 px-4">
-        <CardTitle className="text-md">{event.title}</CardTitle>
+        <CardTitle className="text-md text-white">{event.title}</CardTitle>
         {event.description && (
-          <CardDescription className="line-clamp-2">
+          <CardDescription className="line-clamp-2 text-gray-300">
             {event.description}
           </CardDescription>
         )}
       </CardHeader>
       <CardContent className="py-0 px-4">
-        <div className="flex items-center text-sm text-muted-foreground">
+        <div className="flex items-center text-sm text-gray-300">
           <ClockIcon className="h-4 w-4 mr-1" />
           <span>{formatEventTime(event.startTime, event.endTime, event.allDay)}</span>
         </div>
         
         {event.location && (
-          <div className="flex items-center mt-1 text-sm text-muted-foreground">
+          <div className="flex items-center mt-1 text-sm text-gray-300">
             <MapPinIcon className="h-4 w-4 mr-1" />
             <span>{event.location}</span>
           </div>
@@ -165,12 +165,12 @@ function EventCard({ event }: { event: Event }) {
       </CardContent>
       
       {event.url && (
-        <CardFooter className="py-2 px-4">
+        <CardFooter className="py-2 px-4 border-t border-gray-800">
           <a 
             href={event.url} 
             target="_blank" 
             rel="noreferrer" 
-            className="text-xs flex items-center text-blue-600 hover:underline"
+            className="text-xs flex items-center text-blue-400 hover:text-blue-300 hover:underline"
           >
             <ExternalLinkIcon className="h-3 w-3 mr-1" />
             Open in {event.provider === 'google' ? 'Google Calendar' : 'Calendar'}
