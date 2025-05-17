@@ -451,34 +451,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // We'll keep this route here for compatibility, but it will redirect to the new calendar routes
   apiRouter.get("/calendar/integration-status", async (req: Request, res: Response) => {
-    // For now, we'll use the default user (id: 1)
-    const userId = 1;
-    
-    try {
-      const integrations = await storage.getCalendarIntegrations(userId);
-      
-      // Create a map of provider to enabled status
-      const statusMap: Record<string, boolean> = {
-        google: false,
-        outlook: false,
-        apple: false
-      };
-      
-      integrations.forEach(integration => {
-        if (["google", "outlook", "apple"].includes(integration.provider)) {
-          statusMap[integration.provider] = integration.enabled;
-        }
-      });
-      
-      return res.json(statusMap);
-    } catch (error) {
-      console.error("Failed to fetch integration status:", error);
-      return res.status(500).json({ message: "Failed to fetch integration status" });
-    }
+    res.redirect(307, "/api/calendar/integration-status");
   });
   
-  // Register all routes with /api prefix
+  // Register calendar routes first to handle specific paths
+  app.use("/api/calendar", calendarRoutes);
+  
+  // Register all other API routes with /api prefix
   app.use("/api", apiRouter);
   
   const httpServer = createServer(app);

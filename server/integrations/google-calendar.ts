@@ -38,9 +38,9 @@ export async function refreshAccessToken(refreshToken: string) {
   try {
     const { credentials } = await oauth2Client.refreshAccessToken();
     return credentials;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error refreshing access token:', error);
-    throw error;
+    throw new Error(`Failed to refresh token: ${error.message || 'Unknown error'}`);
   }
 }
 
@@ -129,12 +129,12 @@ export function convertGoogleEvents(events: any[], integrationId: number): Inser
       integrationId,
       externalId: event.id,
       title: event.summary || 'Untitled Event',
-      description: event.description || null,
-      startTime: startDateTime ? new Date(startDateTime) : null,
-      endTime: endDateTime ? new Date(endDateTime) : null,
+      description: event.description || undefined,
+      startTime: startDateTime ? new Date(startDateTime) : undefined,
+      endTime: endDateTime ? new Date(endDateTime) : undefined,
       allDay: !event.start?.dateTime, // If no dateTime, it's an all-day event
-      location: event.location || null,
-      url: event.htmlLink || null
+      location: event.location || undefined,
+      url: event.htmlLink || undefined
     };
   });
 }
