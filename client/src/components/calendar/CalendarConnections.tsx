@@ -225,34 +225,34 @@ function CalendarCard({
   const Icon = provider.icon;
   
   return (
-    <Card className={`overflow-hidden ${isConnected ? 'border-green-300' : 'border-gray-200'}`}>
+    <Card className={`overflow-hidden bg-gray-900 border-gray-800 ${isConnected ? 'border-green-800' : 'border-gray-800'}`}>
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <Icon className="w-8 h-8" />
             <div>
-              <CardTitle className="text-lg">{provider.name}</CardTitle>
-              {isConnected && <span className="text-xs text-green-600 font-medium">Connected</span>}
+              <CardTitle className="text-lg text-white">{provider.name}</CardTitle>
+              {isConnected && <span className="text-xs text-green-400 font-medium">Connected</span>}
             </div>
           </div>
         </div>
       </CardHeader>
       <CardContent className="pb-3">
-        <CardDescription>{provider.description}</CardDescription>
+        <CardDescription className="text-gray-400">{provider.description}</CardDescription>
       </CardContent>
-      <CardFooter className="bg-gray-50 pt-2 pb-3 px-6">
+      <CardFooter className="bg-gray-950 pt-2 pb-3 px-6">
         {provider.comingSoon ? (
-          <Button variant="outline" disabled className="w-full">
+          <Button variant="outline" disabled className="w-full bg-gray-800 text-gray-400 border-gray-700">
             Coming Soon
           </Button>
         ) : isLoading ? (
-          <Button variant="outline" disabled className="w-full">
+          <Button variant="outline" disabled className="w-full bg-gray-800 text-gray-400 border-gray-700">
             Loading...
           </Button>
         ) : isConnected ? (
           <Button 
             variant="outline" 
-            className="w-full border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
+            className="w-full bg-gray-900 border-red-900 text-red-400 hover:bg-red-950 hover:text-red-300"
             onClick={onDisconnect}
             disabled={isDisconnecting}
           >
@@ -261,7 +261,7 @@ function CalendarCard({
         ) : (
           <Button 
             variant="default" 
-            className="w-full"
+            className="w-full bg-purple-700 hover:bg-purple-600 text-white"
             onClick={onConnect}
             disabled={isConnecting}
           >
