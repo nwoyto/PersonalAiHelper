@@ -75,7 +75,7 @@ export async function fetchCalendarEvents(integration: CalendarIntegration) {
 }
 
 // Convert Apple Calendar events to our internal format
-export function convertAppleEvents(events: any[], integrationId: number): InsertCalendarEvent[] {
+export function convertAppleEvents(events: any[], integrationId: number, userId: number): InsertCalendarEvent[] {
   return events.map(event => {
     const startDateTime = event.start?.dateTime;
     const endDateTime = event.end?.dateTime;
@@ -90,7 +90,7 @@ export function convertAppleEvents(events: any[], integrationId: number): Insert
       allDay: !event.start?.dateTime, // If no dateTime, it's an all-day event
       location: event.location || undefined,
       url: event.url || undefined,
-      userId: integration.userId
+      userId: userId
     };
   });
 }
@@ -98,14 +98,21 @@ export function convertAppleEvents(events: any[], integrationId: number): Insert
 // Synchronize Apple Calendar events
 export async function syncAppleCalendar(integration: CalendarIntegration): Promise<number> {
   try {
+    // First, we need Apple developer credentials for authorization
+    // For this integration, we would need:
+    // - Team ID
+    // - Key ID
+    // - Services ID
+    // - Private Key
+    
     // Clear existing events for this integration
     await storage.deleteCalendarEventsByIntegration(integration.id);
     
-    // Fetch mock events from "Apple Calendar"
+    // Fetch events from Apple Calendar
     const appleEvents = await fetchCalendarEvents(integration);
     
     // Convert to our internal format
-    const calendarEvents = convertAppleEvents(appleEvents, integration.id);
+    const calendarEvents = convertAppleEvents(appleEvents, integration.id, integration.userId);
     
     // Save events to database
     let counter = 0;
