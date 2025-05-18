@@ -65,7 +65,7 @@ const calendarProviders: CalendarProvider[] = [
     name: 'Apple Calendar',
     description: 'Connect your Apple Calendar to synchronize all your iOS and macOS events.',
     icon: AppleIcon,
-    comingSoon: true
+    comingSoon: false
   }
 ];
 
