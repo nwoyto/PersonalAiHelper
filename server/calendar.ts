@@ -207,6 +207,22 @@ export async function syncOutlookCalendar(integration: CalendarIntegration): Pro
 }
 
 /**
+ * Synchronize Apple Calendar events for a user
+ */
+export async function syncAppleCalendar(integration: CalendarIntegration): Promise<number> {
+  try {
+    // Import the Apple Calendar integration module
+    const appleCalendar = await import('./integrations/apple-calendar');
+    
+    // Use the module to synchronize events
+    return await appleCalendar.syncAppleCalendar(integration);
+  } catch (error: any) {
+    console.error("Failed to sync Apple Calendar:", error);
+    throw new Error(`Apple Calendar sync failed: ${error.message || 'Unknown error'}`);
+  }
+}
+
+/**
  * Convert Google Calendar events to our internal format
  */
 export function convertGoogleEvents(googleEvents: GoogleCalendarEvent[]): InsertCalendarEvent[] {
