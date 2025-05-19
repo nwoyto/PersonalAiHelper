@@ -1,30 +1,13 @@
 import { Link, useLocation } from "wouter";
-import { Home, ListTodo, Calendar, FileText, Settings, Mic, Radio } from "lucide-react";
+import { Home, ListTodo, Calendar, FileText, Settings, Radio } from "lucide-react";
 
-interface NavBarProps {
-  onVoiceClick: () => void;
-}
+interface NavBarProps {}
 
-export default function NavBar({ onVoiceClick }: NavBarProps) {
+export default function NavBar({}: NavBarProps) {
   const [location] = useLocation();
   
   return (
     <>
-      {/* Floating Voice Button - hidden on login page */}
-      {location !== '/login' && (
-        <div className="fixed bottom-24 left-0 right-0 flex justify-center z-10">
-          <button 
-            onClick={onVoiceClick}
-            className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 w-16 h-16 rounded-full flex items-center justify-center shadow-xl transition-all border-2 border-purple-400/20 backdrop-blur-sm"
-            aria-label="Voice input"
-          >
-            <div className="bg-gray-900/50 rounded-full w-12 h-12 flex items-center justify-center">
-              <Mic className="h-6 w-6 text-white" />
-            </div>
-          </button>
-        </div>
-      )}
-      
       {/* Bottom Navigation - hidden on login page */}
       {location !== '/login' && (
         <nav className="fixed bottom-0 left-0 right-0 bg-gray-900/90 backdrop-blur-md border-t border-gray-800 z-10 shadow-lg">

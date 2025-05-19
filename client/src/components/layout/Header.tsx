@@ -12,12 +12,12 @@ export default function Header({ onVoiceClick }: HeaderProps) {
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
         <div className="flex items-center">
           <Link href="/">
-            <a className="flex items-center">
+            <div className="flex items-center cursor-pointer">
               <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center mr-2">
                 <i className="ri-robot-2-line text-lg text-white"></i>
               </div>
               <span className="text-xl font-bold text-white">Jibe AI</span>
-            </a>
+            </div>
           </Link>
         </div>
         
