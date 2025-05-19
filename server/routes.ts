@@ -271,21 +271,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create tasks from extracted tasks
       const createdTasks = [];
       for (const taskInfo of result.tasks) {
-        const task = await storage.createTask({
-          userId,
-          title: taskInfo.title,
-          description: taskInfo.description || "",
-          completed: false,
-          dueDate: taskInfo.dueDate && !isNaN(new Date(taskInfo.dueDate).getTime()) ? new Date(taskInfo.dueDate) : undefined,
-          category: taskInfo.category || "work",
-          priority: taskInfo.priority || "medium",
-          estimatedMinutes: taskInfo.estimatedMinutes,
-          location: taskInfo.location,
-          people: taskInfo.people,
-          recurring: taskInfo.recurring || false,
-          recurringPattern: taskInfo.recurringPattern,
-        });
-        createdTasks.push(task);
+        try {
+          // Properly handle date parsing
+          let parsedDueDate = undefined;
+          if (taskInfo.dueDate) {
+            try {
+              const dateObj = new Date(taskInfo.dueDate);
+              if (!isNaN(dateObj.getTime())) {
+                parsedDueDate = dateObj;
+              }
+            } catch (e) {
+              console.log("Invalid date format:", taskInfo.dueDate);
+            }
+          }
+          
+          const task = await storage.createTask({
+            userId,
+            title: taskInfo.title,
+            description: taskInfo.description || "",
+            completed: false,
+            dueDate: parsedDueDate,
+            category: taskInfo.category || "work",
+            priority: taskInfo.priority || "medium",
+            estimatedMinutes: typeof taskInfo.estimatedMinutes === 'number' ? taskInfo.estimatedMinutes : undefined,
+            location: taskInfo.location,
+            people: Array.isArray(taskInfo.people) ? taskInfo.people : undefined,
+            recurring: Boolean(taskInfo.recurring),
+            recurringPattern: taskInfo.recurringPattern,
+          });
+          createdTasks.push(task);
+        } catch (error) {
+          console.error("Error creating task:", error, "Task info:", taskInfo);
+          // Continue with next task even if this one fails
+        }
       }
       
       return res.status(201).json({
