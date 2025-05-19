@@ -20,14 +20,17 @@ export default function Login() {
     }
   }, [user]);
 
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+
   const handleLogin = async () => {
     setIsLoading(true);
     setError(null);
     
     try {
       const response = await apiRequest("POST", "/api/auth/login", { 
-        username: "admin", 
-        password: "password" 
+        username, 
+        password 
       });
       const data = await response.json();
       // Store the token in localStorage
@@ -103,18 +106,36 @@ export default function Login() {
           </div>
         </div>
         
-        <div className="space-y-2">
-          <p className="text-center text-text-secondary font-medium">Demo Login</p>
-          <p className="text-xs text-center text-text-secondary mb-4">
-            Use these credentials to try out the app
-          </p>
-          <div className="flex items-center bg-surface-light px-3 py-2 rounded text-sm border">
-            <span className="w-20 text-text-secondary">Username:</span>
-            <span className="font-mono">admin</span>
+        <div className="space-y-4">
+          <p className="text-center text-text-secondary font-medium">Login</p>
+          
+          <div className="space-y-1">
+            <label htmlFor="username" className="block text-sm font-medium">Username</label>
+            <input
+              id="username"
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50"
+              placeholder="Enter username"
+            />
           </div>
-          <div className="flex items-center bg-surface-light px-3 py-2 rounded text-sm border">
-            <span className="w-20 text-text-secondary">Password:</span>
-            <span className="font-mono">password</span>
+          
+          <div className="space-y-1">
+            <label htmlFor="password" className="block text-sm font-medium">Password</label>
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50"
+              placeholder="Enter password"
+            />
+          </div>
+          
+          <div className="text-xs text-center text-text-secondary bg-surface-light p-2 rounded">
+            <p className="font-medium">Demo Credentials</p>
+            <p>Username: admin | Password: password</p>
           </div>
         </div>
         
