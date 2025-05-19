@@ -92,7 +92,7 @@ export default function TaskItem({ task }: TaskItemProps) {
   };
   
   return (
-    <div className={`bg-gray-800 border border-gray-700 rounded-xl p-4 shadow-md transition-all duration-200 ${task.completed ? "opacity-75" : ""}`}>
+    <div className={`bg-blue-950 border border-blue-800 rounded-xl p-4 shadow-md transition-all duration-200 ${task.completed ? "opacity-75" : ""}`}>
       <div className="flex items-start">
         <button 
           className={`shrink-0 w-6 h-6 rounded-full border-2 mt-0.5 mr-3 flex-none ${

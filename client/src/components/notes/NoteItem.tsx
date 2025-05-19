@@ -28,13 +28,13 @@ export default function NoteItem({ note }: NoteItemProps) {
   };
   
   return (
-    <div className="bg-gray-800 border border-gray-700 rounded-xl p-5 shadow-md transition-all hover:shadow-lg">
+    <div className="bg-blue-950 border border-blue-800 rounded-xl p-5 shadow-md transition-all hover:shadow-lg">
       <div className="flex justify-between items-start mb-3">
         <h4 className="font-medium text-white">{note.title}</h4>
         <span className="text-xs text-gray-400">{formatTimestamp(note.timestamp)}</span>
       </div>
       <p className="text-sm text-gray-300 mb-4 line-clamp-3">{note.content}</p>
-      <div className="flex items-center justify-between pt-3 border-t border-gray-700">
+      <div className="flex items-center justify-between pt-3 border-t border-blue-800">
         <span className={`text-xs px-2.5 py-1 rounded-full ${getCategoryClasses(note.category)}`}>
           {note.category.charAt(0).toUpperCase() + note.category.slice(1)}
         </span>

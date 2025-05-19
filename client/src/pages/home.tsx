@@ -62,7 +62,7 @@ export default function Home() {
 
       {/* Greeting & Assistant Status */}
       <section className="mb-10">
-        <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-8 shadow-xl relative overflow-hidden">
+        <div className="bg-gradient-to-br from-blue-950 to-blue-900 rounded-2xl p-8 shadow-xl relative overflow-hidden border border-blue-800">
           <div className="absolute top-0 right-0 w-64 h-64 bg-purple-600 rounded-full filter blur-3xl opacity-10 -mr-20 -mt-20"></div>
           <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-600 rounded-full filter blur-3xl opacity-10 -ml-20 -mb-20"></div>
           
@@ -76,7 +76,7 @@ export default function Home() {
             <h2 className="text-2xl font-bold text-white mb-3">{greeting}, User</h2>
             <p className="text-gray-300 mb-5 text-lg">I'm listening and ready to help</p>
             
-            <div className="flex items-center py-2 px-4 bg-gray-800/50 rounded-full mb-5 border border-purple-500/20 shadow-inner">
+            <div className="flex items-center py-2 px-4 bg-gray-900 rounded-full mb-5 border border-purple-500/20 shadow-inner">
               <span className="w-3 h-3 bg-purple-500 rounded-full mr-3 animate-pulse shadow-lg shadow-purple-500/50"></span>
               <span className="text-purple-300 font-medium">Active and listening for wake word</span>
             </div>
@@ -101,17 +101,17 @@ export default function Home() {
         <div className="grid grid-cols-2 gap-5">
           <button 
             onClick={() => setIsVoiceModalOpen(true)}
-            className="group bg-gradient-to-br from-gray-800 to-gray-900 hover:from-gray-700 hover:to-gray-800 rounded-xl p-6 flex flex-col items-center shadow-lg transition-all duration-300 border border-purple-500/10 hover:border-purple-500/30"
+            className="group bg-gradient-to-br from-blue-950 to-blue-900 hover:from-blue-900 hover:to-blue-800 rounded-xl p-6 flex flex-col items-center shadow-lg transition-all duration-300 border border-purple-500/10 hover:border-purple-500/30"
           >
-            <div className="w-16 h-16 bg-gradient-to-br from-purple-500/20 to-purple-800/20 rounded-2xl flex items-center justify-center mb-4 transform transition-transform group-hover:scale-110 group-hover:rotate-3">
+            <div className="w-16 h-16 bg-gray-900 rounded-2xl flex items-center justify-center mb-4 transform transition-transform group-hover:scale-110 group-hover:rotate-3">
               <Mic size={28} className="text-purple-400 group-hover:text-purple-300 transition-colors" />
             </div>
             <span className="text-white font-medium">New Voice Note</span>
           </button>
           
           <Link href="/calendar">
-            <div className="group bg-gradient-to-br from-gray-800 to-gray-900 hover:from-gray-700 hover:to-gray-800 rounded-xl p-6 flex flex-col items-center shadow-lg transition-all duration-300 border border-blue-500/10 hover:border-blue-500/30">
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-500/20 to-blue-800/20 rounded-2xl flex items-center justify-center mb-4 transform transition-transform group-hover:scale-110 group-hover:rotate-3">
+            <div className="group bg-gradient-to-br from-blue-950 to-blue-900 hover:from-blue-900 hover:to-blue-800 rounded-xl p-6 flex flex-col items-center shadow-lg transition-all duration-300 border border-blue-500/10 hover:border-blue-500/30">
+              <div className="w-16 h-16 bg-gray-900 rounded-2xl flex items-center justify-center mb-4 transform transition-transform group-hover:scale-110 group-hover:rotate-3">
                 <Calendar size={28} className="text-blue-400 group-hover:text-blue-300 transition-colors" />
               </div>
               <span className="text-white font-medium">Schedule Meeting</span>
@@ -120,17 +120,17 @@ export default function Home() {
           
           <button
             onClick={() => setIsTaskFormOpen(true)} 
-            className="group bg-gradient-to-br from-gray-800 to-gray-900 hover:from-gray-700 hover:to-gray-800 rounded-xl p-6 flex flex-col items-center shadow-lg transition-all duration-300 border border-green-500/10 hover:border-green-500/30"
+            className="group bg-gradient-to-br from-blue-950 to-blue-900 hover:from-blue-900 hover:to-blue-800 rounded-xl p-6 flex flex-col items-center shadow-lg transition-all duration-300 border border-green-500/10 hover:border-green-500/30"
           >
-            <div className="w-16 h-16 bg-gradient-to-br from-green-500/20 to-green-800/20 rounded-2xl flex items-center justify-center mb-4 transform transition-transform group-hover:scale-110 group-hover:rotate-3">
+            <div className="w-16 h-16 bg-gray-900 rounded-2xl flex items-center justify-center mb-4 transform transition-transform group-hover:scale-110 group-hover:rotate-3">
               <Plus size={28} className="text-green-400 group-hover:text-green-300 transition-colors" />
             </div>
             <span className="text-white font-medium">New Task</span>
           </button>
           
           <Link href="/notes">
-            <div className="group bg-gradient-to-br from-gray-800 to-gray-900 hover:from-gray-700 hover:to-gray-800 rounded-xl p-6 flex flex-col items-center shadow-lg transition-all duration-300 border border-amber-500/10 hover:border-amber-500/30">
-              <div className="w-16 h-16 bg-gradient-to-br from-amber-500/20 to-amber-800/20 rounded-2xl flex items-center justify-center mb-4 transform transition-transform group-hover:scale-110 group-hover:rotate-3">
+            <div className="group bg-gradient-to-br from-blue-950 to-blue-900 hover:from-blue-900 hover:to-blue-800 rounded-xl p-6 flex flex-col items-center shadow-lg transition-all duration-300 border border-amber-500/10 hover:border-amber-500/30">
+              <div className="w-16 h-16 bg-gray-900 rounded-2xl flex items-center justify-center mb-4 transform transition-transform group-hover:scale-110 group-hover:rotate-3">
                 <Search size={28} className="text-amber-400 group-hover:text-amber-300 transition-colors" />
               </div>
               <span className="text-white font-medium">Find Notes</span>
@@ -159,7 +159,7 @@ export default function Home() {
           {isTasksLoading ? (
             // Loading skeletons
             Array(3).fill(0).map((_, i) => (
-              <div key={i} className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl p-5 shadow-md border border-gray-700">
+              <div key={i} className="bg-gradient-to-br from-blue-950 to-blue-900 rounded-xl p-5 shadow-md border border-blue-800">
                 <div className="flex items-start">
                   <Skeleton className="h-6 w-6 rounded-full mr-4" />
                   <div className="flex-1">
@@ -170,11 +170,11 @@ export default function Home() {
               </div>
             ))
           ) : tasksError ? (
-            <div className="text-red-400 text-center p-6 bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl shadow-md border border-red-900/30">
+            <div className="text-red-400 text-center p-6 bg-gradient-to-br from-blue-950 to-blue-900 rounded-xl shadow-md border border-red-900/30">
               Failed to load tasks
             </div>
           ) : incompleteTasks.length === 0 ? (
-            <div className="text-gray-400 text-center p-6 bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl shadow-md border border-gray-700">
+            <div className="text-gray-400 text-center p-6 bg-gradient-to-br from-blue-950 to-blue-900 rounded-xl shadow-md border border-blue-800">
               No tasks to display
             </div>
           ) : (
@@ -205,7 +205,7 @@ export default function Home() {
           {isNotesLoading ? (
             // Loading skeletons
             Array(2).fill(0).map((_, i) => (
-              <div key={i} className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl p-5 shadow-md border border-gray-700">
+              <div key={i} className="bg-gradient-to-br from-blue-950 to-blue-900 rounded-xl p-5 shadow-md border border-blue-800">
                 <Skeleton className="h-6 w-3/4 rounded mb-3" />
                 <Skeleton className="h-4 w-full rounded mb-2" />
                 <Skeleton className="h-4 w-full rounded mb-3" />
@@ -216,11 +216,11 @@ export default function Home() {
               </div>
             ))
           ) : notesError ? (
-            <div className="text-red-400 text-center p-6 bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl shadow-md border border-red-900/30">
+            <div className="text-red-400 text-center p-6 bg-gradient-to-br from-blue-950 to-blue-900 rounded-xl shadow-md border border-red-900/30">
               Failed to load notes
             </div>
           ) : recentNotes.length === 0 ? (
-            <div className="text-gray-400 text-center p-6 bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl shadow-md border border-gray-700">
+            <div className="text-gray-400 text-center p-6 bg-gradient-to-br from-blue-950 to-blue-900 rounded-xl shadow-md border border-blue-800">
               No conversations to display
             </div>
           ) : (
