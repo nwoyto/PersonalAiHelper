@@ -106,7 +106,7 @@ export default function FloatingRecorder({ onClose, onComplete }: FloatingRecord
   useEffect(() => {
     let timeoutId: ReturnType<typeof setTimeout>;
     
-    if (!initializationAttempted) {
+    if (!initializationAttempted && !isProcessing) {
       timeoutId = setTimeout(() => {
         // Request microphone permission explicitly first
         navigator.mediaDevices.getUserMedia({ audio: true })

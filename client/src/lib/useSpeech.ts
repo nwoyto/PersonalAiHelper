@@ -122,6 +122,18 @@ export function useSpeech(options: UseSpeechOptions = {}) {
     backgroundRecognitionInstance.continuous = true;
     backgroundRecognitionInstance.interimResults = true;
     backgroundRecognitionInstance.lang = 'en-US';
+    // Add error recovery delay
+    let recoveryTimeout: NodeJS.Timeout;
+    
+    const startRecognition = () => {
+      try {
+        if (!isActiveListening) {
+          backgroundRecognitionInstance.start();
+        }
+      } catch (err) {
+        console.error('Recognition start failed:', err);
+      }
+    };
     
     backgroundRecognitionInstance.onstart = () => {
       console.log('Background listening started');
