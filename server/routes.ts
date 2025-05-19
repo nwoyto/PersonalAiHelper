@@ -49,6 +49,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  apiRouter.post("/auth/logout", async (req: Request, res: Response) => {
+    try {
+      // Clear authentication cookies/session if present
+      if (req.headers.authorization) {
+        // Additional token invalidation could be implemented here in a real app
+        // e.g., add the token to a blacklist or invalidate the session
+      }
+      
+      res.status(200).json({ message: "Logged out successfully" });
+    } catch (error) {
+      console.error('Logout error:', error);
+      res.status(500).json({ message: "Logout failed" });
+    }
+  });
+  
   apiRouter.get("/auth/me", authenticate, async (req: Request, res: Response) => {
     try {
       const authReq = req as any;

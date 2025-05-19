@@ -176,9 +176,11 @@ export default function Settings() {
         <Button 
           variant="outline" 
           className="w-full py-4 bg-blue-950 hover:bg-blue-900 text-red-400 font-medium rounded-xl border border-blue-900 transition-colors flex items-center justify-center gap-2 shadow-md"
+          onClick={handleLogout}
+          disabled={isLoggingOut}
         >
           <LogOut className="h-5 w-5" />
-          Sign Out
+          {isLoggingOut ? "Signing Out..." : "Sign Out"}
         </Button>
       </div>
       
