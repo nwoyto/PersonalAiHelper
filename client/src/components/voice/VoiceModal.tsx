@@ -13,13 +13,14 @@ export default function VoiceModal({ onClose, onComplete }: VoiceModalProps) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [mockTranscription, setMockTranscription] = useState("");
   
-  // Check if we're in an environment where speech recognition might not work
-  const isReplitEnvironment = typeof window !== 'undefined' && 
-    (window.location.hostname.includes('replit') || 
-     window.location.hostname.includes('kirk.replit'));
+  // We're going to remove the automatic replit environment check
+  // and instead try to use real speech recognition first,
+  // falling back to demo mode only if it fails
   
-  // For demonstration purposes in Replit where speech recognition has limitations
-  if (isReplitEnvironment) {
+  const [forceDemoMode, setForceDemoMode] = useState(false);
+  
+  // Only use demo mode if speech recognition initialization explicitly failed
+  if (forceDemoMode) {
     const handleSubmitDemo = () => {
       setIsProcessing(true);
       
@@ -151,6 +152,8 @@ export default function VoiceModal({ onClose, onComplete }: VoiceModalProps) {
         } catch (err) {
           console.error('Failed to start listening:', err);
           setInitializationFailed(true);
+          // Fall back to demo mode if speech recognition fails
+          setForceDemoMode(true);
         }
       }, 1000);
     }

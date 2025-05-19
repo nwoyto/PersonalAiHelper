@@ -175,6 +175,8 @@ export default function FloatingRecorder({ onClose, onComplete }: FloatingRecord
         } catch (err) {
           console.error('Failed to start listening:', err);
           setInitializationFailed(true);
+          // Fall back to demo mode if speech recognition fails
+          setForceDemoMode(true);
         }
       }, 500);
     }
