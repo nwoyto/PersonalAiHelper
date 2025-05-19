@@ -26,7 +26,7 @@ export default function Settings() {
       {/* Settings Sections */}
       <div className="space-y-6">
         {/* Account Section */}
-        <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow-md">
+        <div className="bg-blue-950 border border-blue-900 rounded-xl p-6 shadow-md">
           <h3 className="font-medium text-white text-lg mb-5">Account</h3>
           
           <div className="flex items-center mb-6">
@@ -40,7 +40,7 @@ export default function Settings() {
           </div>
           
           <div className="space-y-3">
-            <button className="w-full py-3 px-4 text-left text-sm text-white flex items-center justify-between bg-gray-700/50 hover:bg-gray-700 rounded-lg transition-colors">
+            <button className="w-full py-3 px-4 text-left text-sm text-white flex items-center justify-between bg-gray-900 hover:bg-gray-800 rounded-lg transition-colors">
               <div className="flex items-center">
                 <UserCog className="h-4 w-4 mr-3 text-gray-400" />
                 <span>Edit Profile</span>
@@ -48,7 +48,7 @@ export default function Settings() {
               <ChevronRight className="h-4 w-4 text-gray-400" />
             </button>
             
-            <button className="w-full py-3 px-4 text-left text-sm text-white flex items-center justify-between bg-gray-700/50 hover:bg-gray-700 rounded-lg transition-colors">
+            <button className="w-full py-3 px-4 text-left text-sm text-white flex items-center justify-between bg-gray-900 hover:bg-gray-800 rounded-lg transition-colors">
               <div className="flex items-center">
                 <Shield className="h-4 w-4 mr-3 text-gray-400" />
                 <span>Change Password</span>
@@ -56,7 +56,7 @@ export default function Settings() {
               <ChevronRight className="h-4 w-4 text-gray-400" />
             </button>
             
-            <button className="w-full py-3 px-4 text-left text-sm text-white flex items-center justify-between bg-gray-700/50 hover:bg-gray-700 rounded-lg transition-colors">
+            <button className="w-full py-3 px-4 text-left text-sm text-white flex items-center justify-between bg-gray-900 hover:bg-gray-800 rounded-lg transition-colors">
               <div className="flex items-center">
                 <Bell className="h-4 w-4 mr-3 text-gray-400" />
                 <span>Notification Preferences</span>
@@ -67,17 +67,17 @@ export default function Settings() {
         </div>
         
         {/* Voice Assistant Section */}
-        <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow-md">
+        <div className="bg-blue-950 border border-blue-900 rounded-xl p-6 shadow-md">
           <h3 className="font-medium text-white text-lg mb-5">Voice Assistant</h3>
           <SettingsForm />
         </div>
         
         {/* Privacy Section */}
-        <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow-md">
+        <div className="bg-blue-950 border border-blue-900 rounded-xl p-6 shadow-md">
           <h3 className="font-medium text-white text-lg mb-5">Privacy & Data</h3>
           
           <div className="space-y-4">
-            <button className="w-full py-3 px-4 text-left text-sm text-white flex items-center justify-between bg-gray-700/50 hover:bg-gray-700 rounded-lg transition-colors">
+            <button className="w-full py-3 px-4 text-left text-sm text-white flex items-center justify-between bg-gray-900 hover:bg-gray-800 rounded-lg transition-colors">
               <div className="flex items-center">
                 <Shield className="h-4 w-4 mr-3 text-gray-400" />
                 <span>Data & Privacy Policy</span>
@@ -99,7 +99,7 @@ export default function Settings() {
         </div>
         
         {/* About Section */}
-        <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow-md">
+        <div className="bg-blue-950 border border-blue-900 rounded-xl p-6 shadow-md">
           <h3 className="font-medium text-white text-lg mb-5">About</h3>
           
           <div className="space-y-3">
@@ -107,7 +107,7 @@ export default function Settings() {
               <p className="text-gray-400">Version 1.0.0</p>
             </div>
             
-            <button className="w-full py-3 px-4 text-left text-sm text-white flex items-center justify-between bg-gray-700/50 hover:bg-gray-700 rounded-lg transition-colors">
+            <button className="w-full py-3 px-4 text-left text-sm text-white flex items-center justify-between bg-gray-900 hover:bg-gray-800 rounded-lg transition-colors">
               <div className="flex items-center">
                 <Shield className="h-4 w-4 mr-3 text-gray-400" />
                 <span>Terms of Service</span>
@@ -115,7 +115,7 @@ export default function Settings() {
               <ChevronRight className="h-4 w-4 text-gray-400" />
             </button>
             
-            <button className="w-full py-3 px-4 text-left text-sm text-white flex items-center justify-between bg-gray-700/50 hover:bg-gray-700 rounded-lg transition-colors">
+            <button className="w-full py-3 px-4 text-left text-sm text-white flex items-center justify-between bg-gray-900 hover:bg-gray-800 rounded-lg transition-colors">
               <div className="flex items-center">
                 <HelpCircle className="h-4 w-4 mr-3 text-gray-400" />
                 <span>Help & Support</span>
@@ -123,7 +123,7 @@ export default function Settings() {
               <ChevronRight className="h-4 w-4 text-gray-400" />
             </button>
             
-            <button className="w-full py-3 px-4 text-left text-sm text-white flex items-center justify-between bg-gray-700/50 hover:bg-gray-700 rounded-lg transition-colors">
+            <button className="w-full py-3 px-4 text-left text-sm text-white flex items-center justify-between bg-gray-900 hover:bg-gray-800 rounded-lg transition-colors">
               <div className="flex items-center">
                 <MessageSquare className="h-4 w-4 mr-3 text-gray-400" />
                 <span>Send Feedback</span>
@@ -136,7 +136,7 @@ export default function Settings() {
         {/* Sign Out Button */}
         <Button 
           variant="outline" 
-          className="w-full py-4 bg-gray-800 hover:bg-gray-700 text-red-400 font-medium rounded-xl border border-gray-700 transition-colors flex items-center justify-center gap-2 shadow-md"
+          className="w-full py-4 bg-blue-950 hover:bg-blue-900 text-red-400 font-medium rounded-xl border border-blue-900 transition-colors flex items-center justify-center gap-2 shadow-md"
         >
           <LogOut className="h-5 w-5" />
           Sign Out
@@ -145,7 +145,7 @@ export default function Settings() {
       
       {/* Confirm Clear Data Dialog */}
       <AlertDialog open={isConfirmDialogOpen} onOpenChange={setIsConfirmDialogOpen}>
-        <AlertDialogContent className="bg-gray-800 border-gray-700">
+        <AlertDialogContent className="bg-blue-950 border border-blue-900">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-white">Clear All Data</AlertDialogTitle>
             <AlertDialogDescription className="text-gray-300">
@@ -153,7 +153,7 @@ export default function Settings() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="bg-gray-700 border-gray-600 text-white hover:bg-gray-600">
+            <AlertDialogCancel className="bg-gray-900 border-gray-800 text-white hover:bg-gray-800">
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction 

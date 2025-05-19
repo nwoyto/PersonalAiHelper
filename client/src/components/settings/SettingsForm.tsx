@@ -108,7 +108,7 @@ export default function SettingsForm() {
           control={form.control}
           name="alwaysListening"
           render={({ field }) => (
-            <FormItem className="flex items-center justify-between space-x-2 rounded-lg border border-gray-700 p-5 bg-gray-700/30">
+            <FormItem className="flex items-center justify-between space-x-2 rounded-lg border border-gray-900 p-5 bg-gray-900">
               <div className="space-y-1">
                 <FormLabel className="text-base text-white">Always Listening Mode</FormLabel>
                 <FormDescription className="text-sm text-gray-300">
@@ -136,7 +136,7 @@ export default function SettingsForm() {
           control={form.control}
           name="wakeWord"
           render={({ field }) => (
-            <FormItem className="rounded-lg border border-gray-700 p-5 bg-gray-700/30">
+            <FormItem className="rounded-lg border border-gray-900 p-5 bg-gray-900">
               <div className="flex justify-between items-center mb-2">
                 <div>
                   <FormLabel className="text-base text-white">Wake Word</FormLabel>
@@ -149,10 +149,10 @@ export default function SettingsForm() {
                     onValueChange={field.onChange}
                     defaultValue={field.value}
                   >
-                    <SelectTrigger className="w-40 bg-gray-700 border-gray-600 text-white">
+                    <SelectTrigger className="w-40 bg-gray-800 border-gray-800 text-white">
                       <SelectValue placeholder="Select wake word" />
                     </SelectTrigger>
-                    <SelectContent className="bg-gray-800 border-gray-700 text-white">
+                    <SelectContent className="bg-gray-800 border-gray-900 text-white">
                       <SelectItem value="Hey Assistant">Hey Assistant</SelectItem>
                       <SelectItem value="OK Voice">OK Voice</SelectItem>
                       <SelectItem value="Listen Up">Listen Up</SelectItem>
@@ -165,7 +165,7 @@ export default function SettingsForm() {
               {field.value === "Custom" && (
                 <Input
                   placeholder="Enter custom wake word"
-                  className="mt-3 bg-gray-700 border-gray-600 text-white"
+                  className="mt-3 bg-gray-800 border-gray-800 text-white"
                   onChange={(e) => field.onChange(e.target.value)}
                 />
               )}
@@ -177,7 +177,7 @@ export default function SettingsForm() {
           control={form.control}
           name="voiceGender"
           render={({ field }) => (
-            <FormItem className="rounded-lg border border-gray-700 p-5 bg-gray-700/30">
+            <FormItem className="rounded-lg border border-gray-900 p-5 bg-gray-900">
               <div className="flex justify-between items-center">
                 <div>
                   <FormLabel className="text-base text-white">Voice Gender</FormLabel>
@@ -190,10 +190,10 @@ export default function SettingsForm() {
                     onValueChange={field.onChange}
                     defaultValue={field.value}
                   >
-                    <SelectTrigger className="w-40 bg-gray-700 border-gray-600 text-white">
+                    <SelectTrigger className="w-40 bg-gray-800 border-gray-800 text-white">
                       <SelectValue placeholder="Select voice" />
                     </SelectTrigger>
-                    <SelectContent className="bg-gray-800 border-gray-700 text-white">
+                    <SelectContent className="bg-gray-800 border-gray-900 text-white">
                       <SelectItem value="female">Female</SelectItem>
                       <SelectItem value="male">Male</SelectItem>
                       <SelectItem value="neutral">Neutral</SelectItem>
@@ -209,7 +209,7 @@ export default function SettingsForm() {
           control={form.control}
           name="saveConversations"
           render={({ field }) => (
-            <FormItem className="flex items-center justify-between space-x-2 rounded-lg border border-gray-700 p-5 bg-gray-700/30">
+            <FormItem className="flex items-center justify-between space-x-2 rounded-lg border border-gray-900 p-5 bg-gray-900">
               <div className="space-y-1">
                 <FormLabel className="text-base text-white">Save Conversations</FormLabel>
                 <FormDescription className="text-sm text-gray-300">
