@@ -56,6 +56,12 @@ export default function NavBar({ onVoiceClick }: NavBarProps) {
                 <span className="text-xs mt-1">Settings</span>
               </div>
             </Link>
+            <Link href="/voice-test">
+              <div className={`flex flex-col items-center justify-center pt-1 pb-1 ${location === '/voice-test' ? 'text-primary' : 'text-text-secondary'}`}>
+                <i className="ri-voiceprint-line text-xl"></i>
+                <span className="text-xs mt-1">Voice Test</span>
+              </div>
+            </Link>
           </div>
         </nav>
       )}
