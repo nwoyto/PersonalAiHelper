@@ -108,14 +108,14 @@ export default function SettingsForm() {
           control={form.control}
           name="alwaysListening"
           render={({ field }) => (
-            <FormItem className="flex items-center justify-between space-x-2 rounded-lg border p-4 bg-surface">
-              <div className="space-y-0.5">
-                <FormLabel className="text-base">Always Listening Mode</FormLabel>
-                <FormDescription className="text-xs">
+            <FormItem className="flex items-center justify-between space-x-2 rounded-lg border border-gray-700 p-5 bg-gray-700/30">
+              <div className="space-y-1">
+                <FormLabel className="text-base text-white">Always Listening Mode</FormLabel>
+                <FormDescription className="text-sm text-gray-300">
                   Automatically detect wake word and process speech in the background
                 </FormDescription>
                 {typeof window !== 'undefined' && window.location.hostname.includes('replit') && (
-                  <p className="text-xs italic text-amber-500 mt-1">
+                  <p className="text-xs text-amber-400 mt-2 bg-amber-900/20 p-2 rounded-md border border-amber-800/30">
                     Note: Always-on listening is designed to run in production environments.
                     Some browsers may limit this functionality in development environments.
                   </p>
@@ -125,6 +125,7 @@ export default function SettingsForm() {
                 <Switch
                   checked={field.value}
                   onCheckedChange={field.onChange}
+                  className="data-[state=checked]:bg-purple-600 data-[state=checked]:border-purple-800"
                 />
               </FormControl>
             </FormItem>
@@ -135,11 +136,11 @@ export default function SettingsForm() {
           control={form.control}
           name="wakeWord"
           render={({ field }) => (
-            <FormItem className="rounded-lg border p-4 bg-surface">
+            <FormItem className="rounded-lg border border-gray-700 p-5 bg-gray-700/30">
               <div className="flex justify-between items-center mb-2">
                 <div>
-                  <FormLabel className="text-base">Wake Word</FormLabel>
-                  <FormDescription className="text-xs">
+                  <FormLabel className="text-base text-white">Wake Word</FormLabel>
+                  <FormDescription className="text-sm text-gray-300">
                     Word to activate the assistant
                   </FormDescription>
                 </div>
@@ -148,10 +149,10 @@ export default function SettingsForm() {
                     onValueChange={field.onChange}
                     defaultValue={field.value}
                   >
-                    <SelectTrigger className="w-36 bg-surface-light border-surface-light">
+                    <SelectTrigger className="w-40 bg-gray-700 border-gray-600 text-white">
                       <SelectValue placeholder="Select wake word" />
                     </SelectTrigger>
-                    <SelectContent className="bg-surface border-surface-light">
+                    <SelectContent className="bg-gray-800 border-gray-700 text-white">
                       <SelectItem value="Hey Assistant">Hey Assistant</SelectItem>
                       <SelectItem value="OK Voice">OK Voice</SelectItem>
                       <SelectItem value="Listen Up">Listen Up</SelectItem>
@@ -164,7 +165,7 @@ export default function SettingsForm() {
               {field.value === "Custom" && (
                 <Input
                   placeholder="Enter custom wake word"
-                  className="mt-2 bg-surface-light border-surface-light"
+                  className="mt-3 bg-gray-700 border-gray-600 text-white"
                   onChange={(e) => field.onChange(e.target.value)}
                 />
               )}
@@ -176,11 +177,11 @@ export default function SettingsForm() {
           control={form.control}
           name="voiceGender"
           render={({ field }) => (
-            <FormItem className="rounded-lg border p-4 bg-surface">
+            <FormItem className="rounded-lg border border-gray-700 p-5 bg-gray-700/30">
               <div className="flex justify-between items-center">
                 <div>
-                  <FormLabel className="text-base">Voice Gender</FormLabel>
-                  <FormDescription className="text-xs">
+                  <FormLabel className="text-base text-white">Voice Gender</FormLabel>
+                  <FormDescription className="text-sm text-gray-300">
                     Assistant's voice type
                   </FormDescription>
                 </div>
@@ -189,10 +190,10 @@ export default function SettingsForm() {
                     onValueChange={field.onChange}
                     defaultValue={field.value}
                   >
-                    <SelectTrigger className="w-36 bg-surface-light border-surface-light">
+                    <SelectTrigger className="w-40 bg-gray-700 border-gray-600 text-white">
                       <SelectValue placeholder="Select voice" />
                     </SelectTrigger>
-                    <SelectContent className="bg-surface border-surface-light">
+                    <SelectContent className="bg-gray-800 border-gray-700 text-white">
                       <SelectItem value="female">Female</SelectItem>
                       <SelectItem value="male">Male</SelectItem>
                       <SelectItem value="neutral">Neutral</SelectItem>
@@ -208,10 +209,10 @@ export default function SettingsForm() {
           control={form.control}
           name="saveConversations"
           render={({ field }) => (
-            <FormItem className="flex items-center justify-between space-x-2 rounded-lg border p-4 bg-surface">
-              <div className="space-y-0.5">
-                <FormLabel className="text-base">Save Conversations</FormLabel>
-                <FormDescription className="text-xs">
+            <FormItem className="flex items-center justify-between space-x-2 rounded-lg border border-gray-700 p-5 bg-gray-700/30">
+              <div className="space-y-1">
+                <FormLabel className="text-base text-white">Save Conversations</FormLabel>
+                <FormDescription className="text-sm text-gray-300">
                   Store conversation history
                 </FormDescription>
               </div>
@@ -219,6 +220,7 @@ export default function SettingsForm() {
                 <Switch
                   checked={field.value}
                   onCheckedChange={field.onChange}
+                  className="data-[state=checked]:bg-purple-600 data-[state=checked]:border-purple-800"
                 />
               </FormControl>
             </FormItem>
@@ -227,7 +229,7 @@ export default function SettingsForm() {
         
         <Button 
           type="submit" 
-          className="w-full bg-primary hover:bg-primary/90 text-white"
+          className="w-full bg-purple-600 hover:bg-purple-700 text-white rounded-lg py-3 mt-4 shadow-md"
           disabled={mutation.isPending}
         >
           {mutation.isPending ? "Saving..." : "Save Settings"}

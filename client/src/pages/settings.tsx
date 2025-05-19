@@ -3,8 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
-import Header from "@/components/layout/Header";
-import { ContentCard } from "@/components/ui/content-card";
+import { User, ChevronRight, Bell, Shield, Trash2, HelpCircle, LogOut, MessageSquare, UserCog } from "lucide-react";
 
 export default function Settings() {
   const { toast } = useToast();
@@ -21,122 +20,145 @@ export default function Settings() {
   };
   
   return (
-    <div className="settings-screen px-4 py-6">
-      {/* Header */}
-      <div className="mb-6">
-        <Header title="Settings" />
-      </div>
+    <div className="container mx-auto py-6">
+      <h1 className="text-2xl font-bold text-white mb-8">Settings</h1>
 
       {/* Settings Sections */}
       <div className="space-y-6">
         {/* Account Section */}
-        <ContentCard>
-          <h3 className="font-medium mb-4">Account</h3>
+        <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow-md">
+          <h3 className="font-medium text-white text-lg mb-5">Account</h3>
           
-          <div className="flex items-center mb-4">
-            <div className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center mr-3">
-              <i className="ri-user-line text-primary"></i>
+          <div className="flex items-center mb-6">
+            <div className="w-12 h-12 bg-purple-900/30 rounded-full flex items-center justify-center mr-4 border border-purple-800/30">
+              <User className="h-6 w-6 text-purple-400" />
             </div>
             <div>
-              <p className="font-medium">User</p>
-              <p className="text-sm text-text-secondary">user@example.com</p>
+              <p className="font-medium text-white">User</p>
+              <p className="text-sm text-gray-400">user@example.com</p>
             </div>
           </div>
           
           <div className="space-y-3">
-            <button className="w-full py-2 text-left text-sm flex items-center justify-between">
-              <span>Edit Profile</span>
-              <i className="ri-arrow-right-s-line"></i>
+            <button className="w-full py-3 px-4 text-left text-sm text-white flex items-center justify-between bg-gray-700/50 hover:bg-gray-700 rounded-lg transition-colors">
+              <div className="flex items-center">
+                <UserCog className="h-4 w-4 mr-3 text-gray-400" />
+                <span>Edit Profile</span>
+              </div>
+              <ChevronRight className="h-4 w-4 text-gray-400" />
             </button>
-            <button className="w-full py-2 text-left text-sm flex items-center justify-between">
-              <span>Change Password</span>
-              <i className="ri-arrow-right-s-line"></i>
+            
+            <button className="w-full py-3 px-4 text-left text-sm text-white flex items-center justify-between bg-gray-700/50 hover:bg-gray-700 rounded-lg transition-colors">
+              <div className="flex items-center">
+                <Shield className="h-4 w-4 mr-3 text-gray-400" />
+                <span>Change Password</span>
+              </div>
+              <ChevronRight className="h-4 w-4 text-gray-400" />
             </button>
-            <button className="w-full py-2 text-left text-sm flex items-center justify-between">
-              <span>Notification Preferences</span>
-              <i className="ri-arrow-right-s-line"></i>
+            
+            <button className="w-full py-3 px-4 text-left text-sm text-white flex items-center justify-between bg-gray-700/50 hover:bg-gray-700 rounded-lg transition-colors">
+              <div className="flex items-center">
+                <Bell className="h-4 w-4 mr-3 text-gray-400" />
+                <span>Notification Preferences</span>
+              </div>
+              <ChevronRight className="h-4 w-4 text-gray-400" />
             </button>
           </div>
-        </ContentCard>
+        </div>
         
         {/* Voice Assistant Section */}
-        <ContentCard>
-          <h3 className="font-medium mb-4">Voice Assistant</h3>
-          
+        <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow-md">
+          <h3 className="font-medium text-white text-lg mb-5">Voice Assistant</h3>
           <SettingsForm />
-        </ContentCard>
+        </div>
         
         {/* Privacy Section */}
-        <ContentCard>
-          <h3 className="font-medium mb-4">Privacy & Data</h3>
+        <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow-md">
+          <h3 className="font-medium text-white text-lg mb-5">Privacy & Data</h3>
           
           <div className="space-y-4">
-            <button className="w-full py-2 text-left text-sm flex items-center justify-between">
-              <span>Data & Privacy Policy</span>
-              <i className="ri-arrow-right-s-line"></i>
+            <button className="w-full py-3 px-4 text-left text-sm text-white flex items-center justify-between bg-gray-700/50 hover:bg-gray-700 rounded-lg transition-colors">
+              <div className="flex items-center">
+                <Shield className="h-4 w-4 mr-3 text-gray-400" />
+                <span>Data & Privacy Policy</span>
+              </div>
+              <ChevronRight className="h-4 w-4 text-gray-400" />
             </button>
             
             <button 
-              className="w-full py-2 text-left text-sm flex items-center justify-between text-error"
+              className="w-full py-3 px-4 text-left text-sm text-red-400 flex items-center justify-between bg-red-900/20 hover:bg-red-900/30 rounded-lg transition-colors border border-red-900/30"
               onClick={() => setIsConfirmDialogOpen(true)}
             >
-              <span>Clear All Data</span>
-              <i className="ri-delete-bin-line"></i>
+              <div className="flex items-center">
+                <Trash2 className="h-4 w-4 mr-3 text-red-400" />
+                <span>Clear All Data</span>
+              </div>
+              <ChevronRight className="h-4 w-4 text-red-400" />
             </button>
           </div>
-        </ContentCard>
+        </div>
         
         {/* About Section */}
-        <ContentCard>
-          <h3 className="font-medium mb-4">About</h3>
+        <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow-md">
+          <h3 className="font-medium text-white text-lg mb-5">About</h3>
           
           <div className="space-y-3">
-            <div className="text-sm">
-              <p className="text-text-secondary">Version 1.0.0</p>
+            <div className="text-sm mb-4">
+              <p className="text-gray-400">Version 1.0.0</p>
             </div>
             
-            <button className="w-full py-2 text-left text-sm flex items-center justify-between">
-              <span>Terms of Service</span>
-              <i className="ri-arrow-right-s-line"></i>
+            <button className="w-full py-3 px-4 text-left text-sm text-white flex items-center justify-between bg-gray-700/50 hover:bg-gray-700 rounded-lg transition-colors">
+              <div className="flex items-center">
+                <Shield className="h-4 w-4 mr-3 text-gray-400" />
+                <span>Terms of Service</span>
+              </div>
+              <ChevronRight className="h-4 w-4 text-gray-400" />
             </button>
             
-            <button className="w-full py-2 text-left text-sm flex items-center justify-between">
-              <span>Help & Support</span>
-              <i className="ri-arrow-right-s-line"></i>
+            <button className="w-full py-3 px-4 text-left text-sm text-white flex items-center justify-between bg-gray-700/50 hover:bg-gray-700 rounded-lg transition-colors">
+              <div className="flex items-center">
+                <HelpCircle className="h-4 w-4 mr-3 text-gray-400" />
+                <span>Help & Support</span>
+              </div>
+              <ChevronRight className="h-4 w-4 text-gray-400" />
             </button>
             
-            <button className="w-full py-2 text-left text-sm flex items-center justify-between">
-              <span>Send Feedback</span>
-              <i className="ri-arrow-right-s-line"></i>
+            <button className="w-full py-3 px-4 text-left text-sm text-white flex items-center justify-between bg-gray-700/50 hover:bg-gray-700 rounded-lg transition-colors">
+              <div className="flex items-center">
+                <MessageSquare className="h-4 w-4 mr-3 text-gray-400" />
+                <span>Send Feedback</span>
+              </div>
+              <ChevronRight className="h-4 w-4 text-gray-400" />
             </button>
           </div>
-        </ContentCard>
+        </div>
         
         {/* Sign Out Button */}
         <Button 
           variant="outline" 
-          className="w-full py-3 bg-surface text-error font-medium rounded-lg hover:bg-surface-light border-none"
+          className="w-full py-4 bg-gray-800 hover:bg-gray-700 text-red-400 font-medium rounded-xl border border-gray-700 transition-colors flex items-center justify-center gap-2 shadow-md"
         >
+          <LogOut className="h-5 w-5" />
           Sign Out
         </Button>
       </div>
       
       {/* Confirm Clear Data Dialog */}
       <AlertDialog open={isConfirmDialogOpen} onOpenChange={setIsConfirmDialogOpen}>
-        <AlertDialogContent className="bg-surface border-surface-light">
+        <AlertDialogContent className="bg-gray-800 border-gray-700">
           <AlertDialogHeader>
-            <AlertDialogTitle>Clear All Data</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle className="text-white">Clear All Data</AlertDialogTitle>
+            <AlertDialogDescription className="text-gray-300">
               This action cannot be undone. This will permanently delete all your conversations, tasks, and settings.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="bg-surface-light border-surface-light text-text-primary hover:bg-muted">
+            <AlertDialogCancel className="bg-gray-700 border-gray-600 text-white hover:bg-gray-600">
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleClearData}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-red-600 text-white hover:bg-red-700"
             >
               Delete All Data
             </AlertDialogAction>
