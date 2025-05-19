@@ -3,11 +3,50 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
+import { queryClient } from "@/lib/queryClient";
 import { User, ChevronRight, Bell, Shield, Trash2, HelpCircle, LogOut, MessageSquare, UserCog } from "lucide-react";
+import { useLocation } from "wouter";
 
 export default function Settings() {
   const { toast } = useToast();
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [, setLocation] = useLocation();
+  
+  const handleLogout = async () => {
+    try {
+      setIsLoggingOut(true);
+      
+      // Make a request to the logout endpoint
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include'
+      });
+      
+      // Clear any stored tokens
+      localStorage.removeItem('token');
+      
+      // Clear React Query cache
+      queryClient.clear();
+      
+      toast({
+        title: "Logged out",
+        description: "You have been successfully logged out",
+      });
+      
+      // Redirect to login page
+      setLocation('/login');
+    } catch (error) {
+      console.error('Logout failed:', error);
+      toast({
+        title: "Logout failed",
+        description: "There was a problem logging out. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
   
   const handleClearData = () => {
     // In a real app, we would make an API call to clear user data
