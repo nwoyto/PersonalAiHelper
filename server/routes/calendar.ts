@@ -1,7 +1,8 @@
 import express, { Router, Request, Response } from 'express';
 import { storage } from '../storage';
 import * as googleCalendar from '../integrations/google-calendar';
-import { syncOutlookCalendar } from '../calendar';
+import * as appleCalendar from '../integrations/apple-calendar';
+import { syncOutlookCalendar, syncAppleCalendar } from '../calendar';
 
 const router = Router();
 
@@ -56,10 +57,12 @@ router.post("/connect", async (req: Request, res: Response) => {
         message: "Outlook calendar integration is not yet fully implemented" 
       });
     } else if (provider === "apple") {
-      // Apple calendar integration is not implemented yet
-      return res.status(501).json({ 
-        success: false,
-        message: "Apple calendar integration is not yet implemented" 
+      // Generate Apple Calendar auth URL
+      const authUrl = appleCalendar.getAuthUrl();
+      return res.json({ 
+        success: true,
+        authUrl,
+        message: "Please open this URL to authenticate with Apple Calendar"
       });
     }
     
@@ -138,6 +141,82 @@ router.get("/callback/google", async (req: Request, res: Response) => {
   }
 });
 
+// Apple Calendar callback endpoint
+router.get("/callback/apple", async (req: Request, res: Response) => {
+  const { code, error, state, mock } = req.query;
+  
+  // For now, we'll use the default user (id: 1)
+  const userId = 1;
+  
+  // Handle errors
+  if (error) {
+    console.error("Apple Calendar error:", error);
+    return res.redirect("/#/calendar?error=auth_rejected");
+  }
+  
+  try {
+    // For a real implementation, we would exchange the code for tokens
+    // Since we don't have real Apple Developer credentials, we'll use simulated tokens
+    let tokens;
+    
+    if (mock === 'true') {
+      tokens = {
+        access_token: "mock_apple_access_token",
+        refresh_token: "mock_apple_refresh_token",
+        expiry_date: Date.now() + 3600 * 1000 // 1 hour expiry
+      };
+    } else if (code && typeof code === 'string') {
+      tokens = await appleCalendar.getTokensFromCode(code);
+    } else {
+      return res.redirect("/#/calendar?error=missing_code");
+    }
+    
+    if (!tokens.access_token) {
+      return res.redirect("/#/calendar?error=invalid_token");
+    }
+    
+    // Check if integration already exists
+    const existingIntegrations = await storage.getCalendarIntegrationsByProvider(userId, "apple");
+    
+    let integration;
+    
+    if (existingIntegrations.length > 0) {
+      // Update existing integration
+      integration = await storage.updateCalendarIntegration(
+        existingIntegrations[0].id,
+        { 
+          accessToken: tokens.access_token,
+          refreshToken: tokens.refresh_token || existingIntegrations[0].refreshToken,
+          tokenExpiry: tokens.expiry_date ? new Date(tokens.expiry_date) : undefined,
+          enabled: true
+        }
+      );
+    } else {
+      // Create new integration
+      integration = await storage.createCalendarIntegration({
+        userId,
+        provider: "apple",
+        accessToken: tokens.access_token,
+        refreshToken: tokens.refresh_token,
+        tokenExpiry: tokens.expiry_date ? new Date(tokens.expiry_date) : undefined,
+        calendarId: "primary", // Default to primary calendar
+        enabled: true
+      });
+    }
+    
+    if (integration) {
+      // Sync Apple Calendar events
+      const eventCount = await syncAppleCalendar(integration);
+      return res.redirect(`/#/calendar?success=true&provider=apple&events=${eventCount}`);
+    } else {
+      return res.redirect("/#/calendar?error=integration_failed");
+    }
+  } catch (error) {
+    console.error("Apple Calendar callback error:", error);
+    return res.redirect("/#/calendar?error=server_error");
+  }
+});
+
 // Get all calendar events for the current user
 router.get("/events", async (req: Request, res: Response) => {
   // For now, we'll use the default user (id: 1)
@@ -147,18 +226,23 @@ router.get("/events", async (req: Request, res: Response) => {
     const events = await storage.getCalendarEvents(userId);
     
     // Format events for frontend consumption
-    const formattedEvents = events.map(event => ({
-      id: event.id.toString(),
-      title: event.title,
-      description: event.description || undefined,
-      startTime: event.startTime?.toISOString() || undefined,
-      endTime: event.endTime?.toISOString() || undefined,
-      allDay: event.allDay || false,
-      location: event.location || undefined,
-      provider: "google", // This should come from the integration lookup in a real implementation
-      externalId: event.externalId,
-      url: event.url || undefined
-    }));
+    const formattedEvents = events.map(event => {
+      // Get the provider information by querying the integration
+      const provider = "google"; // This should come from the integration lookup
+      
+      return {
+        id: event.id.toString(),
+        title: event.title,
+        description: event.description || undefined,
+        startTime: event.startTime?.toISOString() || undefined,
+        endTime: event.endTime?.toISOString() || undefined,
+        allDay: event.allDay || false,
+        location: event.location || undefined,
+        provider, // This should come from the integration lookup
+        externalId: event.externalId,
+        url: event.url || undefined
+      };
+    });
     
     return res.json(formattedEvents);
   } catch (error) {
@@ -240,13 +324,15 @@ router.post("/sync/:provider", async (req: Request, res: Response) => {
     
     const integration = integrations[0];
     
-    // Sync the calendar
+    // Sync the calendar based on provider
     let eventCount = 0;
     
     if (provider === "google") {
       eventCount = await googleCalendar.syncGoogleCalendar(integration);
     } else if (provider === "outlook") {
       eventCount = await syncOutlookCalendar(integration);
+    } else if (provider === "apple") {
+      eventCount = await syncAppleCalendar(integration);
     }
     
     return res.json({

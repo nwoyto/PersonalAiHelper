@@ -95,14 +95,19 @@ export default function CalendarConnections() {
     setConnecting(providerId);
     
     try {
-      const response = await apiRequest('/api/calendar/connect', {
+      const response = await fetch('/api/calendar/connect', {
         method: 'POST',
-        data: { provider: providerId }
-      }) as any;
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ provider: providerId })
+      });
       
-      if (response && typeof response === 'object' && 'authUrl' in response) {
+      const data = await response.json();
+      
+      if (data && typeof data === 'object' && 'authUrl' in data) {
         // Open the OAuth URL in a new window
-        window.open(response.authUrl, `${providerId}AuthPopup`, 'width=600,height=700');
+        window.open(data.authUrl, `${providerId}AuthPopup`, 'width=600,height=700');
         
         // Show instructions to the user
         toast({
@@ -153,15 +158,16 @@ export default function CalendarConnections() {
     
     try {
       // Find the integration ID first
-      const integrations = await apiRequest('/api/calendar/integrations', {}) as any[];
+      const response = await fetch('/api/calendar/integrations');
+      const integrations = await response.json();
       
       if (Array.isArray(integrations)) {
         const integration = integrations.find(i => i.provider === providerId.toLowerCase());
         
         if (integration) {
-          await apiRequest(`/api/calendar/integrations/${integration.id}`, {
+          await fetch(`/api/calendar/integrations/${integration.id}`, {
             method: 'DELETE'
-          } as any);
+          });
           
           toast({
             title: 'Calendar Disconnected',
