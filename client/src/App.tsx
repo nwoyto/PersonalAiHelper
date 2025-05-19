@@ -10,6 +10,7 @@ import Calendar from "@/pages/calendar";
 import Settings from "@/pages/settings";
 import NotFound from "@/pages/not-found";
 import Login from "@/pages/login";
+import VoiceTest from "@/pages/voice-test";
 import { useQuery } from "@tanstack/react-query";
 
 // Create context for voice modal
@@ -48,6 +49,7 @@ function App() {
                 <Route path="/notes" component={Notes} />
                 <Route path="/calendar" component={Calendar} />
                 <Route path="/settings" component={Settings} />
+                <Route path="/voice-test" component={VoiceTest} />
                 <Route component={NotFound} />
               </>
             ) : null}
