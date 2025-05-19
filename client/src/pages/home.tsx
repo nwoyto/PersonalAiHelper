@@ -6,8 +6,7 @@ import NoteItem from "@/components/notes/NoteItem";
 import TaskForm from "@/components/tasks/TaskForm";
 import { Link } from "wouter";
 import { Skeleton } from "@/components/ui/skeleton";
-import Header from "@/components/layout/Header";
-import { queryClient } from "@/lib/queryClient";
+import { Mic, Calendar, Plus, Search } from "lucide-react";
 import { VoiceModalContext } from "@/App";
 
 export default function Home() {
@@ -49,28 +48,28 @@ export default function Home() {
   const recentNotes = notes?.slice(0, 2) || [];
   
   return (
-    <div className="home-screen px-4 py-6">
-      {/* Header */}
-      <div className="mb-6">
-        <Header title="Jibe AI" />
-      </div>
+    <div className="container mx-auto py-6">
+      <h1 className="text-2xl font-bold text-white mb-6">Jibe AI</h1>
 
       {/* Greeting & Assistant Status */}
-      <section className="mb-8 slide-up">
-        <div className="bg-surface rounded-xl p-5 flex flex-col items-center text-center mb-6">
-          <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-3">
-            <i className="ri-robot-line text-primary text-2xl"></i>
+      <section className="mb-8">
+        <div className="bg-gray-800 rounded-xl p-6 flex flex-col items-center text-center">
+          <div className="w-20 h-20 bg-purple-900/30 rounded-full flex items-center justify-center mb-4">
+            <svg className="w-10 h-10 text-purple-500" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" fill="currentColor"/>
+              <path d="M8 16l8-8M16 16L8 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+            </svg>
           </div>
-          <h2 className="text-lg font-medium mb-1">{greeting}, User</h2>
-          <p className="text-text-secondary text-sm mb-3">I'm listening and ready to help</p>
+          <h2 className="text-xl font-medium text-white mb-2">{greeting}, User</h2>
+          <p className="text-gray-300 mb-4">I'm listening and ready to help</p>
           
-          <div className="flex items-center text-xs text-primary font-medium mb-2">
-            <span className="w-2 h-2 bg-primary rounded-full mr-2 animate-pulse"></span>
+          <div className="flex items-center text-sm text-purple-400 font-medium mb-3">
+            <span className="w-2 h-2 bg-purple-500 rounded-full mr-2 animate-pulse"></span>
             Active and listening for wake word
           </div>
           
           {typeof window !== 'undefined' && window.location.hostname.includes('replit') && (
-            <div className="text-xs text-amber-500 max-w-xs text-center px-2">
+            <div className="text-sm text-amber-500 max-w-md text-center mt-2">
               <p>In the Replit environment, use the microphone button to activate the voice assistant.</p>
               <p className="mt-1">In production, the assistant listens continuously for the wake word.</p>
             </div>
@@ -79,41 +78,54 @@ export default function Home() {
       </section>
 
       {/* Quick Actions */}
-      <section className="mb-8 slide-up" style={{ animationDelay: '0.1s' }}>
-        <h3 className="text-sm font-medium text-text-secondary uppercase mb-3">Quick Actions</h3>
-        <div className="grid grid-cols-2 gap-3">
-          <Link href="#" onClick={() => setIsVoiceModalOpen(true)}>
-            <button className="w-full bg-surface hover:bg-surface-light rounded-lg p-4 flex flex-col items-center transition">
-              <i className="ri-mic-line text-primary text-xl mb-2"></i>
-              <span className="text-sm">New Voice Note</span>
-            </button>
-          </Link>
+      <section className="mb-8">
+        <h3 className="text-sm font-medium text-gray-400 uppercase mb-4">QUICK ACTIONS</h3>
+        <div className="grid grid-cols-2 gap-4">
+          <button 
+            onClick={() => setIsVoiceModalOpen(true)}
+            className="bg-gray-800 hover:bg-gray-700 transition-colors rounded-lg p-5 flex flex-col items-center"
+          >
+            <div className="w-12 h-12 bg-purple-900/20 rounded-full flex items-center justify-center mb-3">
+              <Mic size={24} className="text-purple-500" />
+            </div>
+            <span className="text-white">New Voice Note</span>
+          </button>
+          
           <Link href="/calendar">
-            <button className="w-full bg-surface hover:bg-surface-light rounded-lg p-4 flex flex-col items-center transition">
-              <i className="ri-calendar-line text-accent text-xl mb-2"></i>
-              <span className="text-sm">Schedule Meeting</span>
-            </button>
+            <div className="bg-gray-800 hover:bg-gray-700 transition-colors rounded-lg p-5 flex flex-col items-center">
+              <div className="w-12 h-12 bg-blue-900/20 rounded-full flex items-center justify-center mb-3">
+                <Calendar size={24} className="text-blue-500" />
+              </div>
+              <span className="text-white">Schedule Meeting</span>
+            </div>
           </Link>
-          <Link href="#" onClick={() => setIsTaskFormOpen(true)}>
-            <button className="w-full bg-surface hover:bg-surface-light rounded-lg p-4 flex flex-col items-center transition">
-              <i className="ri-add-line text-secondary text-xl mb-2"></i>
-              <span className="text-sm">New Task</span>
-            </button>
-          </Link>
+          
+          <button
+            onClick={() => setIsTaskFormOpen(true)} 
+            className="bg-gray-800 hover:bg-gray-700 transition-colors rounded-lg p-5 flex flex-col items-center"
+          >
+            <div className="w-12 h-12 bg-green-900/20 rounded-full flex items-center justify-center mb-3">
+              <Plus size={24} className="text-green-500" />
+            </div>
+            <span className="text-white">New Task</span>
+          </button>
+          
           <Link href="/notes">
-            <button className="w-full bg-surface hover:bg-surface-light rounded-lg p-4 flex flex-col items-center transition">
-              <i className="ri-search-line text-warning text-xl mb-2"></i>
-              <span className="text-sm">Find Notes</span>
-            </button>
+            <div className="bg-gray-800 hover:bg-gray-700 transition-colors rounded-lg p-5 flex flex-col items-center">
+              <div className="w-12 h-12 bg-amber-900/20 rounded-full flex items-center justify-center mb-3">
+                <Search size={24} className="text-amber-500" />
+              </div>
+              <span className="text-white">Find Notes</span>
+            </div>
           </Link>
         </div>
       </section>
 
       {/* Recent Tasks */}
-      <section className="mb-8 slide-up" style={{ animationDelay: '0.2s' }}>
-        <div className="flex justify-between items-center mb-3">
-          <h3 className="text-sm font-medium text-text-secondary uppercase">Your Tasks</h3>
-          <Link href="/tasks" className="text-primary text-sm">View All</Link>
+      <section className="mb-8">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-sm font-medium text-gray-400 uppercase">YOUR TASKS</h3>
+          <Link href="/tasks" className="text-purple-400 text-sm">View All</Link>
         </div>
         
         {/* Task List */}
@@ -121,7 +133,7 @@ export default function Home() {
           {isTasksLoading ? (
             // Loading skeletons
             Array(3).fill(0).map((_, i) => (
-              <div key={i} className="bg-surface rounded-lg p-4">
+              <div key={i} className="bg-gray-800 rounded-lg p-4">
                 <div className="flex items-start">
                   <Skeleton className="h-5 w-5 rounded-full mr-3" />
                   <div className="flex-1">
@@ -132,11 +144,11 @@ export default function Home() {
               </div>
             ))
           ) : tasksError ? (
-            <div className="text-error text-center p-4">
+            <div className="text-red-400 text-center p-4 bg-gray-800 rounded-lg">
               Failed to load tasks
             </div>
           ) : incompleteTasks.length === 0 ? (
-            <div className="text-text-secondary text-center p-4 bg-surface rounded-lg">
+            <div className="text-gray-400 text-center p-4 bg-gray-800 rounded-lg">
               No tasks to display
             </div>
           ) : (
@@ -149,17 +161,17 @@ export default function Home() {
       </section>
 
       {/* Recent Conversations */}
-      <section className="mb-8 slide-up" style={{ animationDelay: '0.3s' }}>
-        <div className="flex justify-between items-center mb-3">
-          <h3 className="text-sm font-medium text-text-secondary uppercase">Recent Conversations</h3>
-          <Link href="/notes" className="text-primary text-sm">View All</Link>
+      <section className="mb-8">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-sm font-medium text-gray-400 uppercase">RECENT CONVERSATIONS</h3>
+          <Link href="/notes" className="text-purple-400 text-sm">View All</Link>
         </div>
         
         <div className="space-y-3">
           {isNotesLoading ? (
             // Loading skeletons
             Array(2).fill(0).map((_, i) => (
-              <div key={i} className="bg-surface rounded-lg p-4">
+              <div key={i} className="bg-gray-800 rounded-lg p-4">
                 <Skeleton className="h-5 w-3/4 rounded mb-2" />
                 <Skeleton className="h-4 w-full rounded mb-2" />
                 <Skeleton className="h-4 w-full rounded mb-2" />
@@ -170,11 +182,11 @@ export default function Home() {
               </div>
             ))
           ) : notesError ? (
-            <div className="text-error text-center p-4">
+            <div className="text-red-400 text-center p-4 bg-gray-800 rounded-lg">
               Failed to load notes
             </div>
           ) : recentNotes.length === 0 ? (
-            <div className="text-text-secondary text-center p-4 bg-surface rounded-lg">
+            <div className="text-gray-400 text-center p-4 bg-gray-800 rounded-lg">
               No conversations to display
             </div>
           ) : (
