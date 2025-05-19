@@ -4,7 +4,7 @@ import { Note } from "@/types";
 import NoteItem from "@/components/notes/NoteItem";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
-import Header from "@/components/layout/Header";
+import { Search, X, FileText } from "lucide-react";
 
 export default function Notes() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -55,14 +55,12 @@ export default function Notes() {
   });
   
   return (
-    <div className="notes-screen px-4 py-6">
+    <div className="container mx-auto py-6">
       {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <div className="flex-1">
-          <Header title="Notes" showUserIcon={false} />
-        </div>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-2xl font-bold text-white">Notes</h1>
         <button 
-          className="rounded-full bg-surface p-2"
+          className="rounded-full bg-gray-800 p-2 hover:bg-gray-700 transition-colors"
           onClick={() => {
             const searchInput = document.getElementById("search-notes") as HTMLInputElement;
             if (searchInput) {
@@ -70,28 +68,28 @@ export default function Notes() {
             }
           }}
         >
-          <i className="ri-search-line text-xl"></i>
+          <Search className="h-5 w-5 text-purple-400" />
         </button>
       </div>
       
       {/* Search */}
-      <div className="mb-4">
+      <div className="mb-6">
         <div className="relative">
-          <i className="ri-search-line absolute left-3 top-1/2 transform -translate-y-1/2 text-text-secondary"></i>
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
           <input
             id="search-notes"
             type="text"
             placeholder="Search notes..."
-            className="w-full bg-surface border-surface-light rounded-lg py-2 pl-10 pr-4 text-text-primary focus:outline-none focus:ring-2 focus:ring-primary"
+            className="w-full bg-gray-800 border border-gray-700 rounded-lg py-3 pl-10 pr-10 text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
           {searchQuery && (
             <button
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-text-secondary"
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white"
               onClick={() => setSearchQuery("")}
             >
-              <i className="ri-close-line"></i>
+              <X className="h-4 w-4" />
             </button>
           )}
         </div>
@@ -100,38 +98,38 @@ export default function Notes() {
       {/* Notes List */}
       {isLoading ? (
         // Loading skeleton
-        <div className="space-y-4">
-          <div className="flex items-center mb-2">
-            <div className="flex-1 h-px bg-surface-light"></div>
-            <Skeleton className="h-4 w-20 mx-3" />
-            <div className="flex-1 h-px bg-surface-light"></div>
+        <div className="space-y-6">
+          <div className="flex items-center mb-4">
+            <div className="flex-1 h-px bg-gray-700"></div>
+            <Skeleton className="h-5 w-24 mx-3 bg-gray-700" />
+            <div className="flex-1 h-px bg-gray-700"></div>
           </div>
           
           {Array(3).fill(0).map((_, i) => (
-            <div key={i} className="bg-surface rounded-lg p-4">
-              <div className="flex justify-between items-start mb-2">
-                <Skeleton className="h-5 w-1/3 rounded" />
-                <Skeleton className="h-4 w-16 rounded" />
+            <div key={i} className="bg-gray-800 border border-gray-700 rounded-xl p-5 shadow-md">
+              <div className="flex justify-between items-start mb-3">
+                <Skeleton className="h-6 w-1/3 rounded bg-gray-700" />
+                <Skeleton className="h-5 w-20 rounded bg-gray-700" />
               </div>
-              <Skeleton className="h-4 w-full rounded mb-1" />
-              <Skeleton className="h-4 w-full rounded mb-1" />
-              <Skeleton className="h-4 w-4/5 rounded mb-3" />
-              <div className="flex justify-between">
-                <Skeleton className="h-4 w-20 rounded" />
-                <Skeleton className="h-4 w-24 rounded" />
+              <Skeleton className="h-4 w-full rounded mb-2 bg-gray-700" />
+              <Skeleton className="h-4 w-full rounded mb-2 bg-gray-700" />
+              <Skeleton className="h-4 w-4/5 rounded mb-4 bg-gray-700" />
+              <div className="flex justify-between pt-2 border-t border-gray-700">
+                <Skeleton className="h-5 w-24 rounded bg-gray-700" />
+                <Skeleton className="h-5 w-28 rounded bg-gray-700" />
               </div>
             </div>
           ))}
         </div>
       ) : error ? (
-        <div className="text-error text-center p-4">
+        <div className="text-red-400 text-center p-6 bg-gray-800 border border-red-900/30 rounded-xl shadow-md">
           Failed to load notes: {(error as Error).message}
         </div>
       ) : filteredNotes.length === 0 ? (
-        <div className="text-text-secondary text-center p-8 bg-surface rounded-lg">
+        <div className="text-gray-300 text-center p-10 bg-gray-800 border border-gray-700 rounded-xl shadow-md">
           <div className="flex flex-col items-center">
-            <i className="ri-file-list-line text-4xl mb-2 text-muted-foreground"></i>
-            <p>
+            <FileText className="h-12 w-12 text-gray-500 mb-4" />
+            <p className="text-lg">
               {searchQuery 
                 ? `No notes matching "${searchQuery}"` 
                 : "No notes yet"}
@@ -139,14 +137,14 @@ export default function Notes() {
           </div>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-6">
           {Object.entries(notesByDate).map(([date, dateNotes]) => (
             <div key={date}>
               {/* Date Divider */}
-              <div className="flex items-center mb-2">
-                <div className="flex-1 h-px bg-surface-light"></div>
-                <span className="px-3 text-text-secondary text-xs">{date}</span>
-                <div className="flex-1 h-px bg-surface-light"></div>
+              <div className="flex items-center mb-4">
+                <div className="flex-1 h-px bg-gray-700"></div>
+                <span className="px-4 text-gray-400 text-sm font-medium">{date}</span>
+                <div className="flex-1 h-px bg-gray-700"></div>
               </div>
               
               {/* Notes for this date */}

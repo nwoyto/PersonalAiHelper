@@ -1,6 +1,6 @@
 import { Note } from "@/types";
 import { formatDistanceToNow } from "date-fns";
-import { ContentCard } from "@/components/ui/content-card";
+import { FileText, CheckSquare } from "lucide-react";
 
 interface NoteItemProps {
   note: Note;
@@ -19,32 +19,32 @@ export default function NoteItem({ note }: NoteItemProps) {
   const getCategoryClasses = (category: string) => {
     switch (category) {
       case "work":
-        return "bg-accent/20 text-accent";
+        return "bg-blue-900/30 text-blue-400 border border-blue-800/40";
       case "personal":
-        return "bg-secondary/20 text-secondary";
+        return "bg-green-900/30 text-green-400 border border-green-800/40";
       default:
-        return "bg-accent/20 text-accent";
+        return "bg-blue-900/30 text-blue-400 border border-blue-800/40";
     }
   };
   
   return (
-    <ContentCard>
-      <div className="flex justify-between items-start mb-2">
-        <h4 className="font-medium">{note.title}</h4>
-        <span className="text-xs text-text-secondary">{formatTimestamp(note.timestamp)}</span>
+    <div className="bg-gray-800 border border-gray-700 rounded-xl p-5 shadow-md transition-all hover:shadow-lg">
+      <div className="flex justify-between items-start mb-3">
+        <h4 className="font-medium text-white">{note.title}</h4>
+        <span className="text-xs text-gray-400">{formatTimestamp(note.timestamp)}</span>
       </div>
-      <p className="text-sm text-text-secondary mb-3 line-clamp-3">{note.content}</p>
-      <div className="flex items-center justify-between">
-        <span className={`text-xs px-2 py-0.5 rounded-full ${getCategoryClasses(note.category)}`}>
+      <p className="text-sm text-gray-300 mb-4 line-clamp-3">{note.content}</p>
+      <div className="flex items-center justify-between pt-3 border-t border-gray-700">
+        <span className={`text-xs px-2.5 py-1 rounded-full ${getCategoryClasses(note.category)}`}>
           {note.category.charAt(0).toUpperCase() + note.category.slice(1)}
         </span>
         {note.extractedTasks > 0 && (
-          <div className="flex items-center text-primary text-xs">
-            <i className="ri-checkbox-line mr-1"></i>
+          <div className="flex items-center text-purple-400 text-xs">
+            <CheckSquare className="h-3.5 w-3.5 mr-1.5" />
             {note.extractedTasks} task{note.extractedTasks !== 1 ? 's' : ''} extracted
           </div>
         )}
       </div>
-    </ContentCard>
+    </div>
   );
 }

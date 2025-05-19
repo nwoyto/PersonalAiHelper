@@ -5,7 +5,7 @@ import TaskItem from "@/components/tasks/TaskItem";
 import TaskForm from "@/components/tasks/TaskForm";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import Header from "@/components/layout/Header";
+import { Plus, CheckSquare, Clock, CalendarDays, CheckCheck } from "lucide-react";
 
 export default function Tasks() {
   const [filter, setFilter] = useState<"all" | "today" | "upcoming" | "completed">("all");
@@ -56,64 +56,66 @@ export default function Tasks() {
   });
   
   return (
-    <div className="tasks-screen px-4 py-6">
+    <div className="container mx-auto py-6">
       {/* Header with action button */}
-      <div className="flex justify-between items-center mb-6">
-        <div className="flex-1">
-          <Header title="Tasks" showUserIcon={false} />
-        </div>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-2xl font-bold text-white">Tasks</h1>
         <Button 
-          className="rounded-full bg-primary p-2 text-white h-auto w-auto"
+          className="rounded-full bg-purple-600 hover:bg-purple-700 p-3 text-white h-auto w-auto shadow-md"
           onClick={() => setIsFormOpen(true)}
         >
-          <i className="ri-add-line text-xl"></i>
+          <Plus className="h-5 w-5" />
         </Button>
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex space-x-2 mb-6 overflow-x-auto pb-2">
+      <div className="flex space-x-3 mb-8 overflow-x-auto pb-2">
         <Button
           variant={filter === "all" ? "default" : "outline"}
-          className={`rounded-full text-sm whitespace-nowrap px-4 ${
+          className={`rounded-full text-sm whitespace-nowrap px-5 py-2 flex items-center gap-2 ${
             filter === "all" 
-              ? "bg-primary text-white"
-              : "bg-surface text-text-secondary border-none"
+              ? "bg-purple-600 hover:bg-purple-700 text-white border-none"
+              : "bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white border-gray-700"
           }`}
           onClick={() => setFilter("all")}
         >
+          <CheckSquare size={16} />
           All Tasks
         </Button>
         <Button
           variant={filter === "today" ? "default" : "outline"}
-          className={`rounded-full text-sm whitespace-nowrap px-4 ${
+          className={`rounded-full text-sm whitespace-nowrap px-5 py-2 flex items-center gap-2 ${
             filter === "today" 
-              ? "bg-primary text-white"
-              : "bg-surface text-text-secondary border-none"
+              ? "bg-purple-600 hover:bg-purple-700 text-white border-none"
+              : "bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white border-gray-700"
           }`}
           onClick={() => setFilter("today")}
         >
+          <Clock size={16} />
           Today
         </Button>
         <Button
           variant={filter === "upcoming" ? "default" : "outline"}
-          className={`rounded-full text-sm whitespace-nowrap px-4 ${
+          className={`rounded-full text-sm whitespace-nowrap px-5 py-2 flex items-center gap-2 ${
             filter === "upcoming" 
-              ? "bg-primary text-white"
-              : "bg-surface text-text-secondary border-none"
+              ? "bg-purple-600 hover:bg-purple-700 text-white border-none"
+              : "bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white border-gray-700"
           }`}
           onClick={() => setFilter("upcoming")}
         >
+          <CalendarDays size={16} />
           Upcoming
         </Button>
         <Button
           variant={filter === "completed" ? "default" : "outline"}
-          className={`rounded-full text-sm whitespace-nowrap px-4 ${
+          className={`rounded-full text-sm whitespace-nowrap px-5 py-2 flex items-center gap-2 ${
             filter === "completed" 
-              ? "bg-primary text-white"
-              : "bg-surface text-text-secondary border-none"
+              ? "bg-purple-600 hover:bg-purple-700 text-white border-none"
+              : "bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white border-gray-700"
           }`}
           onClick={() => setFilter("completed")}
         >
+          <CheckCheck size={16} />
           Completed
         </Button>
       </div>
@@ -121,18 +123,18 @@ export default function Tasks() {
       {/* Tasks by Category */}
       {isLoading ? (
         // Loading skeleton
-        <div className="space-y-6">
+        <div className="space-y-8">
           {Array(2).fill(0).map((_, i) => (
             <section key={i}>
-              <Skeleton className="h-4 w-32 mb-3" />
-              <div className="space-y-3">
+              <Skeleton className="h-5 w-32 mb-4 bg-gray-700" />
+              <div className="space-y-4">
                 {Array(2).fill(0).map((_, j) => (
-                  <div key={j} className="bg-surface rounded-lg p-4">
+                  <div key={j} className="bg-gray-800 border border-gray-700 rounded-xl p-5 shadow-md">
                     <div className="flex items-start">
-                      <Skeleton className="h-5 w-5 rounded-full mr-3" />
+                      <Skeleton className="h-6 w-6 rounded-full mr-4 bg-gray-700" />
                       <div className="flex-1">
-                        <Skeleton className="h-5 w-4/5 rounded mb-2" />
-                        <Skeleton className="h-4 w-2/3 rounded" />
+                        <Skeleton className="h-6 w-4/5 rounded mb-3 bg-gray-700" />
+                        <Skeleton className="h-4 w-2/3 rounded bg-gray-700" />
                       </div>
                     </div>
                   </div>
@@ -142,16 +144,16 @@ export default function Tasks() {
           ))}
         </div>
       ) : error ? (
-        <div className="text-error text-center p-4">
+        <div className="text-red-400 text-center p-6 bg-gray-800 border border-red-900/30 rounded-xl shadow-md">
           Failed to load tasks: {(error as Error).message}
         </div>
       ) : Object.keys(tasksByCategory).length === 0 ? (
-        <div className="text-text-secondary text-center p-8 bg-surface rounded-lg">
+        <div className="text-gray-300 text-center p-10 bg-gray-800 border border-gray-700 rounded-xl shadow-md">
           <div className="flex flex-col items-center">
-            <i className="ri-checkbox-line text-4xl mb-2 text-muted-foreground"></i>
-            <p className="mb-4">No tasks found</p>
+            <CheckSquare className="h-12 w-12 text-gray-500 mb-4" />
+            <p className="mb-5">No tasks found</p>
             <Button 
-              className="bg-primary hover:bg-primary/90"
+              className="bg-purple-600 hover:bg-purple-700 rounded-lg px-5 py-2 shadow-md"
               onClick={() => setIsFormOpen(true)}
             >
               Create New Task
@@ -159,13 +161,14 @@ export default function Tasks() {
           </div>
         </div>
       ) : (
-        <div className="space-y-6">
+        <div className="space-y-8">
           {Object.entries(tasksByCategory).map(([category, categoryTasks]) => (
             <section key={category}>
-              <h3 className="text-sm font-medium text-text-secondary uppercase mb-3">
+              <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4 flex items-center">
+                <span className="inline-block w-2 h-2 rounded-full mr-2 bg-purple-500"></span>
                 {category.charAt(0).toUpperCase() + category.slice(1)} ({categoryTasks.length})
               </h3>
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {categoryTasks.map(task => (
                   <TaskItem key={task.id} task={task} />
                 ))}
