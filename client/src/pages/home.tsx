@@ -53,11 +53,6 @@ export default function Home() {
         <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-blue-500 bg-clip-text text-transparent">
           Jibe AI
         </h1>
-        <div className="flex items-center space-x-2">
-          <div className="bg-gray-800 p-2 rounded-full">
-            <BellRing size={18} className="text-purple-400" />
-          </div>
-        </div>
       </div>
 
       {/* Greeting & Assistant Status */}
