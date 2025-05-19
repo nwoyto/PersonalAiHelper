@@ -206,9 +206,11 @@ export function useSpeech(options: UseSpeechOptions = {}) {
     }
     
     const recognitionInstance = new SpeechRecognition();
-    recognitionInstance.continuous = true;
+    recognitionInstance.continuous = false; // Changed to false for better compatibility
     recognitionInstance.interimResults = true;
-    recognitionInstance.lang = 'en-US';
+    recognitionInstance.lang = 'en-US'; 
+    // Added longer max speech time
+    recognitionInstance.maxAlternatives = 1;
     
     recognitionInstance.onstart = () => {
       setIsListening(true);
@@ -294,10 +296,22 @@ export function useSpeech(options: UseSpeechOptions = {}) {
       setTimeout(() => {
         try {
           setTranscription(''); // Clear previous transcription
-          recognition.start();
+          
+          // Request microphone permission explicitly
+          navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(() => {
+              recognition.start();
+              console.log("Speech recognition started successfully");
+            })
+            .catch(err => {
+              console.error("Microphone permission error:", err);
+              setError("Could not access microphone. Please ensure you've granted permission.");
+              if (options.onError) {
+                options.onError("Could not access microphone. Please ensure you've granted permission.");
+              }
+            });
         } catch (err) {
           console.error('Failed to start recognition:', err);
-          // If already started, ignore
           if ((err as Error).message !== 'Failed to execute \'start\' on \'SpeechRecognition\': recognition has already started.') {
             setError((err as Error).message);
             if (options.onError) {

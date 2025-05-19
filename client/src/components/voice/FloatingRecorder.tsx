@@ -108,14 +108,29 @@ export default function FloatingRecorder({ onClose, onComplete }: FloatingRecord
     
     if (!initializationAttempted) {
       timeoutId = setTimeout(() => {
-        try {
-          startListening();
-          setInitializationAttempted(true);
-        } catch (err) {
-          console.error('Failed to start listening:', err);
-          setInitializationFailed(true);
-          setUseDemoMode(true);
-        }
+        // Request microphone permission explicitly first
+        navigator.mediaDevices.getUserMedia({ audio: true })
+          .then(() => {
+            console.log("Microphone permission granted");
+            try {
+              startListening();
+              setInitializationAttempted(true);
+            } catch (err) {
+              console.error('Failed to start listening:', err);
+              setInitializationFailed(true);
+              setUseDemoMode(true);
+            }
+          })
+          .catch(err => {
+            console.error("Microphone permission error:", err);
+            setInitializationFailed(true);
+            setUseDemoMode(true);
+            toast({
+              title: "Microphone access denied",
+              description: "Please allow microphone access to use voice features",
+              variant: "destructive",
+            });
+          });
       }, 500);
     }
     
