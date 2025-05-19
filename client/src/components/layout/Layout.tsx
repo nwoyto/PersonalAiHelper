@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import NavBar from "./NavBar";
+import Header from "./Header";
 import FloatingRecorder from "../voice/FloatingRecorder";
 import { TranscriptionResult } from "@/types";
 
@@ -24,11 +25,15 @@ export default function Layout({
 
   return (
     <div className="flex flex-col h-screen bg-background text-text-primary">
-      <main className="flex-1 overflow-y-auto pb-28" id="main-content">
+      {/* Add Header component with voice button */}
+      <Header onVoiceClick={handleVoiceClick} />
+      
+      <main className="flex-1 overflow-y-auto pb-20" id="main-content">
         {children}
       </main>
       
-      <NavBar onVoiceClick={handleVoiceClick} />
+      {/* Keep bottom navigation for other links */}
+      <NavBar />
       
       {isVoiceModalOpen && (
         <FloatingRecorder 

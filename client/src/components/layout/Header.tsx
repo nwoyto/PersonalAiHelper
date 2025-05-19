@@ -1,46 +1,35 @@
-import React, { ReactNode } from 'react';
-import { Link } from 'wouter';
-import Logo from './Logo';
+import React from "react";
+import { Link } from "wouter";
+import { Mic } from "lucide-react";
 
 interface HeaderProps {
-  title?: string;
-  showBackButton?: boolean;
-  showUserIcon?: boolean;
-  children?: ReactNode;
+  onVoiceClick: () => void;
 }
 
-export default function Header({ 
-  title = "Jibe AI", 
-  showBackButton = false,
-  showUserIcon = true,
-  children
-}: HeaderProps) {
+export default function Header({ onVoiceClick }: HeaderProps) {
   return (
-    <header className="flex justify-between items-center mb-6 pt-2">
-      <div className="flex items-center">
-        {showBackButton ? (
+    <header className="sticky top-0 z-30 bg-slate-800 border-b border-slate-700 shadow-md">
+      <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+        <div className="flex items-center">
           <Link href="/">
-            <a className="mr-3">
-              <i className="ri-arrow-left-line text-xl"></i>
+            <a className="flex items-center">
+              <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center mr-2">
+                <i className="ri-robot-2-line text-lg text-white"></i>
+              </div>
+              <span className="text-xl font-bold text-white">Jibe AI</span>
             </a>
           </Link>
-        ) : (
-          <Logo className="mr-3" />
-        )}
-        <div>
-          <h1 className="text-xl font-semibold">{title}</h1>
-          <p className="text-text-secondary text-sm">Your AI Assistant</p>
         </div>
-      </div>
-      
-      <div className="flex items-center gap-3">
-        {children}
         
-        {showUserIcon && (
-          <button className="rounded-full bg-surface p-2">
-            <i className="ri-user-line text-text-primary text-xl"></i>
+        <div className="flex items-center space-x-4">
+          <button
+            onClick={onVoiceClick}
+            className="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full transition-colors flex items-center justify-center"
+            aria-label="Voice Assistant"
+          >
+            <Mic size={20} />
           </button>
-        )}
+        </div>
       </div>
     </header>
   );
