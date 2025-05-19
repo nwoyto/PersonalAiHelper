@@ -1,14 +1,14 @@
-import TaskExtractionTester from "@/components/TaskExtractionTester";
+import ManualTaskExtractionTester from "@/components/ManualTaskExtractionTester";
 
 export default function VoiceTest() {
   return (
     <div className="container mx-auto py-6">
       <h1 className="text-2xl font-bold text-white mb-6">Task Extraction Testing</h1>
       <p className="text-gray-300 mb-6">
-        Use this tool to test how well the system can extract tasks from your spoken input. Speak about things you need to do, 
-        including deadlines, priorities, locations, and people involved. The AI will analyze your speech and identify tasks.
+        Use this tool to test how well the system can extract tasks from your text input. Type phrases about things you need to do, 
+        including deadlines, priorities, locations, and people involved. The AI will analyze your text and identify tasks.
       </p>
-      <TaskExtractionTester />
+      <ManualTaskExtractionTester />
     </div>
   );
 }

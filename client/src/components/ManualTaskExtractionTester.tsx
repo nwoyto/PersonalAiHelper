@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { useSpeech } from '@/lib/useSpeech';
 import { 
   Table, 
   TableBody, 
@@ -13,12 +12,10 @@ import {
   TableHeader, 
   TableRow 
 } from '@/components/ui/table';
-import { Mic, MicOff, Save, RotateCcw, CheckCircle2, Loader2 } from 'lucide-react';
+import { Save, RotateCcw, CheckCircle2, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { TranscriptionResult } from '@/types';
 
-// Modified to make some fields optional for compatibility with API
-interface TaskType {
+interface Task {
   title: string;
   description?: string;
   dueDate?: string;
@@ -34,75 +31,69 @@ interface TaskType {
 interface TestResult {
   id: number;
   transcription: string;
-  extractedTasks: TaskType[];
+  extractedTasks: Task[];
   timestamp: string;
 }
 
-export default function TaskExtractionTester() {
+export default function ManualTaskExtractionTester() {
+  const [inputText, setInputText] = useState<string>('');
   const [testResults, setTestResults] = useState<TestResult[]>([]);
-  const [currentTranscription, setCurrentTranscription] = useState<string>('');
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
-  const [processingResult, setProcessingResult] = useState<TranscriptionResult | null>(null);
+  const [currentResult, setCurrentResult] = useState<{ text: string, tasks: Task[] } | null>(null);
   
-  const { 
-    isListening, 
-    transcription, 
-    startListening, 
-    stopListening, 
-    cancelListening 
-  } = useSpeech({
-    onTranscriptionComplete: (result) => {
-      setProcessingResult(result);
-      setIsProcessing(false);
-    }
-  });
-
-  // Update current transcription when transcription changes
-  useEffect(() => {
-    if (isListening && transcription !== currentTranscription) {
-      setCurrentTranscription(transcription);
-    }
-  }, [transcription, isListening, currentTranscription]);
-
-  // Start recording
-  const handleStartRecording = () => {
-    setCurrentTranscription('');
-    setProcessingResult(null);
-    startListening();
-  };
-
-  // Stop recording and process
-  const handleStopRecording = async () => {
-    if (!currentTranscription) {
-      alert('No speech detected. Please try again.');
+  // Process the text for task extraction
+  const handleProcessText = async () => {
+    if (!inputText.trim()) {
+      alert('Please enter some text first');
       return;
     }
     
     setIsProcessing(true);
-    const result = await stopListening();
+    setCurrentResult(null);
     
-    // onTranscriptionComplete will set the processingResult
+    try {
+      const response = await fetch('/api/transcribe', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: inputText }),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Error ${response.status}: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      setCurrentResult({ 
+        text: inputText,
+        tasks: data.tasks || []
+      });
+    } catch (error) {
+      console.error('Failed to process text:', error);
+      alert(`Error processing text: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   // Save the test result
   const handleSaveResult = () => {
-    if (!processingResult) {
-      alert('No processed transcription to save');
+    if (!currentResult) {
+      alert('No processed text to save');
       return;
     }
     
     const newResult: TestResult = {
       id: Date.now(),
-      transcription: processingResult.text,
-      extractedTasks: processingResult.tasks,
+      transcription: currentResult.text,
+      extractedTasks: currentResult.tasks,
       timestamp: new Date().toISOString()
     };
     
     setTestResults(prev => [...prev, newResult]);
-    
-    // Clear for next test
-    setCurrentTranscription('');
-    setProcessingResult(null);
+    setInputText('');
+    setCurrentResult(null);
   };
 
   // Export test results as JSON
@@ -159,55 +150,48 @@ export default function TaskExtractionTester() {
     <div className="container mx-auto py-6 max-w-4xl">
       <Card className="bg-gray-900 border-gray-800 mb-6">
         <CardHeader>
-          <CardTitle className="text-white text-xl">Task Extraction Testing Tool</CardTitle>
+          <CardTitle className="text-white text-xl">Manual Task Extraction Testing</CardTitle>
           <CardDescription className="text-gray-400">
-            Test how well the AI extracts tasks from your spoken input
+            Test how well the AI extracts tasks from your text input
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="transcription" className="text-white">Transcription</Label>
-            <div className="relative">
-              <Textarea 
-                id="transcription" 
-                value={currentTranscription || transcription} 
-                readOnly 
-                placeholder={isListening ? "Listening to your speech..." : "Speak about things you need to do. Include deadlines, priorities, categories, etc."}
-                className={`bg-gray-800 border-gray-700 text-white min-h-[120px] ${isListening ? 'border-purple-500' : ''}`}
-              />
-              {isListening && (
-                <div className="absolute right-3 top-3 animate-pulse">
-                  <Mic className="h-5 w-5 text-purple-500" />
-                </div>
-              )}
-            </div>
+            <Label htmlFor="inputText" className="text-white">Enter text to analyze</Label>
+            <Textarea 
+              id="inputText" 
+              value={inputText} 
+              onChange={(e) => setInputText(e.target.value)}
+              placeholder="Type phrases like 'I need to finish the quarterly report by next Friday' or 'Remember to call John about the project tomorrow'"
+              className="bg-gray-800 border-gray-700 text-white min-h-[120px]"
+            />
           </div>
           
           <div className="flex space-x-3 pt-2">
-            {!isListening ? (
-              <Button
-                onClick={handleStartRecording}
-                className="bg-purple-700 hover:bg-purple-600"
-              >
-                <Mic className="h-4 w-4 mr-2" />
-                Start Recording
-              </Button>
-            ) : (
-              <Button
-                onClick={handleStopRecording}
-                variant="destructive"
-              >
-                <MicOff className="h-4 w-4 mr-2" />
-                Stop & Extract Tasks
-              </Button>
-            )}
+            <Button
+              onClick={handleProcessText}
+              className="bg-purple-700 hover:bg-purple-600"
+              disabled={isProcessing || !inputText.trim()}
+            >
+              {isProcessing ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 className="h-4 w-4 mr-2" />
+                  Extract Tasks
+                </>
+              )}
+            </Button>
             
-            {processingResult && (
+            {currentResult && currentResult.tasks.length > 0 && (
               <Button
                 onClick={handleSaveResult}
                 className="bg-green-700 hover:bg-green-600"
               >
-                <CheckCircle2 className="h-4 w-4 mr-2" />
+                <Save className="h-4 w-4 mr-2" />
                 Save Results
               </Button>
             )}
@@ -241,34 +225,38 @@ export default function TaskExtractionTester() {
         <Card className="bg-gray-900 border-gray-800 mb-6 p-8">
           <div className="flex flex-col items-center justify-center">
             <Loader2 className="h-8 w-8 text-purple-500 animate-spin mb-4" />
-            <p className="text-white text-lg">Extracting tasks from your speech...</p>
+            <p className="text-white text-lg">Analyzing text and extracting tasks...</p>
             <p className="text-gray-400 text-sm mt-2">This may take a few moments</p>
           </div>
         </Card>
       )}
       
-      {processingResult && processingResult.tasks.length > 0 && (
+      {currentResult && currentResult.tasks.length > 0 && (
         <Card className="bg-gray-900 border-gray-800 mb-6">
           <CardHeader>
             <CardTitle className="text-white text-xl">Extracted Tasks</CardTitle>
             <CardDescription className="text-gray-400">
-              {processingResult.tasks.length} task(s) extracted from your speech
+              {currentResult.tasks.length} task(s) extracted from your text
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {processingResult.tasks.map((task, index) => (
+              {currentResult.tasks.map((task, index) => (
                 <Card key={index} className="bg-gray-800 border-gray-700">
                   <CardHeader className="pb-2">
                     <div className="flex justify-between items-start">
                       <CardTitle className="text-white text-lg">{task.title}</CardTitle>
                       <div className="flex space-x-2">
-                        <Badge className={getCategoryColor(task.category)}>
-                          {task.category}
-                        </Badge>
-                        <Badge className={getPriorityColor(task.priority)}>
-                          {task.priority}
-                        </Badge>
+                        {task.category && (
+                          <Badge className={getCategoryColor(task.category)}>
+                            {task.category}
+                          </Badge>
+                        )}
+                        {task.priority && (
+                          <Badge className={getPriorityColor(task.priority)}>
+                            {task.priority}
+                          </Badge>
+                        )}
                       </div>
                     </div>
                   </CardHeader>
@@ -321,12 +309,12 @@ export default function TaskExtractionTester() {
         </Card>
       )}
       
-      {processingResult && processingResult.tasks.length === 0 && (
+      {currentResult && currentResult.tasks.length === 0 && (
         <Card className="bg-gray-900 border-gray-800 mb-6 p-6">
           <div className="text-center">
-            <p className="text-white text-lg">No tasks were extracted from your speech.</p>
+            <p className="text-white text-lg">No tasks were extracted from your text.</p>
             <p className="text-gray-400 mt-2">
-              Try speaking about specific tasks with deadlines, priorities, or other details.
+              Try typing phrases that clearly indicate tasks with details like deadlines, priorities, or categories.
             </p>
           </div>
         </Card>
@@ -354,7 +342,7 @@ export default function TaskExtractionTester() {
                   </CardHeader>
                   <CardContent className="pb-3">
                     <div className="mb-3">
-                      <Label className="text-gray-400 text-sm">Transcription:</Label>
+                      <Label className="text-gray-400 text-sm">Text Input:</Label>
                       <p className="text-white mt-1">{result.transcription}</p>
                     </div>
                     
@@ -368,12 +356,16 @@ export default function TaskExtractionTester() {
                             <div className="flex justify-between">
                               <span className="text-white font-medium">{task.title}</span>
                               <div className="flex space-x-1">
-                                <Badge className={getCategoryColor(task.category)} variant="outline">
-                                  {task.category}
-                                </Badge>
-                                <Badge className={getPriorityColor(task.priority)} variant="outline">
-                                  {task.priority}
-                                </Badge>
+                                {task.category && (
+                                  <Badge className={getCategoryColor(task.category)} variant="outline">
+                                    {task.category}
+                                  </Badge>
+                                )}
+                                {task.priority && (
+                                  <Badge className={getPriorityColor(task.priority)} variant="outline">
+                                    {task.priority}
+                                  </Badge>
+                                )}
                               </div>
                             </div>
                             {task.dueDate && (

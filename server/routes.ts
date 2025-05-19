@@ -276,7 +276,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           title: taskInfo.title,
           description: taskInfo.description || "",
           completed: false,
-          dueDate: taskInfo.dueDate ? new Date(taskInfo.dueDate) : undefined,
+          dueDate: taskInfo.dueDate && !isNaN(new Date(taskInfo.dueDate).getTime()) ? new Date(taskInfo.dueDate) : undefined,
           category: taskInfo.category || "work",
           priority: taskInfo.priority || "medium",
           estimatedMinutes: taskInfo.estimatedMinutes,
