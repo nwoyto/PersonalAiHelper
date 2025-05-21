@@ -2,15 +2,23 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar as CalendarIcon, LinkIcon, ListIcon } from "lucide-react";
+import { Calendar as CalendarIcon, LinkIcon, ListIcon, Clock } from "lucide-react";
 import CalendarEventsList from '../components/calendar/CalendarEventsList';
 import CalendarConnections from '../components/calendar/CalendarConnections';
 import MonthlyCalendar from '../components/calendar/MonthlyCalendar';
+import DayView from '../components/calendar/DayView';
+import WeekView from '../components/calendar/WeekView';
 
 export default function CalendarPage() {
   // Check if any calendars are connected
   const { data: integrationStatus } = useQuery({
     queryKey: ['/api/calendar/integration-status'],
+    refetchOnWindowFocus: false,
+  });
+  
+  // Get calendar events
+  const { data: calendarEvents } = useQuery({
+    queryKey: ['/api/calendar/events'],
     refetchOnWindowFocus: false,
   });
   
@@ -79,7 +87,7 @@ export default function CalendarPage() {
                 {/* Quick calendar stats */}
                 <Card className="bg-gradient-to-br from-indigo-950 to-blue-950 border border-blue-800/50 shadow-lg">
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium text-blue-300">This Month</CardTitle>
+                    <CardTitle className="text-sm font-medium text-blue-300">Calendar Overview</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="flex items-center justify-between">
@@ -93,28 +101,37 @@ export default function CalendarPage() {
                   </CardContent>
                 </Card>
                 
-                {/* Upcoming event */}
+                {/* Today's events summary */}
                 <Card className="bg-gradient-to-br from-indigo-950 to-blue-950 border border-blue-800/50 shadow-lg col-span-1 md:col-span-2">
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium text-blue-300">Next Event</CardTitle>
+                    <CardTitle className="text-sm font-medium text-blue-300">Today's Schedule</CardTitle>
                   </CardHeader>
                   <CardContent>
                     {Array.isArray(calendarEvents) && calendarEvents.length > 0 ? (
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="text-lg font-semibold text-white">{calendarEvents[0].title}</div>
-                          {calendarEvents[0].startTime && (
-                            <div className="text-xs text-blue-300 mt-1">
-                              {new Date(calendarEvents[0].startTime).toLocaleString()}
+                      <div className="space-y-2">
+                        {calendarEvents.slice(0, 2).map(event => (
+                          <div key={event.id} className="flex items-center justify-between p-2 rounded-lg bg-indigo-900/30">
+                            <div>
+                              <div className="text-sm font-medium text-white">{event.title}</div>
+                              {event.startTime && (
+                                <div className="text-xs text-blue-300 mt-1">
+                                  {new Date(event.startTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                                </div>
+                              )}
                             </div>
-                          )}
-                        </div>
-                        <div className="w-9 h-9 rounded-full bg-indigo-900/50 flex items-center justify-center">
-                          <Clock className="w-5 h-5 text-blue-300" />
-                        </div>
+                            <div className="w-8 h-8 rounded-full bg-indigo-800/50 flex items-center justify-center">
+                              <Clock className="w-4 h-4 text-blue-300" />
+                            </div>
+                          </div>
+                        ))}
+                        {calendarEvents.length > 2 && (
+                          <div className="text-xs text-center text-blue-300 mt-2">
+                            +{calendarEvents.length - 2} more events
+                          </div>
+                        )}
                       </div>
                     ) : (
-                      <div className="text-sm text-blue-300">No upcoming events</div>
+                      <div className="text-sm text-blue-300 text-center py-4">No events scheduled today</div>
                     )}
                   </CardContent>
                 </Card>
