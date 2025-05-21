@@ -4,6 +4,8 @@ import { Task, Note } from "@/types";
 import TaskItem from "@/components/tasks/TaskItem";
 import NoteItem from "@/components/notes/NoteItem";
 import TaskForm from "@/components/tasks/TaskForm";
+import InstacartModal from "@/components/integrations/InstacartModal";
+import AmazonModal from "@/components/integrations/AmazonModal";
 import { Link } from "wouter";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Mic, Calendar, Plus, Search, Clock, BellRing, Sparkles } from "lucide-react";
@@ -12,6 +14,8 @@ import { VoiceModalContext } from "@/App";
 export default function Home() {
   const [greeting, setGreeting] = useState("Good day");
   const [isTaskFormOpen, setIsTaskFormOpen] = useState(false);
+  const [isInstacartOpen, setIsInstacartOpen] = useState(false);
+  const [isAmazonOpen, setIsAmazonOpen] = useState(false);
   const { setIsVoiceModalOpen } = useContext(VoiceModalContext);
   
   // Set greeting based on time of day
@@ -95,23 +99,29 @@ export default function Home() {
         </h3>
         
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <div className="group bg-gradient-to-br from-navy-950 to-navy-900 hover:from-navy-900 hover:to-navy-800 rounded-xl p-4 flex flex-col items-center shadow-lg transition-all duration-300 border border-navy-800/50 hover:border-green-500/30">
+          <button
+            onClick={() => setIsInstacartOpen(true)}
+            className="group bg-gradient-to-br from-navy-950 to-navy-900 hover:from-navy-900 hover:to-navy-800 rounded-xl p-4 flex flex-col items-center shadow-lg transition-all duration-300 border border-navy-800/50 hover:border-green-500/30"
+          >
             <div className="w-14 h-14 bg-navy-800 rounded-full flex items-center justify-center mb-3 transform transition-transform group-hover:scale-105">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-8 h-8 text-green-400">
                 <path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" />
               </svg>
             </div>
             <span className="text-white font-medium text-sm">Instacart Order</span>
-          </div>
+          </button>
           
-          <div className="group bg-gradient-to-br from-navy-950 to-navy-900 hover:from-navy-900 hover:to-navy-800 rounded-xl p-4 flex flex-col items-center shadow-lg transition-all duration-300 border border-navy-800/50 hover:border-green-500/30">
+          <button
+            onClick={() => setIsAmazonOpen(true)}
+            className="group bg-gradient-to-br from-navy-950 to-navy-900 hover:from-navy-900 hover:to-navy-800 rounded-xl p-4 flex flex-col items-center shadow-lg transition-all duration-300 border border-navy-800/50 hover:border-green-500/30"
+          >
             <div className="w-14 h-14 bg-navy-800 rounded-full flex items-center justify-center mb-3 transform transition-transform group-hover:scale-105">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-8 h-8 text-green-600">
-                <path d="M12 2.5L5.143 6.655l2.914 8.985L12 23l3.942-7.36 2.915-8.985L12 2.5zm-1.257 1.586L7.2 6.495l2.099 6.478L12 18.847l2.7-5.874 2.099-6.478-6.056-2.41z" />
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-8 h-8 text-orange-500">
+                <path d="M12.5 2.5L5.5 6v7.5L7 14l5.5 2.5L18 14l1.5-1V6l-7-3.5zm0 2.1l5.5 2.4-5.5 2.4-5.5-2.4 5.5-2.4zm-6 3.4l5.5 2.4v5.1L6.5 13V8zm7 0v5l5.5-2.4V8l-5.5 2.5z" />
               </svg>
             </div>
-            <span className="text-white font-medium text-sm">Whole Foods</span>
-          </div>
+            <span className="text-white font-medium text-sm">Amazon Shopping</span>
+          </button>
           
           <div className="group bg-gradient-to-br from-navy-950 to-navy-900 hover:from-navy-900 hover:to-navy-800 rounded-xl p-4 flex flex-col items-center shadow-lg transition-all duration-300 border border-navy-800/50 hover:border-blue-500/30">
             <div className="w-14 h-14 bg-navy-800 rounded-full flex items-center justify-center mb-3 transform transition-transform group-hover:scale-105">
@@ -282,6 +292,17 @@ export default function Home() {
           onClose={() => setIsTaskFormOpen(false)} 
         />
       )}
+      
+      {/* Integration Modals */}
+      <InstacartModal
+        isOpen={isInstacartOpen}
+        onClose={() => setIsInstacartOpen(false)}
+      />
+      
+      <AmazonModal
+        isOpen={isAmazonOpen}
+        onClose={() => setIsAmazonOpen(false)}
+      />
     </div>
   );
 }
