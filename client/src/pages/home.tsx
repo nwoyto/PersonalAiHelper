@@ -55,34 +55,35 @@ export default function Home() {
         </h1>
       </div>
 
-      {/* Greeting & Assistant Status */}
-      <section className="mb-10">
-        <div className="bg-gradient-to-br from-blue-950 to-blue-900 rounded-2xl p-8 shadow-xl relative overflow-hidden border border-blue-800">
+      {/* Compact Header with Assistant Status */}
+      <section className="mb-6">
+        <div className="bg-gradient-to-r from-navy-950 to-navy-900 rounded-xl p-4 shadow-lg border border-navy-800/60 flex items-center relative overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-purple-600 rounded-full filter blur-3xl opacity-10 -mr-20 -mt-20"></div>
           <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-600 rounded-full filter blur-3xl opacity-10 -ml-20 -mb-20"></div>
           
-          <div className="relative flex flex-col items-center text-center z-10">
-            <div className="w-24 h-24 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full flex items-center justify-center mb-6 shadow-lg p-1">
-              <div className="bg-gray-900 rounded-full w-full h-full flex items-center justify-center">
-                <Sparkles className="w-10 h-10 text-purple-400" />
+          <div className="flex-shrink-0 mr-4">
+            <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full flex items-center justify-center shadow-lg p-0.5">
+              <div className="bg-navy-800 rounded-full w-full h-full flex items-center justify-center">
+                <Sparkles className="w-6 h-6 text-purple-400" />
               </div>
             </div>
-            
-            <h2 className="text-2xl font-bold text-white mb-3">{greeting}, User</h2>
-            <p className="text-gray-300 mb-5 text-lg">I'm listening and ready to help</p>
-            
-            <div className="flex items-center py-2 px-4 bg-gray-900 rounded-full mb-5 border border-purple-500/20 shadow-inner">
-              <span className="w-3 h-3 bg-purple-500 rounded-full mr-3 animate-pulse shadow-lg shadow-purple-500/50"></span>
-              <span className="text-purple-300 font-medium">Active and listening for wake word</span>
-            </div>
-            
-            {typeof window !== 'undefined' && window.location.hostname.includes('replit') && (
-              <div className="text-sm text-amber-400 max-w-md text-center mt-2 py-3 px-4 rounded-lg bg-amber-900/20 border border-amber-800/30">
-                <p>In the Replit environment, use the microphone button to activate the voice assistant.</p>
-                <p className="mt-1">In production, the assistant listens continuously for the wake word.</p>
-              </div>
-            )}
           </div>
+          
+          <div className="flex-1 relative z-10">
+            <h2 className="text-xl font-bold text-white">{greeting}, User</h2>
+            <div className="flex items-center mt-1">
+              <span className="w-2 h-2 bg-purple-500 rounded-full mr-2 animate-pulse shadow-sm shadow-purple-500/50"></span>
+              <span className="text-white text-sm">Assistant ready and listening</span>
+            </div>
+          </div>
+          
+          <button
+            onClick={() => setIsVoiceModalOpen(true)}
+            className="ml-auto bg-navy-800 hover:bg-navy-700 rounded-full p-3 text-white shadow-md transition-colors"
+            aria-label="Activate Voice Assistant"
+          >
+            <Mic className="w-5 h-5" />
+          </button>
         </div>
       </section>
 
