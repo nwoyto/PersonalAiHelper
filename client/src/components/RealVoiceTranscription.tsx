@@ -2,9 +2,15 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Mic, MicOff, Save, Loader2, CheckCircle } from 'lucide-react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Mic, MicOff, Save, Loader2, CheckCircle, RefreshCw, Info } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
+import { 
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Task } from '@/types';
 
 export default function RealVoiceTranscription() {
@@ -19,6 +25,111 @@ export default function RealVoiceTranscription() {
   // Reference to the Speech Recognition object
   const recognitionRef = useRef<any>(null);
   
+  // Added a function to reset and initialize speech recognition
+  const initSpeechRecognition = () => {
+    setError(null);
+    
+    // Speech Recognition setup
+    if (typeof window !== 'undefined') {
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      
+      if (SpeechRecognition) {
+        // Create a new instance
+        try {
+          // Stop any existing instance first
+          if (recognitionRef.current) {
+            try {
+              recognitionRef.current.stop();
+            } catch (err) {
+              // Ignore errors when stopping
+            }
+          }
+          
+          recognitionRef.current = new SpeechRecognition();
+          
+          // Configure it
+          if (recognitionRef.current) {
+            recognitionRef.current.continuous = true;
+            recognitionRef.current.interimResults = true;
+            
+            // Set to empty first to use browser default (often works better)
+            recognitionRef.current.lang = '';
+            
+            // Set up event handlers
+            recognitionRef.current.onresult = (event: any) => {
+              let currentTranscript = '';
+              
+              // Process results
+              for (let i = event.resultIndex; i < event.results.length; i++) {
+                const result = event.results[i];
+                const text = result[0].transcript;
+                
+                if (result.isFinal) {
+                  currentTranscript += text + ' ';
+                }
+              }
+              
+              if (currentTranscript) {
+                setTranscript(prev => prev + currentTranscript);
+              }
+            };
+            
+            recognitionRef.current.onerror = (event: any) => {
+              console.error('Speech recognition error:', event.error);
+              
+              if (event.error === 'language-not-supported') {
+                // For language errors, try another approach
+                setError(`Speech recognition language issue detected. Using browser default settings. Try clicking "Start Recording" again.`);
+              } else if (event.error === 'not-allowed') {
+                setError(`Microphone access denied. Please enable microphone permissions in your browser settings.`);
+                setIsRecording(false);
+                
+                toast({
+                  title: "Microphone access denied",
+                  description: "Please enable microphone access in your browser settings.",
+                  variant: "destructive"
+                });
+              } else {
+                setError(`Microphone error: ${event.error}. Please try again.`);
+              }
+              
+              // Always stop recording on errors
+              setIsRecording(false);
+            };
+            
+            recognitionRef.current.onend = () => {
+              // Only try to restart if we're still supposed to be recording
+              if (isRecording) {
+                try {
+                  // Add a small delay before restarting to avoid rapid restart loops
+                  setTimeout(() => {
+                    if (isRecording && recognitionRef.current) {
+                      recognitionRef.current.start();
+                    }
+                  }, 300);
+                } catch (err) {
+                  console.error('Failed to restart recognition:', err);
+                  setIsRecording(false);
+                }
+              }
+            };
+            
+            return true;
+          }
+        } catch (err) {
+          console.error('Error initializing speech recognition:', err);
+          setError('Failed to initialize speech recognition. Please refresh the page and try again.');
+          return false;
+        }
+      } else {
+        setError('Speech recognition is not supported in your browser. Please try using Chrome or Edge.');
+        return false;
+      }
+    }
+    
+    return false;
+  };
+  
   // Set up speech recognition when component mounts
   useEffect(() => {
     // Reset error state when component mounts
@@ -28,105 +139,19 @@ export default function RealVoiceTranscription() {
     const handleStartRecording = () => {
       if (!isRecording) {
         console.log("Received start recording event");
-        setIsRecording(true);
+        toggleRecording();
       }
     };
     
     // Add event listener
     document.addEventListener('startVoiceRecording', handleStartRecording);
     
-    // Speech Recognition setup
-    if (typeof window !== 'undefined') {
-      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-      
-      if (SpeechRecognition) {
-        // Create a new instance
-        recognitionRef.current = new SpeechRecognition();
-        
-        // Configure it
-        if (recognitionRef.current) {
-          recognitionRef.current.continuous = true;
-          recognitionRef.current.interimResults = true;
-          
-          // Try different language codes to avoid language-not-supported error
-          try {
-            // Try to detect available languages
-            const languages = ['en-US', 'en-GB', 'en', 'en-AU'];
-            let languageSet = false;
-            
-            for (const lang of languages) {
-              try {
-                recognitionRef.current.lang = lang;
-                languageSet = true;
-                console.log(`Successfully set speech recognition language to: ${lang}`);
-                break;
-              } catch (langErr) {
-                console.warn(`Failed to set language to ${lang}`, langErr);
-              }
-            }
-            
-            if (!languageSet) {
-              // If no specific language worked, try with empty string to use browser default
-              recognitionRef.current.lang = '';
-              console.log('Using browser default speech recognition language');
-            }
-          } catch (err) {
-            console.error('Error setting speech recognition language:', err);
-          }
-          
-          // Set up event handlers
-          recognitionRef.current.onresult = (event: any) => {
-            let currentTranscript = '';
-            
-            // Process results
-            for (let i = event.resultIndex; i < event.results.length; i++) {
-              const result = event.results[i];
-              const text = result[0].transcript;
-              
-              if (result.isFinal) {
-                currentTranscript += text + ' ';
-              }
-            }
-            
-            if (currentTranscript) {
-              setTranscript(prev => prev + currentTranscript);
-            }
-          };
-          
-          recognitionRef.current.onerror = (event: any) => {
-            console.error('Speech recognition error:', event.error);
-            setError(`Microphone error: ${event.error}. Please check your microphone permissions.`);
-            
-            // If not allowed, stop recording
-            if (event.error === 'not-allowed') {
-              setIsRecording(false);
-              toast({
-                title: "Microphone access denied",
-                description: "Please enable microphone access in your browser settings.",
-                variant: "destructive"
-              });
-            }
-          };
-          
-          recognitionRef.current.onend = () => {
-            // If we're still supposed to be recording but recognition stopped,
-            // try to restart it (common with webkitSpeechRecognition)
-            if (isRecording) {
-              try {
-                recognitionRef.current.start();
-              } catch (err) {
-                console.error('Failed to restart recognition:', err);
-              }
-            }
-          };
-        }
-      } else {
-        setError('Speech recognition is not supported in your browser. Please try using Chrome or Edge.');
-      }
-    }
-    
     // Cleanup function
     return () => {
+      // Remove event listener
+      document.removeEventListener('startVoiceRecording', handleStartRecording);
+      
+      // Stop recognition if it's running
       if (recognitionRef.current) {
         try {
           recognitionRef.current.stop();
@@ -135,7 +160,7 @@ export default function RealVoiceTranscription() {
         }
       }
     };
-  }, []);
+  }, [isRecording]);
   
   // Handle recording state changes
   useEffect(() => {
@@ -167,14 +192,32 @@ export default function RealVoiceTranscription() {
       // Starting a new recording - clear previous transcript
       setTranscript('');
       setExtractedTasks([]);
+      
+      // Reinitialize speech recognition to avoid language errors
+      const initialized = initSpeechRecognition();
+      
+      if (initialized) {
+        setIsRecording(true);
+        toast({
+          title: "Recording started",
+          description: "Speak clearly into your microphone",
+        });
+      } else {
+        // If initialization failed, show toast
+        toast({
+          title: "Failed to start recording",
+          description: "Please make sure your microphone is connected and allowed.",
+          variant: "destructive",
+        });
+      }
     } else {
       // Stopping recording - if we have a transcript, process it
+      setIsRecording(false);
+      
       if (transcript.trim()) {
         processTranscript();
       }
     }
-    
-    setIsRecording(!isRecording);
   };
   
   const processTranscript = async () => {
