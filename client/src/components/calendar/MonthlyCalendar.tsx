@@ -151,7 +151,7 @@ export default function MonthlyCalendar() {
               {week.map((day, dayIndex) => {
                 if (!day) {
                   // Empty cell
-                  return <div key={`blank-${dayIndex}`} className="h-[5.5rem] p-1 border-r border-indigo-800/20 last:border-r-0 bg-blue-950/50" />;
+                  return <div key={`blank-${dayIndex}`} className="h-[4.5rem] p-1 border-r border-indigo-800/20 last:border-r-0 bg-blue-950/50" />;
                 }
                 
                 const isCurrentMonth = isSameMonth(day, currentMonth);
@@ -165,7 +165,7 @@ export default function MonthlyCalendar() {
                   <div 
                     key={day.toString()}
                     className={cn(
-                      "h-[5.5rem] p-1 border-r border-indigo-800/20 last:border-r-0 transition-colors",
+                      "h-[4.5rem] p-1 border-r border-indigo-800/20 last:border-r-0 transition-colors",
                       isCurrentMonth ? "bg-indigo-950/30" : "bg-blue-950/50 text-indigo-400",
                       isSelectedDay && "bg-indigo-900/40",
                       !isCurrentMonth && "opacity-60"

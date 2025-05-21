@@ -106,7 +106,11 @@ export default function FloatingRecorder({ onClose, onComplete }: FloatingRecord
   useEffect(() => {
     let timeoutId: ReturnType<typeof setTimeout>;
     
+    // Only run this once when the component mounts
     if (!initializationAttempted && !isProcessing) {
+      // Set this flag early to prevent infinite loops
+      setInitializationAttempted(true);
+      
       timeoutId = setTimeout(() => {
         // Request microphone permission explicitly first
         navigator.mediaDevices.getUserMedia({ audio: true })
@@ -114,7 +118,6 @@ export default function FloatingRecorder({ onClose, onComplete }: FloatingRecord
             console.log("Microphone permission granted");
             try {
               startListening();
-              setInitializationAttempted(true);
             } catch (err) {
               console.error('Failed to start listening:', err);
               setInitializationFailed(true);
@@ -142,7 +145,7 @@ export default function FloatingRecorder({ onClose, onComplete }: FloatingRecord
         console.error('Error cleaning up:', err);
       }
     };
-  }, [initializationAttempted]);
+  }, []); // Empty dependency array to run only on mount
   
   const handleCancelClick = () => {
     if (!useDemoMode) {
