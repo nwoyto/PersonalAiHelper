@@ -35,10 +35,18 @@ export default function CalendarPage() {
         </div>
         
         <Tabs defaultValue={hasConnectedCalendars ? "monthly" : "connections"} className="w-full">
-          <TabsList className="grid w-full max-w-md grid-cols-3 bg-gray-900/60 border border-blue-800/30 rounded-xl overflow-hidden shadow-lg">
+          <TabsList className="grid w-full max-w-md grid-cols-5 bg-gray-900/60 border border-blue-800/30 rounded-xl overflow-hidden shadow-lg">
+            <TabsTrigger value="day" className="flex items-center data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-900 data-[state=active]:to-blue-800 data-[state=active]:text-white">
+              <CalendarIcon className="w-4 h-4 mr-2" />
+              <span>Day</span>
+            </TabsTrigger>
+            <TabsTrigger value="week" className="flex items-center data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-900 data-[state=active]:to-blue-800 data-[state=active]:text-white">
+              <CalendarIcon className="w-4 h-4 mr-2" />
+              <span>Week</span>
+            </TabsTrigger>
             <TabsTrigger value="monthly" className="flex items-center data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-900 data-[state=active]:to-blue-800 data-[state=active]:text-white">
               <CalendarIcon className="w-4 h-4 mr-2" />
-              <span>Monthly</span>
+              <span>Month</span>
             </TabsTrigger>
             <TabsTrigger value="list" className="flex items-center data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-900 data-[state=active]:to-blue-800 data-[state=active]:text-white">
               <ListIcon className="w-4 h-4 mr-2" />
@@ -50,9 +58,67 @@ export default function CalendarPage() {
             </TabsTrigger>
           </TabsList>
           
+          <TabsContent value="day" className="mt-6">
+            <div className="bg-gradient-to-br from-blue-950 to-blue-900 rounded-xl border border-blue-800 shadow-xl p-4">
+              <DayView />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="week" className="mt-6">
+            <div className="bg-gradient-to-br from-blue-950 to-blue-900 rounded-xl border border-blue-800 shadow-xl p-4">
+              <WeekView />
+            </div>
+          </TabsContent>
+
           <TabsContent value="monthly" className="mt-6">
             <div className="bg-gradient-to-br from-blue-950 to-blue-900 rounded-xl border border-blue-800 shadow-xl p-4">
               <MonthlyCalendar />
+              
+              {/* Additional features below calendar */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+                {/* Quick calendar stats */}
+                <Card className="bg-gradient-to-br from-indigo-950 to-blue-950 border border-blue-800/50 shadow-lg">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium text-blue-300">This Month</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center justify-between">
+                      <div className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                        {Array.isArray(calendarEvents) ? calendarEvents.length : 0} Events
+                      </div>
+                      <div className="w-9 h-9 rounded-full bg-indigo-900/50 flex items-center justify-center">
+                        <CalendarIcon className="w-5 h-5 text-blue-300" />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                {/* Upcoming event */}
+                <Card className="bg-gradient-to-br from-indigo-950 to-blue-950 border border-blue-800/50 shadow-lg col-span-1 md:col-span-2">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium text-blue-300">Next Event</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {Array.isArray(calendarEvents) && calendarEvents.length > 0 ? (
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="text-lg font-semibold text-white">{calendarEvents[0].title}</div>
+                          {calendarEvents[0].startTime && (
+                            <div className="text-xs text-blue-300 mt-1">
+                              {new Date(calendarEvents[0].startTime).toLocaleString()}
+                            </div>
+                          )}
+                        </div>
+                        <div className="w-9 h-9 rounded-full bg-indigo-900/50 flex items-center justify-center">
+                          <Clock className="w-5 h-5 text-blue-300" />
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-sm text-blue-300">No upcoming events</div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
             </div>
           </TabsContent>
           
