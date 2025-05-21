@@ -1,14 +1,14 @@
-import ManualTaskExtractionTester from "@/components/ManualTaskExtractionTester";
+import LiveTranscription from "@/components/LiveTranscription";
 
 export default function VoiceTest() {
   return (
     <div className="container mx-auto py-6">
-      <h1 className="text-2xl font-bold text-white mb-6">Task Extraction Testing</h1>
+      <h1 className="text-2xl font-bold text-white mb-6">Live Transcription</h1>
       <p className="text-gray-300 mb-6">
-        Use this tool to test how well the system can extract tasks from your text input. Type phrases about things you need to do, 
-        including deadlines, priorities, locations, and people involved. The AI will analyze your text and identify tasks.
+        Speak naturally into your microphone and your speech will be transcribed in real-time. The system will automatically analyze
+        your speech for any tasks or actions you mention, and extract them as actionable items you can save.
       </p>
-      <ManualTaskExtractionTester />
+      <LiveTranscription />
     </div>
   );
 }
