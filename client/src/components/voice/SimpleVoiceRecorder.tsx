@@ -264,14 +264,16 @@ export default function SimpleVoiceRecorder({ onClose, onComplete }: SimpleVoice
           )}
           
           {/* Transcript display */}
-          <div className="bg-navy-800/50 border border-navy-700/50 rounded-lg p-4 min-h-[100px] mb-4 text-white shadow-inner relative">
-            {transcript ? (
-              <p className="whitespace-pre-wrap">{transcript}</p>
-            ) : (
-              <p className="text-gray-400 italic">
-                {isRecording ? "Speak now..." : "Click Start Recording to begin"}
-              </p>
-            )}
+          <div className="bg-navy-800/50 border border-navy-700/50 rounded-lg p-4 min-h-[100px] mb-4 text-white shadow-inner relative overflow-hidden">
+            <div className="max-h-[120px] overflow-y-auto pr-2 scrollbar-hide">
+              {transcript ? (
+                <p className="whitespace-pre-wrap">{transcript}</p>
+              ) : (
+                <p className="text-gray-400 italic">
+                  {isRecording ? "Speak now..." : "Click Start Recording to begin"}
+                </p>
+              )}
+            </div>
             
             {isRecording && (
               <div className="absolute top-3 right-3 flex space-x-1">
