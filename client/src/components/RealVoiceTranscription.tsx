@@ -24,6 +24,17 @@ export default function RealVoiceTranscription() {
     // Reset error state when component mounts
     setError(null);
     
+    // Setup event listener for the global voice activation
+    const handleStartRecording = () => {
+      if (!isRecording) {
+        console.log("Received start recording event");
+        setIsRecording(true);
+      }
+    };
+    
+    // Add event listener
+    document.addEventListener('startVoiceRecording', handleStartRecording);
+    
     // Speech Recognition setup
     if (typeof window !== 'undefined') {
       const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
