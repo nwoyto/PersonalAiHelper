@@ -1,6 +1,6 @@
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode } from "react";
 import NavBar from "./NavBar";
-import FloatingRecorder from "../voice/FloatingRecorder";
+import SimpleVoiceRecorder from "../voice/SimpleVoiceRecorder";
 import { TranscriptionResult } from "@/types";
 import { Mic } from "lucide-react";
 import { useLocation } from "wouter";
@@ -17,35 +17,16 @@ export default function Layout({
   isVoiceModalOpen, 
   setIsVoiceModalOpen 
 }: LayoutProps) {
-  const [location, navigate] = useLocation();
-  const [shouldStartRecording, setShouldStartRecording] = useState(false);
+  const [location] = useLocation();
   
   const handleVoiceClick = () => {
-    // Simply open the floating recorder directly on any page
+    // Simply open the voice recorder modal
     setIsVoiceModalOpen(true);
-    
-    toast({
-      title: "Voice Assistant Activated",
-      description: "Speak clearly to record your voice",
-    });
   };
 
   const handleVoiceClose = () => {
     setIsVoiceModalOpen(false);
-    setShouldStartRecording(false);
   };
-  
-  // Pass the recording signal to the Agent page via a custom event
-  useEffect(() => {
-    if (shouldStartRecording && location === '/voice-test') {
-      // Custom event to trigger recording in the Agent component
-      const startRecordingEvent = new CustomEvent('startVoiceRecording');
-      document.dispatchEvent(startRecordingEvent);
-      
-      // Reset the flag after triggering
-      setShouldStartRecording(false);
-    }
-  }, [shouldStartRecording, location]);
 
   return (
     <div className="flex flex-col h-screen bg-background text-text-primary">
@@ -69,12 +50,19 @@ export default function Layout({
       {/* Keep bottom navigation for other links */}
       <NavBar />
       
+      {/* Simple voice recorder modal */}
       {isVoiceModalOpen && (
-        <FloatingRecorder 
+        <SimpleVoiceRecorder 
           onClose={handleVoiceClose} 
           onComplete={(result: TranscriptionResult) => {
             console.log("Transcription complete:", result);
             handleVoiceClose();
+            
+            // Show success message
+            toast({
+              title: "Voice recorded successfully",
+              description: `Created task from your voice input`,
+            });
           }}
         />
       )}

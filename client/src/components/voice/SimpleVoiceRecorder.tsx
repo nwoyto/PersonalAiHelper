@@ -1,0 +1,336 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { Button } from '@/components/ui/button';
+import { Mic, Square, CheckCircle, X } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
+import { TranscriptionResult } from '@/types';
+
+interface SimpleVoiceRecorderProps {
+  onClose: () => void;
+  onComplete: (result: TranscriptionResult) => void;
+}
+
+export default function SimpleVoiceRecorder({ onClose, onComplete }: SimpleVoiceRecorderProps) {
+  const [isRecording, setIsRecording] = useState(false);
+  const [transcript, setTranscript] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  
+  // Reference to the recognition object
+  const recognitionRef = useRef<any>(null);
+  
+  // Request microphone access
+  const requestMicrophoneAccess = async () => {
+    try {
+      await navigator.mediaDevices.getUserMedia({ audio: true });
+      return true;
+    } catch (err) {
+      console.error('Microphone access denied:', err);
+      setErrorMessage('Please allow microphone access to use voice recording');
+      toast({
+        title: 'Microphone access denied',
+        description: 'Please allow microphone access in your browser settings',
+        variant: 'destructive',
+      });
+      return false;
+    }
+  };
+  
+  // Initialize speech recognition
+  const initializeSpeechRecognition = () => {
+    if (typeof window === 'undefined') return false;
+    
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    
+    if (!SpeechRecognition) {
+      setErrorMessage('Speech recognition is not supported in your browser');
+      return false;
+    }
+    
+    try {
+      // Create new recognition instance
+      recognitionRef.current = new SpeechRecognition();
+      
+      // Configure it
+      recognitionRef.current.continuous = true;
+      recognitionRef.current.interimResults = true;
+      
+      // Try various language settings to avoid language-not-supported error
+      try { recognitionRef.current.lang = ''; } catch (e) { /* ignore */ }
+      
+      // Set up event handlers
+      recognitionRef.current.onstart = () => {
+        console.log('Recognition started');
+        setIsRecording(true);
+        setErrorMessage(null);
+      };
+      
+      recognitionRef.current.onresult = (event: any) => {
+        let currentTranscript = '';
+        
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const result = event.results[i];
+          if (result[0]) {
+            currentTranscript += result[0].transcript + ' ';
+          }
+        }
+        
+        if (currentTranscript) {
+          setTranscript(prev => {
+            // Only append if it's new content
+            if (!prev.includes(currentTranscript.trim())) {
+              return prev + currentTranscript;
+            }
+            return prev;
+          });
+        }
+      };
+      
+      recognitionRef.current.onerror = (event: any) => {
+        console.error('Recognition error:', event.error);
+        
+        if (event.error === 'language-not-supported') {
+          setErrorMessage('Your browser does not support the selected language. Try typing instead.');
+        } else if (event.error === 'not-allowed') {
+          setErrorMessage('Microphone access denied. Please check your browser settings.');
+        } else {
+          setErrorMessage(`Error: ${event.error}. Please try again.`);
+        }
+        
+        stopRecording();
+      };
+      
+      recognitionRef.current.onend = () => {
+        console.log('Recognition ended');
+        setIsRecording(false);
+      };
+      
+      return true;
+    } catch (err) {
+      console.error('Failed to initialize speech recognition:', err);
+      setErrorMessage('Failed to initialize speech recognition');
+      return false;
+    }
+  };
+  
+  // Start recording
+  const startRecording = async () => {
+    setErrorMessage(null);
+    
+    // Check microphone access
+    const hasAccess = await requestMicrophoneAccess();
+    if (!hasAccess) return;
+    
+    // Initialize recognition if needed
+    if (!recognitionRef.current) {
+      const initialized = initializeSpeechRecognition();
+      if (!initialized) return;
+    }
+    
+    // Start recording
+    try {
+      recognitionRef.current.start();
+      toast({
+        title: 'Recording started',
+        description: 'Speak clearly into your microphone',
+      });
+    } catch (err) {
+      console.error('Failed to start recording:', err);
+      setErrorMessage('Failed to start recording. Please try again.');
+    }
+  };
+  
+  // Stop recording
+  const stopRecording = () => {
+    if (recognitionRef.current && isRecording) {
+      try {
+        recognitionRef.current.stop();
+      } catch (err) {
+        console.error('Error stopping recognition:', err);
+      }
+    }
+    setIsRecording(false);
+  };
+  
+  // Process the transcription
+  const processTranscription = async () => {
+    if (!transcript.trim()) {
+      toast({
+        title: 'No speech detected',
+        description: 'Please say something before submitting',
+      });
+      return;
+    }
+    
+    setIsProcessing(true);
+    
+    try {
+      const response = await fetch('/api/transcribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: transcript }),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Error ${response.status}: ${response.statusText}`);
+      }
+      
+      const result = await response.json();
+      onComplete(result);
+      
+      toast({
+        title: 'Analysis complete',
+        description: `Found ${result.tasks?.length || 0} tasks in your speech`,
+      });
+    } catch (err) {
+      console.error('Failed to process transcript:', err);
+      
+      // Fallback result if API fails
+      const fallbackResult: TranscriptionResult = {
+        text: transcript,
+        tasks: [{
+          title: "Task from voice input",
+          description: transcript,
+          category: "personal",
+          priority: "medium",
+        }]
+      };
+      
+      onComplete(fallbackResult);
+      
+      toast({
+        title: 'Basic processing complete',
+        description: 'Created a simple task from your speech',
+      });
+    } finally {
+      setIsProcessing(false);
+      onClose();
+    }
+  };
+  
+  // Start recording automatically when component mounts
+  useEffect(() => {
+    startRecording();
+    
+    // Clean up on unmount
+    return () => {
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.stop();
+        } catch (err) {
+          // Ignore cleanup errors
+        }
+      }
+    };
+  }, []);
+  
+  return (
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+      <div className="bg-gradient-to-b from-navy-950 to-navy-900 rounded-xl border border-navy-800 shadow-xl max-w-md w-full p-5 relative overflow-hidden">
+        {/* Background gradients */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-purple-600 rounded-full filter blur-3xl opacity-5 -mr-20 -mt-20"></div>
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-600 rounded-full filter blur-3xl opacity-5 -ml-20 -mb-20"></div>
+        
+        {/* Content */}
+        <div className="relative z-10">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center">
+              <div className={`w-12 h-12 rounded-full flex items-center justify-center mr-3 ${isRecording ? 'bg-red-500/20 animate-pulse' : 'bg-navy-800'}`}>
+                <div className="w-10 h-10 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full flex items-center justify-center">
+                  <Mic className="h-5 w-5 text-white" />
+                </div>
+              </div>
+              <div>
+                <h3 className="font-semibold text-white text-lg">Voice Assistant</h3>
+                <p className="text-gray-300 text-sm">
+                  {isProcessing ? 'Processing...' : isRecording ? 'Listening to you...' : 'Ready to record'}
+                </p>
+              </div>
+            </div>
+            
+            <button
+              onClick={onClose}
+              className="w-8 h-8 bg-navy-800 rounded-full flex items-center justify-center text-gray-400 hover:text-white hover:bg-navy-700 transition-colors"
+              disabled={isProcessing}
+            >
+              <X size={16} />
+            </button>
+          </div>
+          
+          {/* Error message */}
+          {errorMessage && (
+            <div className="bg-red-900/20 border border-red-800/30 rounded-lg p-3 mb-4 text-red-200 text-sm">
+              {errorMessage}
+            </div>
+          )}
+          
+          {/* Transcript display */}
+          <div className="bg-navy-800/50 border border-navy-700/50 rounded-lg p-4 min-h-[100px] mb-4 text-white shadow-inner relative">
+            {transcript ? (
+              <p className="whitespace-pre-wrap">{transcript}</p>
+            ) : (
+              <p className="text-gray-400 italic">
+                {isRecording ? "Speak now..." : "Click Start Recording to begin"}
+              </p>
+            )}
+            
+            {isRecording && (
+              <div className="absolute top-3 right-3 flex space-x-1">
+                <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse delay-100"></div>
+                <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse delay-200"></div>
+              </div>
+            )}
+          </div>
+          
+          {/* Controls */}
+          <div className="flex flex-wrap gap-3 justify-between">
+            <div>
+              {!isRecording ? (
+                <Button
+                  onClick={startRecording}
+                  className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white"
+                  disabled={isProcessing}
+                >
+                  <Mic className="h-4 w-4 mr-2" />
+                  Start Recording
+                </Button>
+              ) : (
+                <Button
+                  onClick={stopRecording}
+                  className="bg-red-600 hover:bg-red-500 text-white"
+                  disabled={isProcessing}
+                >
+                  <Square className="h-4 w-4 mr-2" />
+                  Stop Recording
+                </Button>
+              )}
+            </div>
+            
+            <Button
+              onClick={processTranscription}
+              className="bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-500 hover:to-teal-500 text-white"
+              disabled={isProcessing || !transcript.trim()}
+            >
+              <CheckCircle className="h-4 w-4 mr-2" />
+              Submit
+            </Button>
+          </div>
+          
+          {/* Type input option */}
+          <div className="mt-4 border-t border-navy-800/50 pt-4">
+            <label className="block text-sm text-gray-300 mb-2">
+              Or type manually:
+            </label>
+            <textarea
+              className="w-full bg-navy-800/50 border border-navy-700/50 rounded-lg p-3 min-h-[80px] text-white shadow-inner focus:border-purple-500/40 focus:outline-none focus:ring-1 focus:ring-purple-500/30"
+              value={transcript}
+              onChange={(e) => setTranscript(e.target.value)}
+              placeholder="Type what you would say..."
+              disabled={isProcessing}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
