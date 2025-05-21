@@ -237,26 +237,38 @@ export default function RealVoiceTranscription() {
         </Alert>
       )}
       
-      <Card className="bg-gray-900 border-gray-800 mb-6">
+      <Card className="bg-gradient-to-br from-blue-950 to-blue-900 border border-blue-800 mb-6 shadow-xl">
         <CardHeader>
-          <CardTitle className="text-white text-xl">Voice Transcription</CardTitle>
-          <CardDescription className="text-gray-400">
-            Click the Record button and speak clearly to transcribe your voice
-          </CardDescription>
+          <div className="flex items-center">
+            <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full flex items-center justify-center mr-4 shadow-lg p-1">
+              <div className="bg-gray-900 rounded-full w-full h-full flex items-center justify-center">
+                <Mic className="w-4 h-4 text-purple-400" />
+              </div>
+            </div>
+            <div>
+              <CardTitle className="text-white text-xl">Voice Assistant</CardTitle>
+              <CardDescription className="text-gray-300">
+                Click the Record button and speak clearly to transcribe your voice
+              </CardDescription>
+            </div>
+          </div>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="bg-gray-800 border border-gray-700 rounded-md p-4 min-h-[150px] relative">
+        <CardContent className="space-y-4 relative">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-purple-600 rounded-full filter blur-3xl opacity-5 -mr-20 -mt-20"></div>
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-600 rounded-full filter blur-3xl opacity-5 -ml-20 -mb-20"></div>
+          
+          <div className="bg-gray-900/50 border border-blue-800/50 rounded-lg p-4 min-h-[150px] relative shadow-inner">
             {transcript ? (
               <p className="text-white whitespace-pre-wrap">{transcript}</p>
             ) : (
-              <p className="text-gray-500 italic">
+              <p className="text-gray-400 italic">
                 {isRecording ? "Listening... speak now" : "Press the Record button to start speaking"}
               </p>
             )}
             
             {isRecording && (
               <div className="absolute top-2 right-2">
-                <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+                <div className="w-3 h-3 bg-purple-500 rounded-full animate-pulse shadow-lg shadow-purple-500/50"></div>
               </div>
             )}
           </div>
@@ -264,7 +276,9 @@ export default function RealVoiceTranscription() {
           <div className="flex flex-wrap gap-3 pt-2">
             <Button
               onClick={toggleRecording}
-              className={isRecording ? "bg-red-700 hover:bg-red-600" : "bg-purple-700 hover:bg-purple-600"}
+              className={isRecording 
+                ? "bg-red-600 hover:bg-red-500 shadow-md" 
+                : "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 shadow-md"}
               disabled={!!error && !isRecording}
             >
               {isRecording ? (
@@ -284,7 +298,7 @@ export default function RealVoiceTranscription() {
               <>
                 <Button
                   onClick={processTranscript}
-                  className="bg-blue-700 hover:bg-blue-600"
+                  className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 shadow-md"
                   disabled={isProcessing || !transcript.trim()}
                 >
                   {isProcessing ? (
@@ -303,7 +317,7 @@ export default function RealVoiceTranscription() {
                 <Button
                   onClick={clearTranscript}
                   variant="outline"
-                  className="border-gray-700 text-gray-300 hover:bg-gray-800"
+                  className="border-blue-700/40 text-blue-300 hover:bg-blue-900/20 hover:text-blue-200 shadow-sm"
                 >
                   Clear
                 </Button>
@@ -313,7 +327,7 @@ export default function RealVoiceTranscription() {
             {extractedTasks.length > 0 && (
               <Button
                 onClick={saveTranscription}
-                className="bg-green-700 hover:bg-green-600"
+                className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 shadow-md"
               >
                 <Save className="h-4 w-4 mr-2" />
                 Save
@@ -322,10 +336,10 @@ export default function RealVoiceTranscription() {
           </div>
           
           {/* Manual input option */}
-          <div className="mt-4 pt-4 border-t border-gray-800">
-            <h3 className="text-sm font-medium text-gray-400 mb-2">Or type/paste text manually:</h3>
+          <div className="mt-4 pt-4 border-t border-blue-800/30">
+            <h3 className="text-sm font-medium text-blue-300 mb-2">Or type/paste text manually:</h3>
             <textarea
-              className="w-full bg-gray-800 border border-gray-700 rounded-md p-4 min-h-[100px] text-white"
+              className="w-full bg-gray-900/70 border border-blue-800/30 rounded-lg p-4 min-h-[100px] text-white shadow-inner focus:border-purple-500/30 focus:outline-none focus:ring-1 focus:ring-purple-500/20"
               value={transcript}
               onChange={(e) => setTranscript(e.target.value)}
               placeholder="Type or paste text here..."
@@ -335,38 +349,60 @@ export default function RealVoiceTranscription() {
       </Card>
       
       {isProcessing && (
-        <Card className="bg-gray-900 border-gray-800 mb-6 p-8">
+        <Card className="bg-gradient-to-br from-blue-950 to-blue-900 border border-blue-800 mb-6 p-8 shadow-xl">
           <div className="flex flex-col items-center justify-center">
-            <Loader2 className="h-8 w-8 text-purple-500 animate-spin mb-4" />
-            <p className="text-white text-lg">Analyzing text and extracting tasks...</p>
-            <p className="text-gray-400 text-sm mt-2">This may take a few moments</p>
+            <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full flex items-center justify-center mb-6 shadow-lg p-1">
+              <div className="bg-gray-900 rounded-full w-full h-full flex items-center justify-center">
+                <Loader2 className="h-8 w-8 text-purple-400 animate-spin" />
+              </div>
+            </div>
+            <p className="text-white text-lg font-semibold">Analyzing your speech...</p>
+            <p className="text-blue-300 text-sm mt-2">Extracting tasks and important information</p>
           </div>
         </Card>
       )}
       
       {extractedTasks.length > 0 && (
-        <Card className="bg-gray-900 border-gray-800 mb-6">
+        <Card className="bg-gradient-to-br from-blue-950 to-blue-900 border border-blue-800 mb-6 shadow-xl">
           <CardHeader>
-            <CardTitle className="text-white text-xl">Extracted Tasks</CardTitle>
-            <CardDescription className="text-gray-400">
-              {extractedTasks.length} task(s) extracted from your speech
-            </CardDescription>
+            <div className="flex items-center">
+              <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center mr-4 shadow-lg p-1">
+                <div className="bg-gray-900 rounded-full w-full h-full flex items-center justify-center">
+                  <CheckCircle className="w-4 h-4 text-green-400" />
+                </div>
+              </div>
+              <div>
+                <CardTitle className="text-white text-xl">Extracted Tasks</CardTitle>
+                <CardDescription className="text-gray-300">
+                  {extractedTasks.length} task{extractedTasks.length !== 1 && 's'} found in your speech
+                </CardDescription>
+              </div>
+            </div>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
+          <CardContent className="relative">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-green-600 rounded-full filter blur-3xl opacity-5 -mr-20 -mt-20"></div>
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-600 rounded-full filter blur-3xl opacity-5 -ml-20 -mb-20"></div>
+            
+            <div className="space-y-4 relative z-10">
               {extractedTasks.map((task, index) => (
-                <Card key={index} className="bg-gray-800 border-gray-700">
+                <Card key={index} className="bg-gray-900/50 border border-blue-800/50 shadow-md">
                   <CardHeader className="pb-2">
                     <div className="flex justify-between items-start">
                       <CardTitle className="text-white text-lg">{task.title}</CardTitle>
                       <div className="flex space-x-2">
                         {task.category && (
-                          <Badge className={getCategoryColor(task.category)}>
+                          <Badge className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400">
                             {task.category}
                           </Badge>
                         )}
                         {task.priority && (
-                          <Badge className={getPriorityColor(task.priority)}>
+                          <Badge className={
+                            task.priority === "high" 
+                              ? "bg-gradient-to-r from-red-600 to-red-500"
+                              : task.priority === "medium"
+                                ? "bg-gradient-to-r from-yellow-600 to-amber-500"
+                                : "bg-gradient-to-r from-green-600 to-emerald-500"
+                          }>
                             {task.priority}
                           </Badge>
                         )}
@@ -423,58 +459,77 @@ export default function RealVoiceTranscription() {
       )}
       
       {savedTranscripts.length > 0 && (
-        <Card className="bg-gray-900 border-gray-800">
+        <Card className="bg-gradient-to-br from-blue-950 to-blue-900 border border-blue-800 shadow-xl">
           <CardHeader>
-            <CardTitle className="text-white text-xl">Saved Transcriptions</CardTitle>
-            <CardDescription className="text-gray-400">
-              Your recent transcriptions and extracted tasks
-            </CardDescription>
+            <div className="flex items-center">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mr-4 shadow-lg p-1">
+                <div className="bg-gray-900 rounded-full w-full h-full flex items-center justify-center">
+                  <Save className="w-4 h-4 text-blue-400" />
+                </div>
+              </div>
+              <div>
+                <CardTitle className="text-white text-xl">Saved Transcriptions</CardTitle>
+                <CardDescription className="text-gray-300">
+                  Your recent transcriptions and extracted tasks
+                </CardDescription>
+              </div>
+            </div>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
+          <CardContent className="relative">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600 rounded-full filter blur-3xl opacity-5 -mr-20 -mt-20"></div>
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-600 rounded-full filter blur-3xl opacity-5 -ml-20 -mb-20"></div>
+            
+            <div className="space-y-4 relative z-10">
               {savedTranscripts.map((item) => (
-                <Card key={item.id} className="bg-gray-800 border-gray-700">
+                <Card key={item.id} className="bg-gray-900/50 border border-blue-800/50 shadow-md">
                   <CardHeader className="pb-2">
                     <div className="flex justify-between">
-                      <CardTitle className="text-white text-md">
+                      <CardTitle className="text-white text-md flex items-center">
+                        <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
                         Transcription {new Date(item.timestamp).toLocaleTimeString()}
                       </CardTitle>
-                      <span className="text-gray-400 text-sm">
+                      <span className="text-blue-300 text-sm bg-blue-900/30 py-1 px-2 rounded-full border border-blue-800/30">
                         {new Date(item.timestamp).toLocaleDateString()}
                       </span>
                     </div>
                   </CardHeader>
                   <CardContent className="pb-3">
                     <div className="mb-3">
-                      <h4 className="text-gray-400 text-sm">Transcription:</h4>
-                      <p className="text-white mt-1">{item.text}</p>
+                      <h4 className="text-blue-300 text-sm font-medium">Transcription:</h4>
+                      <p className="text-white mt-1 bg-gray-900/30 p-3 rounded-lg border border-blue-900/20">{item.text}</p>
                     </div>
                     
                     {item.tasks.length > 0 && (
                       <div>
-                        <h4 className="text-gray-400 text-sm mb-2">
+                        <h4 className="text-blue-300 text-sm font-medium mb-2">
                           Tasks ({item.tasks.length}):
                         </h4>
                         <div className="space-y-2">
                           {item.tasks.map((task, taskIndex) => (
-                            <div key={taskIndex} className="bg-gray-900 p-2 rounded">
+                            <div key={taskIndex} className="bg-gray-900/30 p-3 rounded-lg border border-blue-900/20">
                               <div className="flex justify-between">
                                 <span className="text-white font-medium">{task.title}</span>
                                 <div className="flex space-x-1">
                                   {task.category && (
-                                    <Badge className={getCategoryColor(task.category)} variant="outline">
+                                    <Badge className="bg-gradient-to-r from-blue-600/80 to-blue-500/80 text-xs">
                                       {task.category}
                                     </Badge>
                                   )}
                                   {task.priority && (
-                                    <Badge className={getPriorityColor(task.priority)} variant="outline">
+                                    <Badge className={
+                                      task.priority === "high" 
+                                        ? "bg-gradient-to-r from-red-600/80 to-red-500/80"
+                                        : task.priority === "medium"
+                                          ? "bg-gradient-to-r from-yellow-600/80 to-amber-500/80"
+                                          : "bg-gradient-to-r from-green-600/80 to-emerald-500/80"
+                                    }>
                                       {task.priority}
                                     </Badge>
                                   )}
                                 </div>
                               </div>
                               {task.dueDate && (
-                                <div className="text-sm text-gray-400 mt-1">
+                                <div className="text-sm text-blue-300 mt-1">
                                   Due: <span className="text-gray-300">{task.dueDate}</span>
                                 </div>
                               )}
