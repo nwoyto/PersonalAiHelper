@@ -6,8 +6,6 @@ import { Calendar as CalendarIcon, LinkIcon, ListIcon, Clock } from "lucide-reac
 import CalendarEventsList from '../components/calendar/CalendarEventsList';
 import CalendarConnections from '../components/calendar/CalendarConnections';
 import MonthlyCalendar from '../components/calendar/MonthlyCalendar';
-import DayView from '../components/calendar/DayView';
-import WeekView from '../components/calendar/WeekView';
 
 export default function CalendarPage() {
   // Check if any calendars are connected
@@ -68,13 +66,19 @@ export default function CalendarPage() {
           
           <TabsContent value="day" className="mt-6">
             <div className="bg-gradient-to-br from-blue-950 to-blue-900 rounded-xl border border-blue-800 shadow-xl p-4">
-              <DayView />
+              <div className="p-6 text-center">
+                <h3 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent mb-2">Day View</h3>
+                <p className="text-blue-300">Day view will be available in the next update.</p>
+              </div>
             </div>
           </TabsContent>
 
           <TabsContent value="week" className="mt-6">
             <div className="bg-gradient-to-br from-blue-950 to-blue-900 rounded-xl border border-blue-800 shadow-xl p-4">
-              <WeekView />
+              <div className="p-6 text-center">
+                <h3 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent mb-2">Week View</h3>
+                <p className="text-blue-300">Week view will be available in the next update.</p>
+              </div>
             </div>
           </TabsContent>
 

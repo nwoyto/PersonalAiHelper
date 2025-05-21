@@ -102,47 +102,51 @@ export default function FloatingRecorder({ onClose, onComplete }: FloatingRecord
     }
   };
   
-  // Start listening when component mounts
+  // Start recording when component mounts
   useEffect(() => {
-    let timeoutId: ReturnType<typeof setTimeout>;
-    
-    // Only run this once when the component mounts
-    if (!initializationAttempted && !isProcessing) {
-      // Set this flag early to prevent infinite loops
+    // This will run only once when component mounts
+    const setupMicrophone = async () => {
+      if (initializationAttempted || isProcessing) return;
+      
+      // Set flag to prevent repeated initialization
       setInitializationAttempted(true);
       
-      timeoutId = setTimeout(() => {
-        // Request microphone permission explicitly first
-        navigator.mediaDevices.getUserMedia({ audio: true })
-          .then(() => {
-            console.log("Microphone permission granted");
-            try {
-              startListening();
-            } catch (err) {
-              console.error('Failed to start listening:', err);
-              setInitializationFailed(true);
-              setUseDemoMode(true);
-            }
-          })
-          .catch(err => {
-            console.error("Microphone permission error:", err);
+      try {
+        // Request microphone permission 
+        await navigator.mediaDevices.getUserMedia({ audio: true });
+        console.log("Microphone permission granted");
+        
+        // Start listening after a short delay
+        setTimeout(() => {
+          try {
+            startListening();
+            console.log("Started recording");
+          } catch (err) {
+            console.error('Failed to start listening:', err);
             setInitializationFailed(true);
             setUseDemoMode(true);
-            toast({
-              title: "Microphone access denied",
-              description: "Please allow microphone access to use voice features",
-              variant: "destructive",
-            });
-          });
-      }, 500);
-    }
+          }
+        }, 300);
+      } catch (err) {
+        console.error("Microphone permission error:", err);
+        setInitializationFailed(true);
+        setUseDemoMode(true);
+        toast({
+          title: "Microphone access denied",
+          description: "Please allow microphone access to use voice features",
+          variant: "destructive",
+        });
+      }
+    };
     
+    setupMicrophone();
+    
+    // Cleanup function
     return () => {
-      if (timeoutId) clearTimeout(timeoutId);
       try {
         cancelListening();
       } catch (err) {
-        console.error('Error cleaning up:', err);
+        console.error('Error cleaning up recorder:', err);
       }
     };
   }, []); // Empty dependency array to run only on mount
