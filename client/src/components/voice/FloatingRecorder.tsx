@@ -4,6 +4,7 @@ import { useSpeech } from "@/lib/useSpeech";
 import { useToast } from "@/hooks/use-toast";
 import { processTranscription } from "@/lib/openai";
 import { TranscriptionResult } from "@/types";
+import { Mic, Check, X } from "lucide-react";
 
 interface FloatingRecorderProps {
   onClose: () => void;
@@ -209,14 +210,19 @@ export default function FloatingRecorder({ onClose, onComplete }: FloatingRecord
   
   return (
     <div className="fixed bottom-24 left-4 right-4 z-50 flex justify-center">
-      <div className="bg-surface rounded-xl shadow-lg p-3 max-w-md mx-auto w-full">
-        <div className="flex items-center justify-between mb-1">
+      <div className="bg-gradient-to-br from-navy-950 to-navy-900 border border-navy-800 rounded-xl shadow-lg p-4 max-w-md mx-auto w-full relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-purple-600 rounded-full filter blur-3xl opacity-5 -mr-20 -mt-20"></div>
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-600 rounded-full filter blur-3xl opacity-5 -ml-20 -mb-20"></div>
+        
+        <div className="flex items-center justify-between mb-1 relative z-10">
           <div className="flex items-center">
-            <div className={`w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center mr-3 ${!useDemoMode && isListening ? 'pulse-animation' : ''}`}>
-              <i className="ri-mic-fill text-primary text-xl"></i>
+            <div className={`w-12 h-12 rounded-full bg-navy-800 flex items-center justify-center mr-3 ${!useDemoMode && isListening ? 'animate-pulse shadow-md shadow-purple-500/20' : ''}`}>
+              <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-blue-600 rounded-full flex items-center justify-center">
+                <Mic className="h-5 w-5 text-white" />
+              </div>
             </div>
             <div>
-              <p className="text-sm font-medium">
+              <p className="text-white font-medium">
                 {isProcessing 
                   ? "Processing..." 
                   : useDemoMode
@@ -227,26 +233,26 @@ export default function FloatingRecorder({ onClose, onComplete }: FloatingRecord
                         ? "Recognition failed" 
                         : "Ready to listen"}
               </p>
-              {!useDemoMode && isListening && <SoundWave className="h-4" />}
+              {!useDemoMode && isListening && <SoundWave className="h-4 text-purple-400" />}
             </div>
           </div>
           
-          <div className="flex space-x-2">
+          <div className="flex space-x-3">
             <button 
-              className="w-8 h-8 rounded-full bg-destructive/70 hover:bg-destructive flex items-center justify-center text-white disabled:opacity-50"
+              className="w-9 h-9 rounded-full bg-red-600/80 hover:bg-red-600 flex items-center justify-center text-white shadow-md disabled:opacity-50 transition-colors"
               onClick={handleCancelClick}
               disabled={isProcessing}
               aria-label="Cancel"
             >
-              <i className="ri-close-line"></i>
+              <X className="h-5 w-5" />
             </button>
             <button 
-              className="w-8 h-8 rounded-full bg-secondary/70 hover:bg-secondary flex items-center justify-center text-white disabled:opacity-50"
+              className="w-9 h-9 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 flex items-center justify-center text-white shadow-md disabled:opacity-50 transition-all"
               onClick={handleConfirmClick}
               disabled={isProcessing}
               aria-label="Confirm"
             >
-              <i className="ri-check-line"></i>
+              <Check className="h-5 w-5" />
             </button>
           </div>
         </div>
