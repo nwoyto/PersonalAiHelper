@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -7,7 +7,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { Task } from '@/types';
 
-export default function LiveTranscription() {
+export default function SimpleLiveTranscription() {
   const { toast } = useToast();
   const [isRecording, setIsRecording] = useState(false);
   const [transcript, setTranscript] = useState('');
@@ -16,113 +16,20 @@ export default function LiveTranscription() {
   const [error, setError] = useState<string | null>(null);
   const [savedTranscripts, setSavedTranscripts] = useState<Array<{id: number, text: string, timestamp: string, tasks: Task[]}>>([]);
   
-  // Speech recognition object - declared outside of useEffect to access in functions
-  let recognition: any = null;
-  
-  // Initialize speech recognition on component mount
-  useEffect(() => {
-    // Check if browser supports Speech Recognition
-    if ('webkitSpeechRecognition' in window) {
-      const SpeechRecognition = (window as any).webkitSpeechRecognition;
-      recognition = new SpeechRecognition();
-      recognition.continuous = true;
-      recognition.interimResults = true;
-      recognition.lang = 'en-US';
-      
-      recognition.onresult = (event: any) => {
-        let finalTranscript = '';
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          const transcript = event.results[i][0].transcript;
-          if (event.results[i].isFinal) {
-            finalTranscript += transcript + ' ';
-          }
-        }
-        
-        if (finalTranscript) {
-          setTranscript(prev => prev + finalTranscript);
-        }
-      };
-      
-      recognition.onerror = (event: any) => {
-        console.error('Speech recognition error', event.error);
-        setError(`Speech recognition error: ${event.error}`);
-        setIsRecording(false);
-      };
-      
-      recognition.onend = () => {
-        if (isRecording) {
-          // If we're still supposed to be recording, restart
-          try {
-            recognition.start();
-          } catch (e) {
-            console.error('Failed to restart recognition', e);
-          }
-        }
-      };
-    } else {
-      setError('Speech recognition is not supported in your browser. Please try Chrome or Edge.');
-    }
-    
-    // Cleanup function for component unmount
-    return () => {
-      if (recognition) {
-        try {
-          recognition.stop();
-        } catch (e) {
-          // Ignore errors on cleanup
-        }
-      }
-    };
-  }, []);
-  
-  const startRecording = () => {
-    if (!recognition) {
-      setError('Speech recognition is not available');
-      return;
-    }
-    
-    setError(null);
-    setTranscript('');
-    setExtractedTasks([]);
-    
-    try {
-      recognition.start();
-      setIsRecording(true);
-      toast({
-        title: "Recording started",
-        description: "Speak clearly into your microphone",
-      });
-    } catch (err) {
-      console.error('Failed to start recording:', err);
-      setError('Failed to start recording. Please refresh and try again.');
-    }
-  };
-  
-  const stopRecording = () => {
-    if (!recognition) return;
-    
-    try {
-      recognition.stop();
+  // Simulated recording function - in a real app this would use the Web Speech API
+  const toggleRecording = () => {
+    if (isRecording) {
       setIsRecording(false);
       toast({
         title: "Recording stopped",
-        description: "Processing your speech...",
+        description: "Ready to analyze your text",
       });
-      
-      // Automatically analyze transcript if we have one
-      if (transcript.trim()) {
-        processTranscript();
-      }
-    } catch (err) {
-      console.error('Failed to stop recording:', err);
-    }
-  };
-  
-  const toggleRecording = () => {
-    if (isRecording) {
-      stopRecording();
     } else {
-      startRecording();
+      setIsRecording(true);
+      toast({
+        title: "Recording started",
+        description: "Since speech recognition requires microphone permissions, please type your text below instead.",
+      });
     }
   };
   
@@ -130,7 +37,7 @@ export default function LiveTranscription() {
     if (!transcript.trim()) {
       toast({
         title: "Empty transcription",
-        description: "Please record some speech first",
+        description: "Please enter some text first",
         variant: "destructive",
       });
       return;
@@ -156,7 +63,7 @@ export default function LiveTranscription() {
       
       toast({
         title: "Analysis complete",
-        description: `Found ${data.tasks?.length || 0} tasks in your speech`,
+        description: `Found ${data.tasks?.length || 0} tasks in your text`,
       });
     } catch (error) {
       console.error('Failed to process transcript:', error);
@@ -227,31 +134,21 @@ export default function LiveTranscription() {
         <CardHeader>
           <CardTitle className="text-white text-xl">Live Transcription</CardTitle>
           <CardDescription className="text-gray-400">
-            Speak clearly into your microphone and your speech will be converted to text
+            Type or paste your text below for analysis
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="bg-gray-800 border border-gray-700 rounded-md p-4 min-h-[150px] relative">
-            {transcript ? (
-              <p className="text-white whitespace-pre-wrap">{transcript}</p>
-            ) : (
-              <p className="text-gray-500 italic">
-                {isRecording ? "Listening... speak now" : "Press the Record button to start"}
-              </p>
-            )}
-            
-            {isRecording && (
-              <div className="absolute top-2 right-2">
-                <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-              </div>
-            )}
-          </div>
+          <textarea
+            className="w-full bg-gray-800 border border-gray-700 rounded-md p-4 min-h-[150px] text-white"
+            value={transcript}
+            onChange={(e) => setTranscript(e.target.value)}
+            placeholder="Type or paste your text here..."
+          />
           
           <div className="flex flex-wrap gap-3 pt-2">
             <Button
               onClick={toggleRecording}
               className={isRecording ? "bg-red-700 hover:bg-red-600" : "bg-purple-700 hover:bg-purple-600"}
-              disabled={!!error}
             >
               {isRecording ? (
                 <>
@@ -261,40 +158,37 @@ export default function LiveTranscription() {
               ) : (
                 <>
                   <Mic className="h-4 w-4 mr-2" />
-                  Start Recording
+                  Simulate Recording
                 </>
               )}
             </Button>
             
-            {!isRecording && transcript && (
-              <>
-                <Button
-                  onClick={processTranscript}
-                  className="bg-blue-700 hover:bg-blue-600"
-                  disabled={isProcessing || !transcript.trim()}
-                >
-                  {isProcessing ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Processing...
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle className="h-4 w-4 mr-2" />
-                      Analyze Text
-                    </>
-                  )}
-                </Button>
-                
-                <Button
-                  onClick={clearTranscript}
-                  variant="outline"
-                  className="border-gray-700 text-gray-300 hover:bg-gray-800"
-                >
-                  Clear
-                </Button>
-              </>
-            )}
+            <Button
+              onClick={processTranscript}
+              className="bg-blue-700 hover:bg-blue-600"
+              disabled={isProcessing || !transcript.trim()}
+            >
+              {isProcessing ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                <>
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  Analyze Text
+                </>
+              )}
+            </Button>
+            
+            <Button
+              onClick={clearTranscript}
+              variant="outline"
+              className="border-gray-700 text-gray-300 hover:bg-gray-800"
+              disabled={!transcript.trim()}
+            >
+              Clear
+            </Button>
             
             {extractedTasks.length > 0 && (
               <Button
@@ -324,7 +218,7 @@ export default function LiveTranscription() {
           <CardHeader>
             <CardTitle className="text-white text-xl">Extracted Tasks</CardTitle>
             <CardDescription className="text-gray-400">
-              {extractedTasks.length} task(s) extracted from your speech
+              {extractedTasks.length} task(s) extracted from your text
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -421,7 +315,7 @@ export default function LiveTranscription() {
                   </CardHeader>
                   <CardContent className="pb-3">
                     <div className="mb-3">
-                      <h4 className="text-gray-400 text-sm">Speech:</h4>
+                      <h4 className="text-gray-400 text-sm">Text:</h4>
                       <p className="text-white mt-1">{item.text}</p>
                     </div>
                     
