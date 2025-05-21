@@ -74,7 +74,7 @@ export default function NavBar({}: NavBarProps) {
                   : 'text-gray-400 hover:text-gray-300'
               }`}>
                 <Radio className="h-5 w-5 mb-1" />
-                <span className="text-xs font-medium">Voice Test</span>
+                <span className="text-xs font-medium">Agent</span>
               </div>
             </Link>
           </div>
