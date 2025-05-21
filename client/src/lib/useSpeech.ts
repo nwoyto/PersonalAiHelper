@@ -220,7 +220,34 @@ export function useSpeech(options: UseSpeechOptions = {}) {
     const recognitionInstance = new SpeechRecognition();
     recognitionInstance.continuous = false; // Changed to false for better compatibility
     recognitionInstance.interimResults = true;
-    recognitionInstance.lang = 'en-US'; 
+    
+    // Try multiple language options to avoid the language-not-supported error
+    try {
+      // First try with no language specification (browser default)
+      recognitionInstance.lang = '';
+    } catch (err) {
+      console.warn('Failed to set empty language, trying alternatives');
+      
+      // Try alternative languages
+      const languagesToTry = ['en', 'en-US', 'en-GB'];
+      let languageSet = false;
+      
+      for (const lang of languagesToTry) {
+        try {
+          recognitionInstance.lang = lang;
+          languageSet = true;
+          console.log(`Set recognition language to: ${lang}`);
+          break;
+        } catch (langErr) {
+          console.warn(`Failed to set language to ${lang}`);
+        }
+      }
+      
+      if (!languageSet) {
+        console.warn('Could not set any language for speech recognition');
+      }
+    }
+    
     // Added longer max speech time
     recognitionInstance.maxAlternatives = 1;
     

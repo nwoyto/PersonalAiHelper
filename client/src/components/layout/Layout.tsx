@@ -21,28 +21,13 @@ export default function Layout({
   const [shouldStartRecording, setShouldStartRecording] = useState(false);
   
   const handleVoiceClick = () => {
-    // If already on the agent page, just open the voice modal
-    if (location === '/voice-test') {
-      setIsVoiceModalOpen(true);
-      // Signal that recording should start automatically
-      setShouldStartRecording(true);
-    } else {
-      // Navigate to the agent page and open voice modal there
-      navigate('/voice-test');
-      
-      // Show toast
-      toast({
-        title: "Agent activated",
-        description: "Opening voice assistant...",
-      });
-      
-      // Slight delay to ensure navigation completes before opening modal
-      setTimeout(() => {
-        setIsVoiceModalOpen(true);
-        // Signal that recording should start automatically
-        setShouldStartRecording(true);
-      }, 300);
-    }
+    // Simply open the floating recorder directly on any page
+    setIsVoiceModalOpen(true);
+    
+    toast({
+      title: "Voice Assistant Activated",
+      description: "Speak clearly to record your voice",
+    });
   };
 
   const handleVoiceClose = () => {

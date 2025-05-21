@@ -104,52 +104,71 @@ export default function FloatingRecorder({ onClose, onComplete }: FloatingRecord
   
   // Start recording when component mounts
   useEffect(() => {
-    // This will run only once when component mounts
+    // Create a reference to check if the component is mounted
+    let mounted = true;
+    
+    // Request microphone permission and start recording
     const setupMicrophone = async () => {
-      if (initializationAttempted || isProcessing) return;
-      
-      // Set flag to prevent repeated initialization
-      setInitializationAttempted(true);
+      // Don't do anything if we're already processing
+      if (isProcessing) return;
       
       try {
-        // Request microphone permission 
+        // Request microphone permission explicitly
         await navigator.mediaDevices.getUserMedia({ audio: true });
         console.log("Microphone permission granted");
         
-        // Start listening after a short delay
-        setTimeout(() => {
-          try {
-            startListening();
-            console.log("Started recording");
-          } catch (err) {
-            console.error('Failed to start listening:', err);
-            setInitializationFailed(true);
-            setUseDemoMode(true);
-          }
-        }, 300);
+        // Only proceed if component is still mounted
+        if (mounted) {
+          // Start listening with a slight delay to ensure permissions are properly set
+          setTimeout(() => {
+            if (mounted) {
+              try {
+                startListening();
+                console.log("Started recording");
+              } catch (err) {
+                console.error('Failed to start listening:', err);
+                // Only update state if component is still mounted
+                if (mounted) {
+                  setInitializationFailed(true);
+                  setUseDemoMode(true);
+                  toast({
+                    title: "Microphone initialization failed",
+                    description: "Please try again or use text input instead",
+                    variant: "destructive",
+                  });
+                }
+              }
+            }
+          }, 300);
+        }
       } catch (err) {
         console.error("Microphone permission error:", err);
-        setInitializationFailed(true);
-        setUseDemoMode(true);
-        toast({
-          title: "Microphone access denied",
-          description: "Please allow microphone access to use voice features",
-          variant: "destructive",
-        });
+        // Only update state if component is still mounted
+        if (mounted) {
+          setInitializationFailed(true);
+          setUseDemoMode(true);
+          toast({
+            title: "Microphone access denied",
+            description: "Please allow microphone access in your browser settings",
+            variant: "destructive",
+          });
+        }
       }
     };
     
+    // Request microphone access when component mounts
     setupMicrophone();
     
-    // Cleanup function
+    // Clean up when component unmounts
     return () => {
+      mounted = false;
       try {
         cancelListening();
       } catch (err) {
         console.error('Error cleaning up recorder:', err);
       }
     };
-  }, []); // Empty dependency array to run only on mount
+  }, [isProcessing, startListening, cancelListening, toast]);
   
   const handleCancelClick = () => {
     if (!useDemoMode) {
