@@ -47,7 +47,32 @@ export default function RealVoiceTranscription() {
         if (recognitionRef.current) {
           recognitionRef.current.continuous = true;
           recognitionRef.current.interimResults = true;
-          recognitionRef.current.lang = 'en-US';
+          
+          // Try different language codes to avoid language-not-supported error
+          try {
+            // Try to detect available languages
+            const languages = ['en-US', 'en-GB', 'en', 'en-AU'];
+            let languageSet = false;
+            
+            for (const lang of languages) {
+              try {
+                recognitionRef.current.lang = lang;
+                languageSet = true;
+                console.log(`Successfully set speech recognition language to: ${lang}`);
+                break;
+              } catch (langErr) {
+                console.warn(`Failed to set language to ${lang}`, langErr);
+              }
+            }
+            
+            if (!languageSet) {
+              // If no specific language worked, try with empty string to use browser default
+              recognitionRef.current.lang = '';
+              console.log('Using browser default speech recognition language');
+            }
+          } catch (err) {
+            console.error('Error setting speech recognition language:', err);
+          }
           
           // Set up event handlers
           recognitionRef.current.onresult = (event: any) => {
