@@ -99,10 +99,10 @@ export default function MonthlyCalendar() {
   });
   
   return (
-    <div className="bg-gradient-to-b from-blue-950 to-indigo-950 border border-indigo-800/50 rounded-lg shadow-xl">
+    <div className="bg-gradient-to-b from-navy-900 to-navy-950 border border-navy-800/50 rounded-lg shadow-xl">
       {/* Calendar header */}
-      <div className="p-4 flex items-center justify-between border-b border-indigo-800/30">
-        <h2 className="text-xl font-semibold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+      <div className="p-4 flex items-center justify-between border-b border-navy-800/30">
+        <h2 className="text-xl font-semibold text-white">
           {format(currentMonth, 'MMMM yyyy')}
         </h2>
         <div className="flex items-center space-x-2">
@@ -110,7 +110,7 @@ export default function MonthlyCalendar() {
             variant="ghost" 
             size="sm" 
             onClick={goToToday}
-            className="text-blue-300 hover:text-white hover:bg-indigo-900/70"
+            className="text-white hover:text-white hover:bg-navy-800/70"
           >
             Today
           </Button>
@@ -118,7 +118,7 @@ export default function MonthlyCalendar() {
             variant="ghost" 
             size="icon" 
             onClick={prevMonth}
-            className="text-blue-300 hover:text-white hover:bg-indigo-900/70"
+            className="text-white hover:text-white hover:bg-navy-800/70"
           >
             <ChevronLeft className="h-5 w-5" />
           </Button>
@@ -126,7 +126,7 @@ export default function MonthlyCalendar() {
             variant="ghost" 
             size="icon" 
             onClick={nextMonth}
-            className="text-blue-300 hover:text-white hover:bg-indigo-900/70"
+            className="text-white hover:text-white hover:bg-navy-800/70"
           >
             <ChevronRight className="h-5 w-5" />
           </Button>
@@ -136,9 +136,9 @@ export default function MonthlyCalendar() {
       {/* Calendar grid */}
       <div className="overflow-hidden">
         {/* Weekday headers */}
-        <div className="grid grid-cols-7 border-b border-indigo-800/30 bg-indigo-900/30">
+        <div className="grid grid-cols-7 border-b border-navy-800/30 bg-navy-800/30">
           {weekdays.map(day => (
-            <div key={day} className="text-center py-2 text-sm font-medium text-blue-300">
+            <div key={day} className="text-center py-2 text-sm font-medium text-white">
               {day}
             </div>
           ))}
@@ -147,11 +147,11 @@ export default function MonthlyCalendar() {
         {/* Calendar days */}
         <div>
           {weeks.map((week, weekIndex) => (
-            <div key={weekIndex} className="grid grid-cols-7 border-t border-indigo-800/30">
+            <div key={weekIndex} className="grid grid-cols-7 border-t border-navy-800/30">
               {week.map((day, dayIndex) => {
                 if (!day) {
                   // Empty cell
-                  return <div key={`blank-${dayIndex}`} className="h-[4.5rem] p-1 border-r border-indigo-800/20 last:border-r-0 bg-blue-950/50" />;
+                  return <div key={`blank-${dayIndex}`} className="h-[4.5rem] p-1 border-r border-navy-800/20 last:border-r-0 bg-navy-950" />;
                 }
                 
                 const isCurrentMonth = isSameMonth(day, currentMonth);
@@ -165,9 +165,9 @@ export default function MonthlyCalendar() {
                   <div 
                     key={day.toString()}
                     className={cn(
-                      "h-[4.5rem] p-1 border-r border-indigo-800/20 last:border-r-0 transition-colors",
-                      isCurrentMonth ? "bg-indigo-950/30" : "bg-blue-950/50 text-indigo-400",
-                      isSelectedDay && "bg-indigo-900/40",
+                      "h-[4.5rem] p-1 border-r border-navy-800/20 last:border-r-0 transition-colors",
+                      isCurrentMonth ? "bg-navy-900" : "bg-navy-950 text-gray-400",
+                      isSelectedDay && "bg-navy-800",
                       !isCurrentMonth && "opacity-60"
                     )}
                   >
@@ -175,8 +175,8 @@ export default function MonthlyCalendar() {
                       {/* Day number */}
                       <div 
                         className={cn(
-                          "h-6 w-6 flex items-center justify-center text-sm rounded-full",
-                          isCurrentDay && "bg-gradient-to-r from-purple-600 to-blue-600 text-white font-medium"
+                          "h-6 w-6 flex items-center justify-center text-sm rounded-full text-white",
+                          isCurrentDay && "bg-gradient-to-r from-purple-700 to-blue-700 font-medium"
                         )}
                       >
                         {formattedDay}
@@ -192,26 +192,26 @@ export default function MonthlyCalendar() {
                                   className={cn(
                                     "text-xs py-1 px-2 rounded-md truncate shadow-sm",
                                     event.provider === 'google' 
-                                      ? "bg-gradient-to-r from-blue-900/70 to-blue-800/70 text-blue-100 border-l-2 border-blue-500" 
-                                      : "bg-gradient-to-r from-purple-900/70 to-purple-800/70 text-purple-100 border-l-2 border-purple-500",
+                                      ? "bg-navy-800 text-white border-l-2 border-blue-500" 
+                                      : "bg-navy-800 text-white border-l-2 border-purple-500",
                                     event.allDay && "border-l-2 border-green-500"
                                   )}
                                 >
                                   {event.title}
                                 </div>
                               </TooltipTrigger>
-                              <TooltipContent className="max-w-xs bg-indigo-950 border border-indigo-800">
+                              <TooltipContent className="max-w-xs bg-navy-900 border border-navy-800">
                                 <div className="space-y-1">
                                   <p className="font-medium text-white">{event.title}</p>
-                                  {event.description && <p className="text-xs text-blue-200">{event.description}</p>}
-                                  {event.location && <p className="text-xs text-blue-300">{event.location}</p>}
+                                  {event.description && <p className="text-xs text-white opacity-80">{event.description}</p>}
+                                  {event.location && <p className="text-xs text-white opacity-70">{event.location}</p>}
                                 </div>
                               </TooltipContent>
                             </Tooltip>
                           </TooltipProvider>
                         ))}
                         {eventCount > 2 && (
-                          <div className="text-xs font-medium py-1 px-2 rounded-md bg-indigo-900/30 text-blue-300">
+                          <div className="text-xs font-medium py-1 px-2 rounded-md bg-navy-800 text-white">
                             +{eventCount - 2} more
                           </div>
                         )}

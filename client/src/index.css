@@ -2,6 +2,51 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Custom colors */
+:root {
+  --navy-950: #0a192f;
+  --navy-900: #112240;
+  --navy-800: #233554;
+  --navy-700: #2a4365;
+}
+
+.bg-navy-950 {
+  background-color: var(--navy-950);
+}
+.bg-navy-900 {
+  background-color: var(--navy-900);
+}
+.bg-navy-800 {
+  background-color: var(--navy-800);
+}
+.bg-navy-700 {
+  background-color: var(--navy-700);
+}
+
+.from-navy-950 {
+  --tw-gradient-from: var(--navy-950) var(--tw-gradient-from-position);
+  --tw-gradient-to: rgb(10 25 47 / 0) var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+.from-navy-900 {
+  --tw-gradient-from: var(--navy-900) var(--tw-gradient-from-position);
+  --tw-gradient-to: rgb(17 34 64 / 0) var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);  
+}
+.to-navy-950 {
+  --tw-gradient-to: var(--navy-950) var(--tw-gradient-to-position);
+}
+.to-navy-900 {
+  --tw-gradient-to: var(--navy-900) var(--tw-gradient-to-position);
+}
+
+.border-navy-800 {
+  border-color: var(--navy-800);
+}
+.text-navy-100 {
+  color: #ccd6f6;
+}
+
 :root {
   --background: 240 10% 3.9%;
   --foreground: 0 0% 98%;

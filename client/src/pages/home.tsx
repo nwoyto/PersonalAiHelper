@@ -86,6 +86,53 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Favorite Automations */}
+      <section className="mb-10">
+        <h3 className="flex items-center text-sm font-semibold text-gray-400 uppercase tracking-wider mb-5">
+          <Sparkles size={16} className="mr-2" />
+          FAVORITE AUTOMATIONS
+        </h3>
+        
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="group bg-gradient-to-br from-navy-950 to-navy-900 hover:from-navy-900 hover:to-navy-800 rounded-xl p-4 flex flex-col items-center shadow-lg transition-all duration-300 border border-navy-800/50 hover:border-green-500/30">
+            <div className="w-14 h-14 bg-navy-800 rounded-full flex items-center justify-center mb-3 transform transition-transform group-hover:scale-105">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-8 h-8 text-green-400">
+                <path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" />
+              </svg>
+            </div>
+            <span className="text-white font-medium text-sm">Instacart Order</span>
+          </div>
+          
+          <div className="group bg-gradient-to-br from-navy-950 to-navy-900 hover:from-navy-900 hover:to-navy-800 rounded-xl p-4 flex flex-col items-center shadow-lg transition-all duration-300 border border-navy-800/50 hover:border-green-500/30">
+            <div className="w-14 h-14 bg-navy-800 rounded-full flex items-center justify-center mb-3 transform transition-transform group-hover:scale-105">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-8 h-8 text-green-600">
+                <path d="M12 2.5L5.143 6.655l2.914 8.985L12 23l3.942-7.36 2.915-8.985L12 2.5zm-1.257 1.586L7.2 6.495l2.099 6.478L12 18.847l2.7-5.874 2.099-6.478-6.056-2.41z" />
+              </svg>
+            </div>
+            <span className="text-white font-medium text-sm">Whole Foods</span>
+          </div>
+          
+          <div className="group bg-gradient-to-br from-navy-950 to-navy-900 hover:from-navy-900 hover:to-navy-800 rounded-xl p-4 flex flex-col items-center shadow-lg transition-all duration-300 border border-navy-800/50 hover:border-blue-500/30">
+            <div className="w-14 h-14 bg-navy-800 rounded-full flex items-center justify-center mb-3 transform transition-transform group-hover:scale-105">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-8 h-8 text-blue-400">
+                <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+              </svg>
+            </div>
+            <span className="text-white font-medium text-sm">Outlook Mail</span>
+          </div>
+          
+          <div className="group bg-gradient-to-br from-navy-950 to-navy-900 hover:from-navy-900 hover:to-navy-800 rounded-xl p-4 flex flex-col items-center shadow-lg transition-all duration-300 border border-navy-800/50 hover:border-blue-500/30">
+            <div className="w-14 h-14 bg-navy-800 rounded-full flex items-center justify-center mb-3 transform transition-transform group-hover:scale-105">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-8 h-8 text-blue-500">
+                <path d="M19 5.5a1 1 0 0 0-1-1h-1V3H7v1.5H6a1 1 0 0 0-1 1v12.5a1 1 0 0 0 1 1h13a1 1 0 0 0 1-1V5.5zm-6 11c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z" />
+                <path d="M13 9.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z" />
+              </svg>
+            </div>
+            <span className="text-white font-medium text-sm">Kayak Flights</span>
+          </div>
+        </div>
+      </section>
+      
       {/* Quick Actions */}
       <section className="mb-10">
         <h3 className="flex items-center text-sm font-semibold text-gray-400 uppercase tracking-wider mb-5">
@@ -96,17 +143,17 @@ export default function Home() {
         <div className="grid grid-cols-2 gap-5">
           <button 
             onClick={() => setIsVoiceModalOpen(true)}
-            className="group bg-gradient-to-br from-blue-950 to-blue-900 hover:from-blue-900 hover:to-blue-800 rounded-xl p-6 flex flex-col items-center shadow-lg transition-all duration-300 border border-purple-500/10 hover:border-purple-500/30"
+            className="group bg-gradient-to-br from-navy-950 to-navy-900 hover:from-navy-900 hover:to-navy-800 rounded-xl p-6 flex flex-col items-center shadow-lg transition-all duration-300 border border-purple-500/10 hover:border-purple-500/30"
           >
-            <div className="w-16 h-16 bg-gray-900 rounded-2xl flex items-center justify-center mb-4 transform transition-transform group-hover:scale-110 group-hover:rotate-3">
+            <div className="w-16 h-16 bg-navy-800 rounded-2xl flex items-center justify-center mb-4 transform transition-transform group-hover:scale-110 group-hover:rotate-3">
               <Mic size={28} className="text-purple-400 group-hover:text-purple-300 transition-colors" />
             </div>
             <span className="text-white font-medium">New Voice Note</span>
           </button>
           
           <Link href="/calendar">
-            <div className="group bg-gradient-to-br from-blue-950 to-blue-900 hover:from-blue-900 hover:to-blue-800 rounded-xl p-6 flex flex-col items-center shadow-lg transition-all duration-300 border border-blue-500/10 hover:border-blue-500/30">
-              <div className="w-16 h-16 bg-gray-900 rounded-2xl flex items-center justify-center mb-4 transform transition-transform group-hover:scale-110 group-hover:rotate-3">
+            <div className="group bg-gradient-to-br from-navy-950 to-navy-900 hover:from-navy-900 hover:to-navy-800 rounded-xl p-6 flex flex-col items-center shadow-lg transition-all duration-300 border border-blue-500/10 hover:border-blue-500/30">
+              <div className="w-16 h-16 bg-navy-800 rounded-2xl flex items-center justify-center mb-4 transform transition-transform group-hover:scale-110 group-hover:rotate-3">
                 <Calendar size={28} className="text-blue-400 group-hover:text-blue-300 transition-colors" />
               </div>
               <span className="text-white font-medium">Schedule Meeting</span>
@@ -115,17 +162,17 @@ export default function Home() {
           
           <button
             onClick={() => setIsTaskFormOpen(true)} 
-            className="group bg-gradient-to-br from-blue-950 to-blue-900 hover:from-blue-900 hover:to-blue-800 rounded-xl p-6 flex flex-col items-center shadow-lg transition-all duration-300 border border-green-500/10 hover:border-green-500/30"
+            className="group bg-gradient-to-br from-navy-950 to-navy-900 hover:from-navy-900 hover:to-navy-800 rounded-xl p-6 flex flex-col items-center shadow-lg transition-all duration-300 border border-green-500/10 hover:border-green-500/30"
           >
-            <div className="w-16 h-16 bg-gray-900 rounded-2xl flex items-center justify-center mb-4 transform transition-transform group-hover:scale-110 group-hover:rotate-3">
+            <div className="w-16 h-16 bg-navy-800 rounded-2xl flex items-center justify-center mb-4 transform transition-transform group-hover:scale-110 group-hover:rotate-3">
               <Plus size={28} className="text-green-400 group-hover:text-green-300 transition-colors" />
             </div>
             <span className="text-white font-medium">New Task</span>
           </button>
           
           <Link href="/notes">
-            <div className="group bg-gradient-to-br from-blue-950 to-blue-900 hover:from-blue-900 hover:to-blue-800 rounded-xl p-6 flex flex-col items-center shadow-lg transition-all duration-300 border border-amber-500/10 hover:border-amber-500/30">
-              <div className="w-16 h-16 bg-gray-900 rounded-2xl flex items-center justify-center mb-4 transform transition-transform group-hover:scale-110 group-hover:rotate-3">
+            <div className="group bg-gradient-to-br from-navy-950 to-navy-900 hover:from-navy-900 hover:to-navy-800 rounded-xl p-6 flex flex-col items-center shadow-lg transition-all duration-300 border border-amber-500/10 hover:border-amber-500/30">
+              <div className="w-16 h-16 bg-navy-800 rounded-2xl flex items-center justify-center mb-4 transform transition-transform group-hover:scale-110 group-hover:rotate-3">
                 <Search size={28} className="text-amber-400 group-hover:text-amber-300 transition-colors" />
               </div>
               <span className="text-white font-medium">Find Notes</span>

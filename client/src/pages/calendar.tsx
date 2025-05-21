@@ -83,59 +83,59 @@ export default function CalendarPage() {
           </TabsContent>
 
           <TabsContent value="monthly" className="mt-6">
-            <div className="bg-gradient-to-br from-blue-950 to-blue-900 rounded-xl border border-blue-800 shadow-xl p-4">
+            <div className="bg-gradient-to-b from-navy-950 to-navy-900 rounded-xl border border-navy-800/50 shadow-xl p-4">
               <MonthlyCalendar />
               
               {/* Additional features below calendar */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-                {/* Quick calendar stats - More translucent */}
-                <Card className="bg-gradient-to-br from-indigo-950/70 to-blue-950/70 border border-blue-800/30 shadow-lg backdrop-blur-sm">
+                {/* Quick calendar stats - Dark navy theme */}
+                <Card className="bg-navy-900/90 border border-navy-800/50 shadow-lg backdrop-blur-sm">
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium text-blue-300">Calendar Overview</CardTitle>
+                    <CardTitle className="text-sm font-medium text-white">Calendar Overview</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="flex items-center justify-between">
-                      <div className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                      <div className="text-2xl font-bold text-white">
                         {Array.isArray(calendarEvents) ? calendarEvents.length : 0} Events
                       </div>
-                      <div className="w-9 h-9 rounded-full bg-indigo-900/30 flex items-center justify-center">
-                        <CalendarIcon className="w-5 h-5 text-blue-300" />
+                      <div className="w-9 h-9 rounded-full bg-navy-800 flex items-center justify-center">
+                        <CalendarIcon className="w-5 h-5 text-white" />
                       </div>
                     </div>
                   </CardContent>
                 </Card>
                 
-                {/* Today's events summary - More translucent */}
-                <Card className="bg-gradient-to-br from-indigo-950/70 to-blue-950/70 border border-blue-800/30 shadow-lg col-span-1 md:col-span-2 backdrop-blur-sm">
+                {/* Today's events summary - Dark navy theme */}
+                <Card className="bg-navy-900/90 border border-navy-800/50 shadow-lg col-span-1 md:col-span-2 backdrop-blur-sm">
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium text-blue-300">Today's Schedule</CardTitle>
+                    <CardTitle className="text-sm font-medium text-white">Today's Schedule</CardTitle>
                   </CardHeader>
                   <CardContent>
                     {Array.isArray(calendarEvents) && calendarEvents.length > 0 ? (
                       <div className="space-y-2">
                         {calendarEvents.slice(0, 2).map(event => (
-                          <div key={event.id} className="flex items-center justify-between p-2 rounded-lg bg-indigo-900/20 border border-indigo-800/20">
+                          <div key={event.id} className="flex items-center justify-between p-2 rounded-lg bg-navy-800/60 border border-navy-800/80">
                             <div>
                               <div className="text-sm font-medium text-white">{event.title}</div>
                               {event.startTime && (
-                                <div className="text-xs text-blue-300 mt-1">
+                                <div className="text-xs text-white opacity-70 mt-1">
                                   {new Date(event.startTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                                 </div>
                               )}
                             </div>
-                            <div className="w-8 h-8 rounded-full bg-indigo-800/30 flex items-center justify-center">
-                              <Clock className="w-4 h-4 text-blue-300" />
+                            <div className="w-8 h-8 rounded-full bg-navy-700 flex items-center justify-center">
+                              <Clock className="w-4 h-4 text-white" />
                             </div>
                           </div>
                         ))}
                         {calendarEvents.length > 2 && (
-                          <div className="text-xs text-center text-blue-300 mt-2">
+                          <div className="text-xs text-center text-white mt-2">
                             +{calendarEvents.length - 2} more events
                           </div>
                         )}
                       </div>
                     ) : (
-                      <div className="text-sm text-blue-300 text-center py-4">No events scheduled today</div>
+                      <div className="text-sm text-white text-center py-4">No events scheduled today</div>
                     )}
                   </CardContent>
                 </Card>
