@@ -19,13 +19,13 @@ export default function RealVoiceTranscription() {
   const [transcript, setTranscript] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [extractedTasks, setExtractedTasks] = useState<Task[]>([]);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<JSX.Element | string | null>(null);
   const [savedTranscripts, setSavedTranscripts] = useState<Array<{id: number, text: string, timestamp: string, tasks: Task[]}>>([]);
   
   // Reference to the Speech Recognition object
   const recognitionRef = useRef<any>(null);
   
-  // Added a function to reset and initialize speech recognition
+  // Added a function to reset and initialize speech recognition with reliable fallbacks
   const initSpeechRecognition = () => {
     setError(null);
     
@@ -52,10 +52,20 @@ export default function RealVoiceTranscription() {
             recognitionRef.current.continuous = true;
             recognitionRef.current.interimResults = true;
             
-            // Set to empty first to use browser default (often works better)
-            recognitionRef.current.lang = '';
+            try {
+              // Initially try with no language specified (browser default)
+              recognitionRef.current.lang = '';
+            } catch (err) {
+              console.warn('Could not set default language', err);
+            }
             
             // Set up event handlers
+            recognitionRef.current.onstart = () => {
+              console.log('Recognition started successfully');
+              // Clear any previous errors on successful start
+              setError(null);
+            };
+            
             recognitionRef.current.onresult = (event: any) => {
               let currentTranscript = '';
               
@@ -71,6 +81,8 @@ export default function RealVoiceTranscription() {
               
               if (currentTranscript) {
                 setTranscript(prev => prev + currentTranscript);
+                // If we get results, clear any previous errors
+                setError(null);
               }
             };
             
@@ -78,11 +90,28 @@ export default function RealVoiceTranscription() {
               console.error('Speech recognition error:', event.error);
               
               if (event.error === 'language-not-supported') {
-                // For language errors, try another approach
-                setError(`Speech recognition language issue detected. Using browser default settings. Try clicking "Start Recording" again.`);
+                // We'll handle this one specially - it's very common
+                setError(
+                  <div className="space-y-2">
+                    <p>Voice recognition is having trouble with your browser's language settings.</p>
+                    <ul className="list-disc list-inside space-y-1 text-sm">
+                      <li>Try clicking "Start Recording" again</li>
+                      <li>Try typing your tasks directly in the text area below</li>
+                      <li>Check that your browser permissions allow microphone access</li>
+                    </ul>
+                  </div>
+                );
               } else if (event.error === 'not-allowed') {
-                setError(`Microphone access denied. Please enable microphone permissions in your browser settings.`);
-                setIsRecording(false);
+                setError(
+                  <div className="space-y-2">
+                    <p>Microphone access denied. Please check your browser settings:</p>
+                    <ul className="list-disc list-inside space-y-1 text-sm">
+                      <li>Click the lock/site info icon in your address bar</li>
+                      <li>Ensure microphone access is set to "Allow"</li>
+                      <li>Refresh the page after changing permissions</li>
+                    </ul>
+                  </div>
+                );
                 
                 toast({
                   title: "Microphone access denied",
@@ -90,23 +119,26 @@ export default function RealVoiceTranscription() {
                   variant: "destructive"
                 });
               } else {
-                setError(`Microphone error: ${event.error}. Please try again.`);
+                setError(`Microphone error: ${event.error}. Please try again or use the text input below.`);
               }
               
-              // Always stop recording on errors
+              // Stop recording on errors
               setIsRecording(false);
             };
             
             recognitionRef.current.onend = () => {
+              console.log('Recognition ended');
+              
               // Only try to restart if we're still supposed to be recording
               if (isRecording) {
                 try {
                   // Add a small delay before restarting to avoid rapid restart loops
                   setTimeout(() => {
                     if (isRecording && recognitionRef.current) {
+                      console.log('Attempting to restart recognition');
                       recognitionRef.current.start();
                     }
-                  }, 300);
+                  }, 500);
                 } catch (err) {
                   console.error('Failed to restart recognition:', err);
                   setIsRecording(false);
@@ -118,11 +150,28 @@ export default function RealVoiceTranscription() {
           }
         } catch (err) {
           console.error('Error initializing speech recognition:', err);
-          setError('Failed to initialize speech recognition. Please refresh the page and try again.');
+          setError(
+            <div className="space-y-2">
+              <p>Unable to initialize voice recognition. You can:</p>
+              <ul className="list-disc list-inside space-y-1 text-sm">
+                <li>Refresh the page and try again</li>
+                <li>Type your requests directly in the text area below</li>
+                <li>Try using Chrome or Edge browsers which have better voice recognition support</li>
+              </ul>
+            </div>
+          );
           return false;
         }
       } else {
-        setError('Speech recognition is not supported in your browser. Please try using Chrome or Edge.');
+        setError(
+          <div className="space-y-2">
+            <p>Speech recognition is not supported in your browser.</p>
+            <ul className="list-disc list-inside space-y-1 text-sm">
+              <li>Try using Google Chrome or Microsoft Edge</li>
+              <li>You can still type your requests in the text area below</li>
+            </ul>
+          </div>
+        );
         return false;
       }
     }
@@ -311,8 +360,16 @@ export default function RealVoiceTranscription() {
   return (
     <div className="container mx-auto py-6 max-w-4xl">
       {error && (
-        <Alert className="mb-6 bg-red-900/30 border-red-800 text-red-300">
-          <AlertDescription>{error}</AlertDescription>
+        <Alert className="mb-6 bg-navy-900/60 border-blue-800/50 shadow-lg">
+          <div className="flex items-start">
+            <div className="w-8 h-8 mr-3 bg-blue-900/30 rounded-full flex items-center justify-center flex-shrink-0">
+              <Info className="h-4 w-4 text-blue-400" />
+            </div>
+            <div>
+              <AlertTitle className="text-white font-medium mb-1">Voice Recognition Status</AlertTitle>
+              <AlertDescription className="text-blue-200">{error}</AlertDescription>
+            </div>
+          </div>
         </Alert>
       )}
       
