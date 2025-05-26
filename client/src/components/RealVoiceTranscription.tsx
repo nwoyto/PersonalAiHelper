@@ -47,17 +47,13 @@ export default function RealVoiceTranscription() {
           
           recognitionRef.current = new SpeechRecognition();
           
-          // Configure it
+          // Configure it with better browser compatibility
           if (recognitionRef.current) {
-            recognitionRef.current.continuous = true;
+            recognitionRef.current.continuous = false; // Better compatibility
             recognitionRef.current.interimResults = true;
             
-            try {
-              // Initially try with no language specified (browser default)
-              recognitionRef.current.lang = '';
-            } catch (err) {
-              console.warn('Could not set default language', err);
-            }
+            // Don't set language at all to avoid language-not-supported error
+            // Let the browser use its default language setting
             
             // Set up event handlers
             recognitionRef.current.onstart = () => {
@@ -128,22 +124,10 @@ export default function RealVoiceTranscription() {
             
             recognitionRef.current.onend = () => {
               console.log('Recognition ended');
+              setIsRecording(false);
               
-              // Only try to restart if we're still supposed to be recording
-              if (isRecording) {
-                try {
-                  // Add a small delay before restarting to avoid rapid restart loops
-                  setTimeout(() => {
-                    if (isRecording && recognitionRef.current) {
-                      console.log('Attempting to restart recognition');
-                      recognitionRef.current.start();
-                    }
-                  }, 500);
-                } catch (err) {
-                  console.error('Failed to restart recognition:', err);
-                  setIsRecording(false);
-                }
-              }
+              // Don't automatically restart - let user manually restart if needed
+              // This prevents the rapid cycling issue we were seeing
             };
             
             return true;
