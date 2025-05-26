@@ -5,11 +5,28 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertTaskSchema, insertNoteSchema } from "@shared/schema";
 import { z, ZodError } from "zod";
-import { analyzeTranscription } from "./openai";
+import { analyzeTranscription, transcribeAudio } from "./openai";
 import calendarRoutes from "./routes/calendar";
+import multer from "multer";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const apiRouter = express.Router();
+  
+  // Configure multer for audio file uploads
+  const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: {
+      fileSize: 25 * 1024 * 1024, // 25MB limit for audio files
+    },
+    fileFilter: (req, file, cb) => {
+      // Accept audio files
+      if (file.mimetype.startsWith('audio/')) {
+        cb(null, true);
+      } else {
+        cb(new Error('Only audio files are allowed'));
+      }
+    },
+  });
 
   // Auth endpoints
   apiRouter.post("/auth/register", async (req: Request, res: Response) => {
