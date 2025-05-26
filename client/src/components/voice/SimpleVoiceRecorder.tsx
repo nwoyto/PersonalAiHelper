@@ -7,7 +7,6 @@ import { TranscriptionResult } from '@/types';
 import { processTranscription } from '@/lib/openai';
 import { toast } from '@/hooks/use-toast';
 
-// Extend the Window interface to include speech recognition
 declare global {
   interface Window {
     SpeechRecognition: any;
@@ -28,14 +27,12 @@ export default function SimpleVoiceRecorder({ onClose, onComplete }: SimpleVoice
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   
-  // Reference to the recognition object
   const recognitionRef = useRef<any>(null);
   
   // Request microphone access
   const requestMicrophoneAccess = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      // Stop the stream immediately since we just needed permission
       stream.getTracks().forEach(track => track.stop());
       setHasPermission(true);
       setErrorMessage(null);
@@ -48,11 +45,10 @@ export default function SimpleVoiceRecorder({ onClose, onComplete }: SimpleVoice
     }
   };
   
-  // Initialize speech recognition with better browser compatibility
+  // Initialize speech recognition
   const initializeSpeechRecognition = async () => {
     if (typeof window === 'undefined') return false;
     
-    // Check if speech recognition is supported
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     
     if (!SpeechRecognition) {
@@ -60,25 +56,18 @@ export default function SimpleVoiceRecorder({ onClose, onComplete }: SimpleVoice
       return false;
     }
     
-    // Request microphone permission first
     const hasAccess = await requestMicrophoneAccess();
-    if (!hasAccess) {
-      return false;
-    }
+    if (!hasAccess) return false;
     
     try {
-      // Create new recognition instance
       const recognition = new SpeechRecognition();
       
-      // Configure recognition settings
-      recognition.continuous = false; // Single recognition session
-      recognition.interimResults = true; // Show results as user speaks
+      // Minimal configuration to avoid browser compatibility issues
+      recognition.continuous = false;
+      recognition.interimResults = true;
       recognition.maxAlternatives = 1;
+      // Don't set language - use browser default
       
-      // Don't set language initially - let browser use default
-      // This avoids the "language-not-supported" error
-      
-      // Set up event handlers
       recognition.onstart = () => {
         console.log('Speech recognition started');
         setIsRecording(true);
@@ -98,7 +87,6 @@ export default function SimpleVoiceRecorder({ onClose, onComplete }: SimpleVoice
           }
         }
         
-        // Update transcript with both final and interim results
         setTranscript(finalTranscript + interimTranscript);
       };
       
@@ -120,28 +108,12 @@ export default function SimpleVoiceRecorder({ onClose, onComplete }: SimpleVoice
           case 'network':
             errorMsg = 'Network error occurred. Please check your internet connection.';
             break;
-          case 'language-not-supported':
-            errorMsg = 'Language not supported. Trying with browser default...';
-            // Try to restart with no language specified
-            setTimeout(() => {
-              if (recognitionRef.current) {
-                try {
-                  recognitionRef.current.lang = '';
-                  startRecording();
-                } catch (err) {
-                  setErrorMessage('Speech recognition failed. Please try typing your message instead.');
-                }
-              }
-            }, 500);
-            break;
           default:
-            errorMsg = `Speech recognition error: ${event.error}`;
+            errorMsg = `Unable to start voice recognition. Please try typing your message instead.`;
         }
         
-        if (event.error !== 'language-not-supported') {
-          setErrorMessage(errorMsg);
-          setIsRecording(false);
-        }
+        setErrorMessage(errorMsg);
+        setIsRecording(false);
       };
       
       recognition.onend = () => {
@@ -159,11 +131,10 @@ export default function SimpleVoiceRecorder({ onClose, onComplete }: SimpleVoice
     }
   };
   
-  // Initialize speech recognition on component mount
+  // Initialize on mount
   useEffect(() => {
     initializeSpeechRecognition();
     
-    // Cleanup on unmount
     return () => {
       if (recognitionRef.current) {
         try {
@@ -198,8 +169,7 @@ export default function SimpleVoiceRecorder({ onClose, onComplete }: SimpleVoice
     } catch (err: any) {
       console.error('Failed to start recording:', err);
       
-      if (err.message.includes('already started')) {
-        // Recognition is already running, just update state
+      if (err.message && err.message.includes('already started')) {
         setIsRecording(true);
       } else {
         setErrorMessage('Failed to start recording. Please try again.');
@@ -283,14 +253,12 @@ export default function SimpleVoiceRecorder({ onClose, onComplete }: SimpleVoice
         </CardHeader>
         
         <CardContent className="space-y-4">
-          {/* Error message */}
           {errorMessage && (
             <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
               <p className="text-sm text-red-700 dark:text-red-300">{errorMessage}</p>
             </div>
           )}
           
-          {/* Microphone permission status */}
           {hasPermission === false && (
             <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md">
               <p className="text-sm text-yellow-700 dark:text-yellow-300">
@@ -306,7 +274,6 @@ export default function SimpleVoiceRecorder({ onClose, onComplete }: SimpleVoice
             </div>
           )}
           
-          {/* Voice recording section */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium">Voice Recording</span>
@@ -335,7 +302,6 @@ export default function SimpleVoiceRecorder({ onClose, onComplete }: SimpleVoice
               </div>
             </div>
             
-            {/* Transcript display */}
             <div className="min-h-[80px] p-3 bg-gray-50 dark:bg-gray-800 rounded-md border">
               {isRecording && (
                 <div className="flex items-center gap-2 mb-2">
@@ -364,7 +330,6 @@ export default function SimpleVoiceRecorder({ onClose, onComplete }: SimpleVoice
             )}
           </div>
           
-          {/* Text input alternative */}
           <div className="space-y-3 border-t pt-4">
             <span className="text-sm font-medium">Or Type Your Message</span>
             <textarea
