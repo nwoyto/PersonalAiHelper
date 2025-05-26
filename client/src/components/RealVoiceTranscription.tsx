@@ -86,15 +86,14 @@ export default function RealVoiceTranscription() {
               console.error('Speech recognition error:', event.error);
               
               if (event.error === 'language-not-supported') {
-                // We'll handle this one specially - it's very common
+                // This is very common - direct users to the text input
                 setError(
                   <div className="space-y-2">
-                    <p>Voice recognition is having trouble with your browser's language settings.</p>
-                    <ul className="list-disc list-inside space-y-1 text-sm">
-                      <li>Try clicking "Start Recording" again</li>
-                      <li>Try typing your tasks directly in the text area below</li>
-                      <li>Check that your browser permissions allow microphone access</li>
-                    </ul>
+                    <p><strong>Voice recording isn't working in your browser.</strong></p>
+                    <p className="text-sm text-blue-200">
+                      No worries! Use the <strong>"Text Input (Always Works)"</strong> section below instead. 
+                      Just type what you would say to your assistant and click "Analyze Text".
+                    </p>
                   </div>
                 );
               } else if (event.error === 'not-allowed') {
@@ -455,15 +454,43 @@ export default function RealVoiceTranscription() {
             )}
           </div>
           
-          {/* Manual input option */}
+          {/* Text input option - more prominent */}
           <div className="mt-4 pt-4 border-t border-blue-800/30">
-            <h3 className="text-sm font-medium text-blue-300 mb-2">Or type/paste text manually:</h3>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-base font-medium text-white">Text Input (Always Works)</h3>
+              <Button
+                onClick={processTranscript}
+                className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 shadow-md"
+                disabled={isProcessing || !transcript.trim()}
+                size="sm"
+              >
+                {isProcessing ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="h-4 w-4 mr-2" />
+                    Analyze Text
+                  </>
+                )}
+              </Button>
+            </div>
             <textarea
-              className="w-full bg-gray-900/70 border border-blue-800/30 rounded-lg p-4 min-h-[100px] text-white shadow-inner focus:border-purple-500/30 focus:outline-none focus:ring-1 focus:ring-purple-500/20"
+              className="w-full bg-gray-900/70 border border-blue-800/30 rounded-lg p-4 min-h-[120px] text-white shadow-inner focus:border-purple-500/30 focus:outline-none focus:ring-1 focus:ring-purple-500/20 resize-y"
               value={transcript}
               onChange={(e) => setTranscript(e.target.value)}
-              placeholder="Type or paste text here..."
+              placeholder="Type what you would say to your assistant here... 
+
+Examples:
+• Schedule a meeting with John tomorrow at 2pm
+• Remind me to buy groceries this evening
+• Add task to review the quarterly report by Friday"
             />
+            <p className="text-blue-300 text-xs mt-2">
+              Type your requests above and click "Analyze Text" to extract tasks and actions
+            </p>
           </div>
         </CardContent>
       </Card>
