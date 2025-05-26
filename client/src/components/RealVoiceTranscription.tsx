@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Mic, MicOff, Save, Loader2, CheckCircle, RefreshCw, Info } from 'lucide-react';
+import { Mic, MicOff, Save, Loader2, CheckCircle, RefreshCw, Info, Upload } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { 
@@ -12,6 +12,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Task } from '@/types';
+import AudioRecorder from './voice/AudioRecorder';
 
 export default function RealVoiceTranscription() {
   const { toast } = useToast();
@@ -252,8 +253,9 @@ export default function RealVoiceTranscription() {
     }
   };
   
-  const processTranscript = async () => {
-    if (!transcript.trim()) {
+  const processTranscript = async (textToProcess?: string) => {
+    const text = textToProcess || transcript;
+    if (!text.trim()) {
       toast({
         title: "Empty transcription",
         description: "Please speak or type something first",
@@ -270,7 +272,7 @@ export default function RealVoiceTranscription() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ text: transcript }),
+        body: JSON.stringify({ text }),
       });
       
       if (!response.ok) {
@@ -342,8 +344,17 @@ export default function RealVoiceTranscription() {
 
   return (
     <div className="container mx-auto py-6 max-w-4xl">
+      {/* New reliable audio recording system */}
+      <AudioRecorder 
+        onTranscriptionComplete={(text) => {
+          setTranscript(text);
+          setError(null);
+          processTranscript(text);
+        }}
+      />
+      
       {error && (
-        <Alert className="mb-6 bg-navy-900/60 border-blue-800/50 shadow-lg">
+        <Alert className="mt-6 bg-navy-900/60 border-blue-800/50 shadow-lg">
           <div className="flex items-start">
             <div className="w-8 h-8 mr-3 bg-blue-900/30 rounded-full flex items-center justify-center flex-shrink-0">
               <Info className="h-4 w-4 text-blue-400" />
@@ -356,7 +367,7 @@ export default function RealVoiceTranscription() {
         </Alert>
       )}
       
-      <Card className="bg-gradient-to-br from-blue-950 to-blue-900 border border-blue-800 mb-6 shadow-xl">
+      <Card className="bg-gradient-to-br from-blue-950 to-blue-900 border border-blue-800 mb-6 shadow-xl mt-6">
         <CardHeader>
           <div className="flex items-center">
             <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full flex items-center justify-center mr-4 shadow-lg p-1">

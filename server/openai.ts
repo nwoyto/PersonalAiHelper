@@ -120,35 +120,31 @@ export async function analyzeTranscription(text: string): Promise<TranscriptionA
   }
 }
 
-export async function transcribeAudio(audioData: ArrayBuffer): Promise<{ text: string }> {
+export async function transcribeAudio(audioBuffer: Buffer): Promise<{ text: string }> {
+  const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+  });
+
   try {
-    // In a real implementation, we would send the audio data to OpenAI's Whisper API
-    // Since we can't directly use the Whisper API in this demo, we'll simulate it
-    
-    // For a real implementation, the code would look something like this:
-    /*
-    const formData = new FormData();
-    formData.append("file", new Blob([audioData]), "audio.webm");
-    formData.append("model", "whisper-1");
-    
-    const response = await fetch("https://api.openai.com/v1/audio/transcriptions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`
-      },
-      body: formData
+    // Convert Buffer to File for OpenAI API
+    const audioFile = new File([audioBuffer], "recording.webm", {
+      type: "audio/webm",
     });
+
+    console.log('Sending audio to OpenAI Whisper API...');
     
-    const result = await response.json();
-    return { text: result.text };
-    */
-    
-    // Simulated response for demo purposes
-    return { 
-      text: "Schedule a meeting with the design team for tomorrow at 2 PM to discuss the new mobile app wireframes." 
-    };
+    const transcription = await openai.audio.transcriptions.create({
+      file: audioFile,
+      model: "whisper-1",
+      language: "en", // You can make this configurable later
+    });
+
+    console.log('OpenAI Whisper transcription successful');
+    return { text: transcription.text };
   } catch (error) {
-    console.error("Error transcribing audio:", error);
-    return { text: "Failed to transcribe audio." };
+    console.error("OpenAI Whisper transcription error:", error);
+    throw new Error("Failed to transcribe audio with Whisper API");
   }
 }
+
+// Legacy function removed - using proper Whisper API implementation above

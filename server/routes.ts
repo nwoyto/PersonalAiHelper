@@ -350,6 +350,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(500).json({ message: "Failed to process transcription" });
     }
   });
+
+  // Audio transcription endpoint using OpenAI Whisper
+  apiRouter.post("/transcribe-audio", upload.single('audio'), async (req: Request, res: Response) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: "Audio file is required" });
+      }
+
+      console.log('Received audio file:', req.file.originalname, 'Size:', req.file.size, 'bytes');
+      
+      // Transcribe audio using OpenAI Whisper
+      const transcription = await transcribeAudio(req.file.buffer);
+      
+      console.log('Transcription successful:', transcription.text.substring(0, 100) + '...');
+      
+      res.json({ text: transcription.text });
+    } catch (error) {
+      console.error("Error transcribing audio:", error);
+      res.status(500).json({ error: "Failed to transcribe audio" });
+    }
+  });
   
   // Calendar integration endpoints
   apiRouter.get("/calendar/integrations", async (req: Request, res: Response) => {
