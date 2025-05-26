@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Mic, Square, CheckCircle, X } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { Mic, Square, CheckCircle, X, Send } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { TranscriptionResult } from '@/types';
 
@@ -35,7 +36,7 @@ export default function SimpleVoiceRecorder({ onClose, onComplete }: SimpleVoice
     }
   };
   
-  // Initialize speech recognition
+  // Initialize speech recognition with better browser compatibility
   const initializeSpeechRecognition = () => {
     if (typeof window === 'undefined') return false;
     
@@ -50,12 +51,12 @@ export default function SimpleVoiceRecorder({ onClose, onComplete }: SimpleVoice
       // Create new recognition instance
       recognitionRef.current = new SpeechRecognition();
       
-      // Configure it
-      recognitionRef.current.continuous = true;
+      // Configure with better compatibility settings
+      recognitionRef.current.continuous = false; // Better compatibility
       recognitionRef.current.interimResults = true;
       
-      // Try various language settings to avoid language-not-supported error
-      try { recognitionRef.current.lang = ''; } catch (e) { /* ignore */ }
+      // Don't set language at all to use browser default
+      // This avoids the language-not-supported error entirely
       
       // Set up event handlers
       recognitionRef.current.onstart = () => {
@@ -89,14 +90,16 @@ export default function SimpleVoiceRecorder({ onClose, onComplete }: SimpleVoice
         console.error('Recognition error:', event.error);
         
         if (event.error === 'language-not-supported') {
-          setErrorMessage('Your browser does not support the selected language. Try typing instead.');
+          setErrorMessage('Speech recognition had a technical issue. Please use the text input below instead.');
         } else if (event.error === 'not-allowed') {
-          setErrorMessage('Microphone access denied. Please check your browser settings.');
+          setErrorMessage('Microphone access denied. Please allow microphone access in your browser settings.');
+        } else if (event.error === 'no-speech') {
+          setErrorMessage('No speech detected. Please try speaking again or use the text input below.');
         } else {
-          setErrorMessage(`Error: ${event.error}. Please try again.`);
+          setErrorMessage(`Speech recognition error (${event.error}). Please use the text input below.`);
         }
         
-        stopRecording();
+        setIsRecording(false);
       };
       
       recognitionRef.current.onend = () => {
@@ -112,30 +115,37 @@ export default function SimpleVoiceRecorder({ onClose, onComplete }: SimpleVoice
     }
   };
   
-  // Start recording
+  // Start recording with better error handling
   const startRecording = async () => {
     setErrorMessage(null);
+    setTranscript(''); // Clear any previous transcript
     
-    // Check microphone access
+    // Check microphone access first
     const hasAccess = await requestMicrophoneAccess();
-    if (!hasAccess) return;
+    if (!hasAccess) {
+      setErrorMessage('Microphone access is required. Please allow microphone access and try again.');
+      return;
+    }
     
-    // Initialize recognition if needed
-    if (!recognitionRef.current) {
-      const initialized = initializeSpeechRecognition();
-      if (!initialized) return;
+    // Always reinitialize recognition for a fresh start
+    const initialized = initializeSpeechRecognition();
+    if (!initialized) {
+      setErrorMessage('Speech recognition is not available in your browser. Please use the text input below.');
+      return;
     }
     
     // Start recording
     try {
       recognitionRef.current.start();
+      console.log('Starting speech recognition...');
+      
       toast({
         title: 'Recording started',
         description: 'Speak clearly into your microphone',
       });
     } catch (err) {
       console.error('Failed to start recording:', err);
-      setErrorMessage('Failed to start recording. Please try again.');
+      setErrorMessage('Could not start recording. Please try using the text input below.');
     }
   };
   
@@ -207,11 +217,9 @@ export default function SimpleVoiceRecorder({ onClose, onComplete }: SimpleVoice
     }
   };
   
-  // Start recording automatically when component mounts
+  // Clean up on unmount only - don't auto-start recording
   useEffect(() => {
-    startRecording();
-    
-    // Clean up on unmount
+    // Just set up cleanup, let user manually start recording
     return () => {
       if (recognitionRef.current) {
         try {
@@ -242,7 +250,10 @@ export default function SimpleVoiceRecorder({ onClose, onComplete }: SimpleVoice
               <div>
                 <h3 className="font-semibold text-white text-lg">Voice Assistant</h3>
                 <p className="text-gray-300 text-sm">
-                  {isProcessing ? 'Processing...' : isRecording ? 'Listening to you...' : 'Ready to record'}
+                  {isProcessing ? 'Processing your voice...' : 
+                   isRecording ? 'Listening - speak now!' : 
+                   errorMessage ? 'Use text input below' :
+                   'Click "Start Recording" to begin'}
                 </p>
               </div>
             </div>
