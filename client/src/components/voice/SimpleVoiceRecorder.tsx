@@ -13,6 +13,7 @@ interface SimpleVoiceRecorderProps {
 export default function SimpleVoiceRecorder({ onClose, onComplete }: SimpleVoiceRecorderProps) {
   const [isRecording, setIsRecording] = useState(false);
   const [transcript, setTranscript] = useState('');
+  const [textInput, setTextInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   
@@ -216,6 +217,36 @@ export default function SimpleVoiceRecorder({ onClose, onComplete }: SimpleVoice
       onClose();
     }
   };
+
+  // Handle text input submission
+  const handleTextSubmit = async () => {
+    const textToProcess = textInput.trim();
+    if (!textToProcess) {
+      setErrorMessage('Please enter some text to process.');
+      return;
+    }
+
+    setIsProcessing(true);
+
+    try {
+      const result: TranscriptionResult = {
+        text: textToProcess,
+        tasks: [] // Will be populated by the server
+      };
+
+      onComplete(result);
+      toast({
+        title: 'Text processed',
+        description: 'Your request has been submitted',
+      });
+      onClose();
+    } catch (error) {
+      console.error('Error processing text:', error);
+      setErrorMessage('Failed to process your request. Please try again.');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
   
   // Clean up on unmount only - don't auto-start recording
   useEffect(() => {
@@ -329,18 +360,27 @@ export default function SimpleVoiceRecorder({ onClose, onComplete }: SimpleVoice
             </Button>
           </div>
           
-          {/* Type input option */}
+          {/* Text input option */}
           <div className="mt-4 border-t border-navy-800/50 pt-4">
             <label className="block text-sm text-gray-300 mb-2">
-              Or type manually:
+              Or type your request:
             </label>
-            <textarea
-              className="w-full bg-navy-800/50 border border-navy-700/50 rounded-lg p-3 min-h-[80px] text-white shadow-inner focus:border-purple-500/40 focus:outline-none focus:ring-1 focus:ring-purple-500/30"
-              value={transcript}
-              onChange={(e) => setTranscript(e.target.value)}
-              placeholder="Type what you would say..."
-              disabled={isProcessing}
-            />
+            <div className="flex gap-2">
+              <textarea
+                className="flex-1 bg-navy-800/50 border border-navy-700/50 rounded-lg p-3 min-h-[80px] text-white shadow-inner focus:border-purple-500/40 focus:outline-none focus:ring-1 focus:ring-purple-500/30"
+                value={textInput}
+                onChange={(e) => setTextInput(e.target.value)}
+                placeholder="Type what you would say..."
+                disabled={isProcessing}
+              />
+              <Button
+                onClick={handleTextSubmit}
+                className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white self-end"
+                disabled={isProcessing || !textInput.trim()}
+              >
+                <Send className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </div>
       </div>
