@@ -1,9 +1,19 @@
-import React, { useState, useEffect, useRef } from 'react';
+
+import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Mic, Square, CheckCircle, X, Send } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Mic, MicOff, Send, X, Loader2 } from 'lucide-react';
 import { TranscriptionResult } from '@/types';
+import { processTranscription } from '@/lib/openai';
+import { toast } from '@/hooks/use-toast';
+
+// Extend the Window interface to include speech recognition
+declare global {
+  interface Window {
+    SpeechRecognition: any;
+    webkitSpeechRecognition: any;
+  }
+}
 
 interface SimpleVoiceRecorderProps {
   onClose: () => void;
@@ -16,6 +26,7 @@ export default function SimpleVoiceRecorder({ onClose, onComplete }: SimpleVoice
   const [textInput, setTextInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   
   // Reference to the recognition object
   const recognitionRef = useRef<any>(null);
@@ -23,134 +34,179 @@ export default function SimpleVoiceRecorder({ onClose, onComplete }: SimpleVoice
   // Request microphone access
   const requestMicrophoneAccess = async () => {
     try {
-      await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      // Stop the stream immediately since we just needed permission
+      stream.getTracks().forEach(track => track.stop());
+      setHasPermission(true);
+      setErrorMessage(null);
       return true;
     } catch (err) {
       console.error('Microphone access denied:', err);
-      setErrorMessage('Please allow microphone access to use voice recording');
-      toast({
-        title: 'Microphone access denied',
-        description: 'Please allow microphone access in your browser settings',
-        variant: 'destructive',
-      });
+      setHasPermission(false);
+      setErrorMessage('Microphone access denied. Please allow microphone access in your browser settings.');
       return false;
     }
   };
   
   // Initialize speech recognition with better browser compatibility
-  const initializeSpeechRecognition = () => {
+  const initializeSpeechRecognition = async () => {
     if (typeof window === 'undefined') return false;
     
+    // Check if speech recognition is supported
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     
     if (!SpeechRecognition) {
-      setErrorMessage('Speech recognition is not supported in your browser');
+      setErrorMessage('Speech recognition is not supported in this browser. Please use Chrome, Edge, or Safari.');
+      return false;
+    }
+    
+    // Request microphone permission first
+    const hasAccess = await requestMicrophoneAccess();
+    if (!hasAccess) {
       return false;
     }
     
     try {
       // Create new recognition instance
-      recognitionRef.current = new SpeechRecognition();
+      const recognition = new SpeechRecognition();
       
-      // Configure with better compatibility settings
-      recognitionRef.current.continuous = false; // Better compatibility
-      recognitionRef.current.interimResults = true;
+      // Configure recognition settings
+      recognition.continuous = false; // Single recognition session
+      recognition.interimResults = true; // Show results as user speaks
+      recognition.maxAlternatives = 1;
       
-      // Don't set language at all to use browser default
-      // This avoids the language-not-supported error entirely
+      // Don't set language initially - let browser use default
+      // This avoids the "language-not-supported" error
       
       // Set up event handlers
-      recognitionRef.current.onstart = () => {
-        console.log('Recognition started');
+      recognition.onstart = () => {
+        console.log('Speech recognition started');
         setIsRecording(true);
         setErrorMessage(null);
       };
       
-      recognitionRef.current.onresult = (event: any) => {
-        let currentTranscript = '';
+      recognition.onresult = (event: any) => {
+        let finalTranscript = '';
+        let interimTranscript = '';
         
         for (let i = event.resultIndex; i < event.results.length; i++) {
-          const result = event.results[i];
-          if (result[0]) {
-            currentTranscript += result[0].transcript + ' ';
+          const transcript = event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            finalTranscript += transcript;
+          } else {
+            interimTranscript += transcript;
           }
         }
         
-        if (currentTranscript) {
-          setTranscript(prev => {
-            // Only append if it's new content
-            if (!prev.includes(currentTranscript.trim())) {
-              return prev + currentTranscript;
-            }
-            return prev;
-          });
+        // Update transcript with both final and interim results
+        setTranscript(finalTranscript + interimTranscript);
+      };
+      
+      recognition.onerror = (event: any) => {
+        console.error('Speech recognition error:', event.error);
+        
+        let errorMsg = '';
+        switch (event.error) {
+          case 'no-speech':
+            errorMsg = 'No speech detected. Please try speaking again.';
+            break;
+          case 'audio-capture':
+            errorMsg = 'Microphone not available. Please check your microphone connection.';
+            break;
+          case 'not-allowed':
+            errorMsg = 'Microphone access denied. Please allow microphone access and try again.';
+            setHasPermission(false);
+            break;
+          case 'network':
+            errorMsg = 'Network error occurred. Please check your internet connection.';
+            break;
+          case 'language-not-supported':
+            errorMsg = 'Language not supported. Trying with browser default...';
+            // Try to restart with no language specified
+            setTimeout(() => {
+              if (recognitionRef.current) {
+                try {
+                  recognitionRef.current.lang = '';
+                  startRecording();
+                } catch (err) {
+                  setErrorMessage('Speech recognition failed. Please try typing your message instead.');
+                }
+              }
+            }, 500);
+            break;
+          default:
+            errorMsg = `Speech recognition error: ${event.error}`;
+        }
+        
+        if (event.error !== 'language-not-supported') {
+          setErrorMessage(errorMsg);
+          setIsRecording(false);
         }
       };
       
-      recognitionRef.current.onerror = (event: any) => {
-        console.error('Recognition error:', event.error);
-        
-        if (event.error === 'language-not-supported') {
-          setErrorMessage('Speech recognition had a technical issue. Please use the text input below instead.');
-        } else if (event.error === 'not-allowed') {
-          setErrorMessage('Microphone access denied. Please allow microphone access in your browser settings.');
-        } else if (event.error === 'no-speech') {
-          setErrorMessage('No speech detected. Please try speaking again or use the text input below.');
-        } else {
-          setErrorMessage(`Speech recognition error (${event.error}). Please use the text input below.`);
-        }
-        
+      recognition.onend = () => {
+        console.log('Speech recognition ended');
         setIsRecording(false);
       };
       
-      recognitionRef.current.onend = () => {
-        console.log('Recognition ended');
-        setIsRecording(false);
-      };
-      
+      recognitionRef.current = recognition;
       return true;
+      
     } catch (err) {
-      console.error('Failed to initialize speech recognition:', err);
-      setErrorMessage('Failed to initialize speech recognition');
+      console.error('Error initializing speech recognition:', err);
+      setErrorMessage('Failed to initialize speech recognition. Please refresh the page and try again.');
       return false;
     }
   };
   
-  // Start recording with better error handling
+  // Initialize speech recognition on component mount
+  useEffect(() => {
+    initializeSpeechRecognition();
+    
+    // Cleanup on unmount
+    return () => {
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.abort();
+        } catch (err) {
+          console.error('Error cleaning up recognition:', err);
+        }
+      }
+    };
+  }, []);
+  
   const startRecording = async () => {
-    setErrorMessage(null);
-    setTranscript(''); // Clear any previous transcript
-    
-    // Check microphone access first
-    const hasAccess = await requestMicrophoneAccess();
-    if (!hasAccess) {
-      setErrorMessage('Microphone access is required. Please allow microphone access and try again.');
-      return;
+    if (!recognitionRef.current) {
+      const initialized = await initializeSpeechRecognition();
+      if (!initialized) return;
     }
     
-    // Always reinitialize recognition for a fresh start
-    const initialized = initializeSpeechRecognition();
-    if (!initialized) {
-      setErrorMessage('Speech recognition is not available in your browser. Please use the text input below.');
-      return;
+    if (hasPermission === false) {
+      const hasAccess = await requestMicrophoneAccess();
+      if (!hasAccess) return;
     }
     
-    // Start recording
     try {
+      setTranscript('');
+      setErrorMessage(null);
       recognitionRef.current.start();
-      console.log('Starting speech recognition...');
       
       toast({
-        title: 'Recording started',
-        description: 'Speak clearly into your microphone',
+        title: "Recording started",
+        description: "Speak clearly into your microphone",
       });
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to start recording:', err);
-      setErrorMessage('Could not start recording. Please try using the text input below.');
+      
+      if (err.message.includes('already started')) {
+        // Recognition is already running, just update state
+        setIsRecording(true);
+      } else {
+        setErrorMessage('Failed to start recording. Please try again.');
+      }
     }
   };
   
-  // Stop recording
   const stopRecording = () => {
     if (recognitionRef.current && isRecording) {
       try {
@@ -159,15 +215,14 @@ export default function SimpleVoiceRecorder({ onClose, onComplete }: SimpleVoice
         console.error('Error stopping recognition:', err);
       }
     }
-    setIsRecording(false);
   };
   
-  // Process the transcription
-  const processTranscription = async () => {
-    if (!transcript.trim()) {
+  const handleProcessTranscript = async (text: string) => {
+    if (!text.trim()) {
       toast({
-        title: 'No speech detected',
-        description: 'Please say something before submitting',
+        title: "No text to process",
+        description: "Please record some speech or type a message first.",
+        variant: "destructive",
       });
       return;
     }
@@ -175,215 +230,168 @@ export default function SimpleVoiceRecorder({ onClose, onComplete }: SimpleVoice
     setIsProcessing(true);
     
     try {
-      const response = await fetch('/api/transcribe', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: transcript }),
-      });
+      const result = await processTranscription(text);
+      onComplete(result);
       
-      if (!response.ok) {
-        throw new Error(`Error ${response.status}: ${response.statusText}`);
+      if (result.tasks.length > 0) {
+        toast({
+          title: "Tasks extracted",
+          description: `Created ${result.tasks.length} new task${result.tasks.length !== 1 ? 's' : ''}`,
+        });
       }
-      
-      const result = await response.json();
-      onComplete(result);
-      
-      toast({
-        title: 'Analysis complete',
-        description: `Found ${result.tasks?.length || 0} tasks in your speech`,
-      });
-    } catch (err) {
-      console.error('Failed to process transcript:', err);
-      
-      // Fallback result if API fails
-      const fallbackResult: TranscriptionResult = {
-        text: transcript,
-        tasks: [{
-          title: "Task from voice input",
-          description: transcript,
-          category: "personal",
-          priority: "medium",
-        }]
-      };
-      
-      onComplete(fallbackResult);
-      
-      toast({
-        title: 'Basic processing complete',
-        description: 'Created a simple task from your speech',
-      });
-    } finally {
-      setIsProcessing(false);
-      onClose();
-    }
-  };
-
-  // Handle text input submission
-  const handleTextSubmit = async () => {
-    const textToProcess = textInput.trim();
-    if (!textToProcess) {
-      setErrorMessage('Please enter some text to process.');
-      return;
-    }
-
-    setIsProcessing(true);
-
-    try {
-      const result: TranscriptionResult = {
-        text: textToProcess,
-        tasks: [] // Will be populated by the server
-      };
-
-      onComplete(result);
-      toast({
-        title: 'Text processed',
-        description: 'Your request has been submitted',
-      });
-      onClose();
     } catch (error) {
-      console.error('Error processing text:', error);
-      setErrorMessage('Failed to process your request. Please try again.');
+      console.error('Error processing transcription:', error);
+      toast({
+        title: "Processing failed",
+        description: "Failed to process the transcription. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setIsProcessing(false);
     }
   };
   
-  // Clean up on unmount only - don't auto-start recording
-  useEffect(() => {
-    // Just set up cleanup, let user manually start recording
-    return () => {
-      if (recognitionRef.current) {
-        try {
-          recognitionRef.current.stop();
-        } catch (err) {
-          // Ignore cleanup errors
-        }
-      }
-    };
-  }, []);
+  const handleSendTranscript = () => {
+    const textToProcess = transcript.trim() || textInput.trim();
+    handleProcessTranscript(textToProcess);
+  };
+  
+  const handleSendTextInput = () => {
+    handleProcessTranscript(textInput);
+  };
   
   return (
-    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-      <div className="bg-gradient-to-b from-navy-950 to-navy-900 rounded-xl border border-navy-800 shadow-xl max-w-md w-full p-5 relative overflow-hidden">
-        {/* Background gradients */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-purple-600 rounded-full filter blur-3xl opacity-5 -mr-20 -mt-20"></div>
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-600 rounded-full filter blur-3xl opacity-5 -ml-20 -mb-20"></div>
-        
-        {/* Content */}
-        <div className="relative z-10">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center">
-              <div className={`w-12 h-12 rounded-full flex items-center justify-center mr-3 ${isRecording ? 'bg-red-500/20 animate-pulse' : 'bg-navy-800'}`}>
-                <div className="w-10 h-10 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full flex items-center justify-center">
-                  <Mic className="h-5 w-5 text-white" />
-                </div>
-              </div>
-              <div>
-                <h3 className="font-semibold text-white text-lg">Voice Assistant</h3>
-                <p className="text-gray-300 text-sm">
-                  {isProcessing ? 'Processing your voice...' : 
-                   isRecording ? 'Listening - speak now!' : 
-                   errorMessage ? 'Use text input below' :
-                   'Click "Start Recording" to begin'}
-                </p>
-              </div>
+    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+      <Card className="w-full max-w-md bg-white dark:bg-gray-900">
+        <CardHeader className="pb-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-lg">Voice Assistant</CardTitle>
+              <CardDescription>
+                Record your voice or type your message
+              </CardDescription>
             </div>
-            
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={onClose}
-              className="w-8 h-8 bg-navy-800 rounded-full flex items-center justify-center text-gray-400 hover:text-white hover:bg-navy-700 transition-colors"
-              disabled={isProcessing}
+              className="h-8 w-8 p-0"
             >
-              <X size={16} />
-            </button>
+              <X className="h-4 w-4" />
+            </Button>
           </div>
-          
+        </CardHeader>
+        
+        <CardContent className="space-y-4">
           {/* Error message */}
           {errorMessage && (
-            <div className="bg-red-900/20 border border-red-800/30 rounded-lg p-3 mb-4 text-red-200 text-sm">
-              {errorMessage}
+            <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
+              <p className="text-sm text-red-700 dark:text-red-300">{errorMessage}</p>
             </div>
           )}
           
-          {/* Transcript display */}
-          <div className="bg-navy-800/50 border border-navy-700/50 rounded-lg p-4 min-h-[100px] mb-4 text-white shadow-inner relative overflow-hidden">
-            <div className="max-h-[120px] overflow-y-auto pr-2 scrollbar-hide">
-              {transcript ? (
-                <p className="whitespace-pre-wrap">{transcript}</p>
-              ) : (
-                <p className="text-gray-400 italic">
-                  {isRecording ? "Speak now..." : "Click Start Recording to begin"}
-                </p>
-              )}
+          {/* Microphone permission status */}
+          {hasPermission === false && (
+            <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md">
+              <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                Microphone access is required for voice recording. Please allow access and try again.
+              </p>
+              <Button
+                onClick={requestMicrophoneAccess}
+                size="sm"
+                className="mt-2"
+              >
+                Grant Permission
+              </Button>
+            </div>
+          )}
+          
+          {/* Voice recording section */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium">Voice Recording</span>
+              <div className="flex gap-2">
+                {!isRecording ? (
+                  <Button
+                    onClick={startRecording}
+                    disabled={isProcessing || hasPermission === false}
+                    size="sm"
+                    className="flex items-center gap-2"
+                  >
+                    <Mic className="h-4 w-4" />
+                    Start Recording
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={stopRecording}
+                    variant="destructive"
+                    size="sm"
+                    className="flex items-center gap-2"
+                  >
+                    <MicOff className="h-4 w-4" />
+                    Stop Recording
+                  </Button>
+                )}
+              </div>
             </div>
             
-            {isRecording && (
-              <div className="absolute top-3 right-3 flex space-x-1">
-                <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-                <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse delay-100"></div>
-                <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse delay-200"></div>
-              </div>
+            {/* Transcript display */}
+            <div className="min-h-[80px] p-3 bg-gray-50 dark:bg-gray-800 rounded-md border">
+              {isRecording && (
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Recording...</span>
+                </div>
+              )}
+              <p className="text-sm whitespace-pre-wrap">
+                {transcript || "Click 'Start Recording' and speak your message..."}
+              </p>
+            </div>
+            
+            {transcript && (
+              <Button
+                onClick={handleSendTranscript}
+                disabled={isProcessing}
+                className="w-full flex items-center gap-2"
+              >
+                {isProcessing ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Send className="h-4 w-4" />
+                )}
+                Process Voice Recording
+              </Button>
             )}
           </div>
           
-          {/* Controls */}
-          <div className="flex flex-wrap gap-3 justify-between">
-            <div>
-              {!isRecording ? (
-                <Button
-                  onClick={startRecording}
-                  className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white"
-                  disabled={isProcessing}
-                >
-                  <Mic className="h-4 w-4 mr-2" />
-                  Start Recording
-                </Button>
-              ) : (
-                <Button
-                  onClick={stopRecording}
-                  className="bg-red-600 hover:bg-red-500 text-white"
-                  disabled={isProcessing}
-                >
-                  <Square className="h-4 w-4 mr-2" />
-                  Stop Recording
-                </Button>
-              )}
-            </div>
+          {/* Text input alternative */}
+          <div className="space-y-3 border-t pt-4">
+            <span className="text-sm font-medium">Or Type Your Message</span>
+            <textarea
+              value={textInput}
+              onChange={(e) => setTextInput(e.target.value)}
+              placeholder="Type your message here..."
+              className="w-full min-h-[80px] p-3 border rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+              disabled={isProcessing}
+            />
             
-            <Button
-              onClick={processTranscription}
-              className="bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-500 hover:to-teal-500 text-white"
-              disabled={isProcessing || !transcript.trim()}
-            >
-              <CheckCircle className="h-4 w-4 mr-2" />
-              Submit
-            </Button>
-          </div>
-          
-          {/* Text input option */}
-          <div className="mt-4 border-t border-navy-800/50 pt-4">
-            <label className="block text-sm text-gray-300 mb-2">
-              Or type your request:
-            </label>
-            <div className="flex gap-2">
-              <textarea
-                className="flex-1 bg-navy-800/50 border border-navy-700/50 rounded-lg p-3 min-h-[80px] text-white shadow-inner focus:border-purple-500/40 focus:outline-none focus:ring-1 focus:ring-purple-500/30"
-                value={textInput}
-                onChange={(e) => setTextInput(e.target.value)}
-                placeholder="Type what you would say..."
-                disabled={isProcessing}
-              />
+            {textInput && (
               <Button
-                onClick={handleTextSubmit}
-                className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white self-end"
-                disabled={isProcessing || !textInput.trim()}
+                onClick={handleSendTextInput}
+                disabled={isProcessing}
+                className="w-full flex items-center gap-2"
               >
-                <Send className="h-4 w-4" />
+                {isProcessing ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Send className="h-4 w-4" />
+                )}
+                Process Text Message
               </Button>
-            </div>
+            )}
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

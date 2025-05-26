@@ -52,14 +52,14 @@ class WakeWordDetector {
 
   processTranscript(transcript: string): boolean {
     const lowerTranscript = transcript.toLowerCase();
-    
+
     // Skip if we've already processed this text (to avoid multiple triggers)
     if (lowerTranscript === this.lastResult) {
       return false;
     }
-    
+
     this.lastResult = lowerTranscript;
-    
+
     // Calculate how close the transcript is to containing our wake word
     // Simple implementation: just check if the wake word is contained
     // A more sophisticated implementation would use fuzzy matching
@@ -68,7 +68,7 @@ class WakeWordDetector {
       this.onDetected();
       return true;
     }
-    
+
     return false;
   }
 
@@ -87,7 +87,7 @@ export function useSpeech(options: UseSpeechOptions = {}) {
   const [recognition, setRecognition] = useState<SpeechRecognition | null>(null);
   const [backgroundRecognition, setBackgroundRecognition] = useState<SpeechRecognition | null>(null);
   const wakeWordDetectorRef = useRef<WakeWordDetector | null>(null);
-  
+
   // Initialize wake word detector
   useEffect(() => {
     if (!wakeWordDetectorRef.current) {
@@ -112,19 +112,19 @@ export function useSpeech(options: UseSpeechOptions = {}) {
     if (!settings?.alwaysListening) return;
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    
+
     if (!SpeechRecognition) {
       setError('Speech recognition is not supported in this browser.');
       return;
     }
-    
+
     const backgroundRecognitionInstance = new SpeechRecognition();
     backgroundRecognitionInstance.continuous = true;
     backgroundRecognitionInstance.interimResults = true;
     backgroundRecognitionInstance.lang = 'en-US';
     // Add error recovery delay
     let recoveryTimeout: NodeJS.Timeout;
-    
+
     const startRecognition = () => {
       try {
         if (!isActiveListening) {
@@ -134,34 +134,34 @@ export function useSpeech(options: UseSpeechOptions = {}) {
         console.error('Recognition start failed:', err);
       }
     };
-    
+
     backgroundRecognitionInstance.onstart = () => {
       console.log('Background listening started');
     };
-    
+
     backgroundRecognitionInstance.onresult = (event: any) => {
       const results = event.results as SpeechRecognitionResultList;
       const transcript = Array.from(results)
         .map((result: any) => result[0].transcript)
         .join('');
-      
+
       setBackgroundTranscription(transcript);
-      
+
       // Check for wake word
       if (wakeWordDetectorRef.current?.processTranscript(transcript)) {
         // Wake word detected, handled by the detector
         backgroundRecognitionInstance.stop();
       }
     };
-    
+
     backgroundRecognitionInstance.onerror = (event: any) => {
       if (event.error === 'no-speech') {
         // Ignore "no speech" errors
         return;
       }
-      
+
       console.error(`Background speech recognition error: ${event.error}`);
-      
+
       // Try to restart background recognition after a short delay
       setTimeout(() => {
         try {
@@ -171,7 +171,7 @@ export function useSpeech(options: UseSpeechOptions = {}) {
         }
       }, 1000);
     };
-    
+
     backgroundRecognitionInstance.onend = () => {
       // Restart background recognition if it's not because we're actively listening
       if (!isActiveListening && settings?.alwaysListening) {
@@ -187,9 +187,9 @@ export function useSpeech(options: UseSpeechOptions = {}) {
         }, 1000);
       }
     };
-    
+
     setBackgroundRecognition(backgroundRecognitionInstance);
-    
+
     // Start background listening immediately if always-listening is enabled
     if (settings?.alwaysListening) {
       try {
@@ -198,7 +198,7 @@ export function useSpeech(options: UseSpeechOptions = {}) {
         console.error('Failed to start background recognition:', err);
       }
     }
-    
+
     return () => {
       if (backgroundRecognitionInstance) {
         backgroundRecognitionInstance.abort();
@@ -211,46 +211,22 @@ export function useSpeech(options: UseSpeechOptions = {}) {
     if (typeof window === 'undefined') return;
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    
+
     if (!SpeechRecognition) {
       setError('Speech recognition is not supported in this browser.');
       return;
     }
-    
+
     const recognitionInstance = new SpeechRecognition();
     recognitionInstance.continuous = false; // Changed to false for better compatibility
     recognitionInstance.interimResults = true;
-    
-    // Try multiple language options to avoid the language-not-supported error
-    try {
-      // First try with no language specification (browser default)
-      recognitionInstance.lang = '';
-    } catch (err) {
-      console.warn('Failed to set empty language, trying alternatives');
-      
-      // Try alternative languages
-      const languagesToTry = ['en', 'en-US', 'en-GB'];
-      let languageSet = false;
-      
-      for (const lang of languagesToTry) {
-        try {
-          recognitionInstance.lang = lang;
-          languageSet = true;
-          console.log(`Set recognition language to: ${lang}`);
-          break;
-        } catch (langErr) {
-          console.warn(`Failed to set language to ${lang}`);
-        }
-      }
-      
-      if (!languageSet) {
-        console.warn('Could not set any language for speech recognition');
-      }
-    }
-    
+
+    // Don't set language - use browser default to avoid compatibility issues
+    console.log('Using browser default language for speech recognition');
+
     // Added longer max speech time
     recognitionInstance.maxAlternatives = 1;
-    
+
     recognitionInstance.onstart = () => {
       setIsListening(true);
       setIsActiveListening(true);
@@ -259,35 +235,35 @@ export function useSpeech(options: UseSpeechOptions = {}) {
         options.onListening();
       }
     };
-    
+
     recognitionInstance.onresult = (event: any) => {
       const results = event.results as SpeechRecognitionResultList;
       const transcript = Array.from(results)
         .map((result: any) => result[0].transcript)
         .join('');
-      
+
       setTranscription(transcript);
     };
-    
+
     recognitionInstance.onerror = (event: any) => {
       if (event.error === 'no-speech') {
         // Ignore "no speech" errors
         return;
       }
-      
+
       setError(`Speech recognition error: ${event.error}`);
       setIsListening(false);
       setIsActiveListening(false);
-      
+
       if (options.onError) {
         options.onError(event.error);
       }
     };
-    
+
     recognitionInstance.onend = () => {
       setIsListening(false);
       setIsActiveListening(false);
-      
+
       // Restart background listening if always-listening is enabled
       if (settings?.alwaysListening && backgroundRecognition) {
         // Add a longer delay to ensure recognition has fully ended
@@ -302,9 +278,9 @@ export function useSpeech(options: UseSpeechOptions = {}) {
         }, 1500);
       }
     };
-    
+
     setRecognition(recognitionInstance);
-    
+
     return () => {
       if (recognitionInstance) {
         recognitionInstance.abort();
@@ -319,7 +295,7 @@ export function useSpeech(options: UseSpeechOptions = {}) {
       console.log('Recognition already active, no need to start again');
       return;
     }
-    
+
     // Stop background recognition first
     if (backgroundRecognition) {
       try {
@@ -328,14 +304,14 @@ export function useSpeech(options: UseSpeechOptions = {}) {
         console.error('Error stopping background recognition:', err);
       }
     }
-    
+
     // Start active recognition
     if (recognition) {
       // Add a slight delay to ensure the previous recognition has fully stopped
       setTimeout(() => {
         try {
           setTranscription(''); // Clear previous transcription
-          
+
           // Request microphone permission explicitly
           navigator.mediaDevices.getUserMedia({ audio: true })
             .then(() => {
@@ -372,15 +348,15 @@ export function useSpeech(options: UseSpeechOptions = {}) {
     if (recognition) {
       recognition.stop();
       setIsActiveListening(false);
-      
+
       if (transcription.trim()) {
         try {
           const result = await processTranscription(transcription);
-          
+
           if (options.onTranscriptionComplete) {
             options.onTranscriptionComplete(result);
           }
-          
+
           return result;
         } catch (err) {
           setError((err as Error).message);
@@ -390,7 +366,7 @@ export function useSpeech(options: UseSpeechOptions = {}) {
         }
       }
     }
-    
+
     return { text: transcription, tasks: [] };
   }, [recognition, transcription, options]);
 
